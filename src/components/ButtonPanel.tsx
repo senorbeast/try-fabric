@@ -1,6 +1,7 @@
 import { fabric } from "fabric";
 import Button from "./Button";
 import { fabricRefType } from "./Canvas";
+import { drawQuadratic } from "./utils";
 
 const addRectangle = (fabricRef: fabricRefType) => {
     const rect = new fabric.Rect({
@@ -134,11 +135,31 @@ const animateCurve = (fabricRef: fabricRefType) => {
     // Use first object
     const firstObj = fabricRef.current!.getObjects()[0];
 
-    const path = fabricRef
-        .current!.getObjects()
-        .filter((obj) => obj.isType("path"))[0] as fabric.Path;
+    // const path = fabricRef
+    //     .current!.getObjects()
+    //     .filter((obj) => obj.isType("path"))[0] as fabric.Path;
 
-    path.path?.forEach((point) => console.log(point.x, point.y));
+    const pathArray =
+        "M78.2,0.1c0,0,9.4,79.1,2.3,117  c-4.5,24.1-31.8,106.2-56.3,108.7c-12.7,1.3-24.2-11.9-16.5-15.5C15,207,40.2,231.1,19,261.7c-9.8,14.1-24.7,31.9-12.5,44.9  c11.3,12,53-36.8,59.2-23.8c8.6,18-40.8,23-28,49.2c14.7,30.4,21.6,39.9,48,58.5c31.3,22,147,66.2,147.2,149.5";
+
+    const path = new fabric.Path(pathArray, {
+        fill: "",
+        stroke: "black",
+        strokeDashArray: [5, 5],
+        strokeDashOffset: 0,
+    });
+    fabricRef.current!.add(path);
+
+    function animatePath() {
+        path.animate("strokeDashOffset", "-=3", {
+            duration: 100,
+            onChange: canvas.renderAll.bind(canvas),
+            onComplete: function () {
+                // animatePath();
+            },
+        });
+    }
+    animatePath();
 };
 
 const resetPos = (fabricRef: fabricRefType) => {
@@ -167,6 +188,10 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
             <Button name="resetPos" onClick={() => resetPos(fabricRef)} />
             <Button name="to-left" onClick={() => animateLeft(fabricRef)} />
             <Button name="to-curve" onClick={() => animateCurve(fabricRef)} />
+            <Button
+                name="drawQuadratic"
+                onClick={() => drawQuadratic(fabricRef)}
+            />
             <Button
                 name="from-to-line"
                 onClick={() =>
