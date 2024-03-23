@@ -2,6 +2,7 @@ import { fabric } from "fabric";
 import Button from "./Button";
 import { fabricRefType } from "./Canvas";
 import { drawQuadratic } from "./utils";
+import { interpolatePath } from "./covertors";
 
 const addRectangle = (fabricRef: fabricRefType) => {
     const rect = new fabric.Rect({
@@ -13,6 +14,18 @@ const addRectangle = (fabricRef: fabricRefType) => {
     });
 
     fabricRef.current!.add(rect);
+};
+
+const addPoint = (fabricRef: fabricRefType, point: PointType) => {
+    const pointObj = new fabric.Rect({
+        top: point[0],
+        left: point[1],
+        width: 5,
+        height: 5,
+        fill: "red",
+    });
+
+    fabricRef.current!.add(pointObj);
 };
 
 const addPath = (fabricRef: fabricRefType) => {
@@ -37,13 +50,14 @@ const animateLeft = (fabricRef: fabricRefType) => {
 };
 
 // Animate the object using Fabric.js animate function
-function animateObject(
+function animateFirstObject(
     fabricRef: fabricRefType,
     x1: number,
     y1: number,
     x2: number,
     y2: number,
-    duration: number
+    duration: number,
+    onComplete: () => void | undefined
 ) {
     const canvas = fabricRef.current!;
     // Use first object
@@ -58,34 +72,95 @@ function animateObject(
         {
             duration: duration,
             onChange: canvas.renderAll.bind(canvas),
-            onComplete: function () {
-                console.log("Animation complete");
-            },
+            onComplete: onComplete,
         }
     );
 }
 
-type PointType = {
-    x: number;
-    y: number;
-};
-
-// Function to calculate a point along a quadratic Bezier curve
-function calculateQuadraticBezierPoint(
-    startPoint: PointType,
-    controlPoint: PointType,
-    endPoint: PointType,
-    t: number
+function animateObject(
+    fabricRef: fabricRefType,
+    object: fabric.Object,
+    x1: number,
+    y1: number,
+    x2: number,
+    y2: number,
+    duration: number,
+    onComplete: () => void | undefined
 ) {
-    const x =
-        (1 - t) * (1 - t) * startPoint.x +
-        2 * (1 - t) * t * controlPoint.x +
-        t * t * endPoint.x;
-    const y =
-        (1 - t) * (1 - t) * startPoint.y +
-        2 * (1 - t) * t * controlPoint.y +
-        t * t * endPoint.y;
-    return { x: x, y: y };
+    const canvas = fabricRef.current!;
+    // Use first object
+
+    // Set the initial position
+    object.set({ left: x1, top: y1 });
+
+    // Animate to the target position
+    object.animate(
+        { left: x2, top: y2 }, // to
+        {
+            duration: duration,
+            onChange: canvas.renderAll.bind(canvas),
+            onComplete: onComplete,
+        }
+    );
+}
+
+export type PointType = [number, number];
+
+function animateObjectAlongPath(
+    fabricRef: fabricRefType,
+    // path: string[],
+    // duration: number,
+    onComplete: () => void | undefined
+) {
+    const canvas = fabricRef.current!;
+
+    // Use first object
+    const firstObj = fabricRef.current!.getObjects()[0];
+
+    // points on path
+    const points: PointType[] = [];
+    const percentageIncrement = 0.01;
+
+    const path: (string | number)[][] = [
+        ["M", 100, 100],
+        ["Q", 200, 200, 300, 100],
+    ];
+
+    for (
+        let percentage = 0;
+        percentage <= 1;
+        percentage += percentageIncrement
+    ) {
+        points.push(interpolatePath(path, percentage));
+    }
+    console.log(points);
+    const numPoints = points.length;
+
+    let currentIndex = 0;
+    const nextPoint = () => {
+        if (currentIndex < numPoints) {
+            const currentPoint = points[currentIndex];
+
+            firstObj.animate(
+                {
+                    left: currentPoint[0],
+                    top: currentPoint[1],
+                },
+                {
+                    duration: 5, // Divide duration by number of points for even movement speed
+                    onChange: canvas.renderAll.bind(canvas),
+                    onComplete: () => {
+                        currentIndex++;
+                        nextPoint();
+                    },
+                }
+            );
+        } else if (onComplete) {
+            onComplete();
+        }
+    };
+
+    nextPoint(); // Start animation
 }
 
 // Animate object along the curved path
@@ -180,6 +255,23 @@ const resetPos = (fabricRef: fabricRefType) => {
     );
 };
 
+// const logObject = (fabricRef: fabricRefType, points: PointType[]) => {
+//     const canvas = fabricRef.current!;
+//     // Use first object
+//     const firstObj = fabricRef.current!.getObjects()[0];
+
+//     points.forEach((point) => addRectangle(fabricRef));
+
+//     console.log(firstObj);
+// };
+
+const logObject = (fabricRef: fabricRefType) => {
+    // Use first object
+    const firstObj = fabricRef.current!.getObjects()[0];
+
+    console.log(firstObj);
+};
+
 const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
     return (
         <div className="flex gap-5">
@@ -188,6 +280,15 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
             <Button name="resetPos" onClick={() => resetPos(fabricRef)} />
             <Button name="to-left" onClick={() => animateLeft(fabricRef)} />
             <Button name="to-curve" onClick={() => animateCurve(fabricRef)} />
+            <Button name="logObject" onClick={() => logObject(fabricRef)} />
+            <Button
+                name="animateObjectAlongPath"
+                onClick={() =>
+                    animateObjectAlongPath(fabricRef, () =>
+                        console.log("Completed Path Animate")
+                    )
+                }
+            />
             <Button
                 name="drawQuadratic"
                 onClick={() => drawQuadratic(fabricRef)}
@@ -195,7 +296,7 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
             <Button
                 name="from-to-line"
                 onClick={() =>
-                    animateObject(fabricRef, 600, 600, 300, 300, 500)
+                    animateFirstObject(fabricRef, 600, 600, 300, 300, 500)
                 }
             />
         </div>

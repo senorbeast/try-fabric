@@ -79,9 +79,9 @@ export const drawQuadratic = (fabricRef: fabricRefType) => {
     const canvas = fabricRef.current!;
 
     canvas.on({
-        "object:selected": onObjectSelected,
-        "object:moving": onObjectMoving,
-        "selection:cleared": onSelectionCleared,
+        "object:selected": (e) => onObjectSelected(e, canvas),
+        "object:moving": (e) => onObjectMoving(e, canvas),
+        "selection:cleared": (e) => onSelectionCleared(e, canvas),
     });
 
     const line = new fabric.Path("M 65 0 Q 100, 100, 200, 0", {
@@ -99,7 +99,8 @@ export const drawQuadratic = (fabricRef: fabricRefType) => {
     line.path[1][3] = 300;
     line.path[1][4] = 100;
 
-    line.selectable = false;
+    // line.selectable = false;
+    line.name = "quadLine";
     canvas.add(line);
 
     const p1 = makeCurvePoint(200, 200, null, line, null);
@@ -153,20 +154,22 @@ function makeCurvePoint(left, top, line1, line2, line3) {
     return c;
 }
 
-function onObjectSelected(e) {
+function onObjectSelected(e, canvas) {
     var activeObject = e.target;
-
     if (activeObject.name == "p0" || activeObject.name == "p2") {
         activeObject.line2.animate("opacity", "1", {
             duration: 200,
             onChange: canvas.renderAll.bind(canvas),
         });
         activeObject.line2.selectable = true;
+    } else {
+        console.log(activeObject);
     }
 }
 
-function onSelectionCleared(e) {
+function onSelectionCleared(e, canvas) {
     var activeObject = e.target;
+    console.log(activeObject);
     if (activeObject.name == "p0" || activeObject.name == "p2") {
         activeObject.line2.animate("opacity", "0", {
             duration: 200,
@@ -182,7 +185,7 @@ function onSelectionCleared(e) {
     }
 }
 
-function onObjectMoving(e) {
+function onObjectMoving(e, canvas) {
     if (e.target.name == "p0" || e.target.name == "p2") {
         var p = e.target;
 
