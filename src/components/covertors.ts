@@ -1,5 +1,4 @@
-import { PointType } from "./ButtonPanel";
-export type PathCommand = "M" | "L" | "Q" | "C";
+import { PointType } from "./functions";
 
 export function interpolatePath(
     path: (string | number)[][],
@@ -9,7 +8,7 @@ export function interpolatePath(
     let interpolatedPoint: PointType = [0, 0];
 
     for (let i = 0; i < path.length; i++) {
-        const command: PathCommand = path[i][0] as PathCommand;
+        const command: string = path[i][0] as string;
         if (command === "M") {
             currentPoint = [path[i][1] as number, path[i][2] as number];
         } else if (command === "L") {

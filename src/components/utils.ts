@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { fabricRefType } from "./Canvas";
 import { fabric } from "fabric";
 
@@ -74,6 +75,8 @@ export function animateDrag(fabricRef: fabricRefType) {
     }
     canvas.renderAll();
 }
+
+// Quad
 
 export const drawQuadratic = (fabricRef: fabricRefType) => {
     const canvas = fabricRef.current!;
@@ -155,7 +158,7 @@ function makeCurvePoint(left, top, line1, line2, line3) {
 }
 
 function onObjectSelected(e, canvas) {
-    var activeObject = e.target;
+    const activeObject = e.target;
     if (activeObject.name == "p0" || activeObject.name == "p2") {
         activeObject.line2.animate("opacity", "1", {
             duration: 200,
@@ -168,7 +171,7 @@ function onObjectSelected(e, canvas) {
 }
 
 function onSelectionCleared(e, canvas) {
-    var activeObject = e.target;
+    const activeObject = e.target;
     console.log(activeObject);
     if (activeObject.name == "p0" || activeObject.name == "p2") {
         activeObject.line2.animate("opacity", "0", {
@@ -187,7 +190,7 @@ function onSelectionCleared(e, canvas) {
 
 function onObjectMoving(e, canvas) {
     if (e.target.name == "p0" || e.target.name == "p2") {
-        var p = e.target;
+        const p = e.target;
 
         if (p.line1) {
             p.line1.path[0][1] = p.left;
@@ -197,14 +200,14 @@ function onObjectMoving(e, canvas) {
             p.line3.path[1][4] = p.top;
         }
     } else if (e.target.name == "p1") {
-        var p = e.target;
+        const p = e.target;
 
         if (p.line2) {
             p.line2.path[1][1] = p.left;
             p.line2.path[1][2] = p.top;
         }
     } else if (e.target.name == "p0" || e.target.name == "p2") {
-        var p = e.target;
+        const p = e.target;
 
         p.line1 && p.line1.set({ x2: p.left, y2: p.top });
         p.line2 && p.line2.set({ x1: p.left, y1: p.top });
