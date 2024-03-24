@@ -293,7 +293,7 @@ const logObject = (fabricRef: fabricRefType) => {
 };
 
 const drawCubicBeizer = (fabricRef: fabricRefType) => {
-    // const canvas = fabricRef.current!;
+    const canvas = fabricRef.current!;
 
     // Or create an instance with custom options
     const customOptions = {
@@ -303,7 +303,6 @@ const drawCubicBeizer = (fabricRef: fabricRefType) => {
         c2: new Vec2(400, 200),
     };
     const cubicBezier = new CubicBezier(fabricRef, customOptions);
-
-    // cubicBezier.renderControlPoints(canvas);
-    // cubicBezier.renderCurve(canvas);
+    cubicBezier.renderCurve(canvas);
+    cubicBezier.renderControlPoints(canvas);
 };

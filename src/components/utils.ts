@@ -206,12 +206,5 @@ function onObjectMoving(e, canvas) {
             p.line2.path[1][1] = p.left;
             p.line2.path[1][2] = p.top;
         }
-    } else if (e.target.name == "p0" || e.target.name == "p2") {
-        const p = e.target;
-
-        p.line1 && p.line1.set({ x2: p.left, y2: p.top });
-        p.line2 && p.line2.set({ x1: p.left, y1: p.top });
-        p.line3 && p.line3.set({ x1: p.left, y1: p.top });
-        p.line4 && p.line4.set({ x1: p.left, y1: p.top });
     }
 }

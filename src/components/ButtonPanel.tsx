@@ -1,17 +1,13 @@
 import Button from "./Button";
 import { fabricRefType } from "./Canvas";
 import { cubic, linear, quad } from "./covertors";
+import { drawCubic } from "./cubic";
 import {
     addRectangle,
-    addPath,
-    resetPos,
-    animateLeft,
-    animateCurve,
     logObject,
     animateObjectAlongPath,
     animateFirstObject,
     animateOnPathC,
-    drawCubicBeizer,
 } from "./functions";
 import { drawQuadratic } from "./utils";
 
@@ -42,10 +38,7 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
                 name="drawQuadratic"
                 onClick={() => drawQuadratic(fabricRef)}
             />
-            <Button
-                name="drawCubicBeizer"
-                onClick={() => drawCubicBeizer(fabricRef)}
-            />
+            <Button name="drawCubic" onClick={() => drawCubic(fabricRef)} />
             <Button
                 name="from-to-line"
                 onClick={() =>

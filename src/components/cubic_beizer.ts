@@ -4,12 +4,10 @@ import { fabricRefType } from "./Canvas";
 export class Vec2 {
     x: number;
     y: number;
-
     constructor(x: number, y: number) {
         this.x = x;
         this.y = y;
     }
-
     toString(): string {
         return `${this.x} ${this.y}`;
     }
@@ -41,20 +39,24 @@ class CubicBezier {
         this.curve.selectable = this.controlCurve.selectable = false;
         this.curve.fill = this.controlCurve.fill = "none";
         this.curve.stroke = "black";
-        this.controlCurve.stroke = "black";
-        canvas.calcOffset();
-        this.renderControlPoints(canvas);
-        this.renderCurve(canvas);
-        canvas.add(this.curve);
+        this.controlCurve.stroke = "blue";
+        this.controlCurve.strokeDashArray = [5, 5];
+        canvas.add(this.curve, this.controlCurve);
         canvas.renderAll();
+        canvas.calcOffset();
     }
 
     private toSVGPath(): string {
-        let str = `M${this.start.toString()}`;
-        str += `C${this.c1.toString()}`;
-        str += `${this.c2.toString()}`;
-        str += `${this.end.toString()}`;
-        return str;
+        const startX = this.start.x;
+        const startY = this.start.y;
+        const endX = this.end.x;
+        const endY = this.end.y;
+        const c1X = this.c1.x;
+        const c1Y = this.c1.y;
+        const c2X = this.c2.x;
+        const c2Y = this.c2.y;
+
+        return `M ${startX} ${startY} C ${c1X} ${c1Y}, ${c2X} ${c2Y}, ${endX} ${endY}`;
     }
 
     private toControlPath(): string {
@@ -65,51 +67,47 @@ class CubicBezier {
         return str;
     }
 
-    private renderControlPoints(canvas: {
-        add: (arg0: fabric.Circle) => void;
-    }) {
+    public renderControlPoints(canvas: fabric.Canvas) {
         const r = 10;
         const points = [
-            new fabric.Circle({
-                top: this.start.y,
-                left: this.start.x,
-                radius: r,
-                as: "start",
-            }),
-            new fabric.Circle({
-                top: this.end.y,
-                left: this.end.x,
-                radius: r,
-                as: "end",
-            }),
-            new fabric.Circle({
-                top: this.c1.y,
-                left: this.c1.x,
-                radius: r,
-                as: "c1",
-            }),
-            new fabric.Circle({
-                top: this.c2.y,
-                left: this.c2.x,
-                radius: r,
-                as: "c2",
-            }),
+            {
+                point: this.start,
+                label: "start",
+            },
+            {
+                point: this.end,
+                label: "end",
+            },
+            {
+                point: this.c1,
+                label: "c1",
+            },
+            {
+                point: this.c2,
+                label: "c2",
+            },
         ];
 
-        points.forEach((p) => {
-            p.fill = "#f55";
-            p.stroke = "#2B436E";
-            p.hasControls = p.hasBorder = false;
-            p.belongsTo = this;
-            canvas.add(p);
+        points.forEach(({ point, label }) => {
+            const circle = new fabric.Circle({
+                top: point.y,
+                left: point.x,
+                radius: r,
+                fill: "#f55",
+                stroke: "#2B436E",
+                hasControls: false,
+                hasBorder: false,
+                as: label,
+            });
+            circle.belongsTo = this;
+            canvas.add(circle);
         });
     }
 
-    private renderCurve(canvas: fabric.Canvas) {
+    public renderCurve(canvas: fabric.Canvas) {
         const dummyPath = new fabric.Path(this.toSVGPath());
         this.curve.path = dummyPath.path;
-        const dummyPath2 = new fabric.Path(this.toControlPath());
-        this.controlCurve.path = dummyPath2.path;
+        canvas.renderAll();
     }
 }
 
