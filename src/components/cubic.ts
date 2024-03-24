@@ -3,14 +3,6 @@ import { fabric } from "fabric";
 
 export const drawCubic = (fabricRef: fabricRefType) => {
     const canvas = fabricRef.current!;
-    canvas.on({
-        "object:selected": (e: fabric.IEvent<MouseEvent>) =>
-            onObjectSelected(e, canvas),
-        "object:moving": (e: fabric.IEvent<MouseEvent>) =>
-            onObjectMoving(e, canvas),
-        "selection:cleared": (e: fabric.IEvent<MouseEvent>) =>
-            onSelectionCleared(e, canvas),
-    });
 
     const startPoint = [100, 100];
     const controlPoint1 = [200, 100];
@@ -26,14 +18,14 @@ export const drawCubic = (fabricRef: fabricRefType) => {
         }
     );
 
-    // line.path[0][1] = 100;
-    // line.path[0][2] = 100;
-    // line.path[1][1] = 200;
-    // line.path[1][2] = 200;
-    // line.path[1][3] = 300;
-    // line.path[1][4] = 200;
-    // line.path[1][5] = 400;
-    // line.path[1][6] = 100;
+    line.path[0][1] = 100;
+    line.path[0][2] = 100;
+    line.path[1][1] = 200;
+    line.path[1][2] = 200;
+    line.path[1][3] = 300;
+    line.path[1][4] = 200;
+    line.path[1][5] = 400;
+    line.path[1][6] = 100;
 
     line.name = "cubeLine";
     canvas.add(line);
@@ -78,6 +70,8 @@ export const drawCubic = (fabricRef: fabricRefType) => {
     const p3 = makeEndPoint(endPoint[0], endPoint[1], null, null, null, line);
     p3.name = "p3";
     canvas.add(p3);
+
+    addCBCHelpers(fabricRef);
 };
 
 type pathORNull = fabric.Path | null;
@@ -126,6 +120,63 @@ function makeControlPoint(
     c.line3 = line3;
     c.line4 = line4;
     return c;
+}
+
+function getReqObj(canvas: fabric.Canvas) {
+    let line, p0, p1, p2, p3;
+    canvas.getObjects().map((obj) => {
+        switch (obj.name) {
+            case "cubeLine":
+                line = obj;
+                break;
+            case "p0":
+                p0 = obj;
+                break;
+            case "p1":
+                p1 = obj;
+                break;
+            case "p2":
+                p2 = obj;
+                break;
+            case "p3":
+                p3 = obj;
+                break;
+            default:
+                break;
+        }
+    });
+    return { line, p0, p1, p2, p3 };
+}
+
+export function addCBCHelpers(fabricRef: fabricRefType) {
+    // This is required all canvas JSON is loaded,
+    // these objects/functionality is not stored in the json
+
+    const canvas = fabricRef.current!;
+    canvas.on({
+        "object:selected": (e: fabric.IEvent<MouseEvent>) =>
+            onObjectSelected(e, canvas),
+        "object:moving": (e: fabric.IEvent<MouseEvent>) =>
+            onObjectMoving(e, canvas),
+        "selection:cleared": (e: fabric.IEvent<MouseEvent>) =>
+            onSelectionCleared(e, canvas),
+    });
+
+    // Read from the path
+    const { line, p0, p1, p2, p3 } = getReqObj(canvas);
+
+    const path = line.path;
+    // const startPoint = [path[0][1], path[0][2]];
+    // const controlPoint1 = [path[1][1], path[1][2]];
+    // const controlPoint2 = [path[1][3], path[1][4]];
+    // const endPoint = [path[1][5], path[1][6]];
+    console.log(path);
+
+    // Connect existing points with the path line
+    p0.line1 = line;
+    p1.line2 = line;
+    p2.line3 = line;
+    p3.line4 = line;
 }
 
 function onObjectSelected(e: fabric.IEvent<MouseEvent>, canvas: fabric.Canvas) {
