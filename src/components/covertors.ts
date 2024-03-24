@@ -1,5 +1,20 @@
 import { PointType } from "./functions";
 
+export const quad: (string | number)[][] = [
+    ["M", 50, 400],
+    ["Q", 200, 450, 300, 100],
+];
+export const linear: (string | number)[][] = [
+    ["M", 50, 400],
+    ["L", 400, 200],
+];
+
+export const cubic: (string | number)[][] = [
+    ["M", 50, 400],
+    ["C", 300, -300, 500, 700, 700, 50],
+];
+
+// Only single path each time
 export function interpolatePath(
     path: (string | number)[][],
     percentage: number

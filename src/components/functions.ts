@@ -1,6 +1,7 @@
 import { fabric } from "fabric";
 import { fabricRefType } from "./Canvas";
 import { interpolatePath } from "./covertors";
+import CubicBezier, { Vec2 } from "./cubic_beizer";
 
 export {
     initFabric,
@@ -15,6 +16,7 @@ export {
     animateObjectAlongPath,
     resetPos,
     logObject,
+    drawCubicBeizer,
     animateOnPathC,
 };
 
@@ -31,11 +33,11 @@ const disposeFabric = (fabricRef: fabricRefType) => {
 
 const addRectangle = (fabricRef: fabricRefType) => {
     const rect = new fabric.Rect({
-        top: 50,
+        top: 400,
         left: 50,
         width: 50,
         height: 50,
-        fill: "red",
+        fill: "white",
     });
 
     fabricRef.current!.add(rect);
@@ -155,9 +157,9 @@ function animateOnPathC(
 
     const path: (string | number)[][] = [
         ["M", 50, 50],
-        ["L", 400, 200],
-        ["Q", 200, 450, 300, 100],
         ["C", 150, 50, 300, 350, 550, 100],
+        ["Q", 200, 450, 300, 100],
+        ["L", 400, 200],
     ];
 
     function animate(progress: number) {
@@ -183,9 +185,9 @@ function animateOnPathC(
 
 function animateObjectAlongPath(
     fabricRef: fabricRefType,
-    // path: string[],
+    path: (string | number)[][],
     // duration: number,
-    onComplete: () => void | undefined
+    onComplete?: () => void | undefined
 ) {
     const canvas = fabricRef.current!;
 
@@ -195,16 +197,6 @@ function animateObjectAlongPath(
     // points on path
     const points: PointType[] = [];
     const percentageIncrement = 0.01;
-
-    const path: (string | number)[][] = [
-        ["M", 50, 50],
-        ["L", 400, 200],
-        ["Q", 200, 450, 300, 100],
-        // ["C", 150, 50, 300, 350, 550, 100],
-        // ["M", 100, 200],
-        // ["C", 150, 50, 300, 250, 350, 100],
-        // ["C", 200, 200, 600, 300, 100],
-    ];
 
     for (
         let percentage = 0;
@@ -298,4 +290,20 @@ const logObject = (fabricRef: fabricRefType) => {
     const firstObj = fabricRef.current!.getObjects()[0];
 
     console.log(firstObj);
+};
+
+const drawCubicBeizer = (fabricRef: fabricRefType) => {
+    // const canvas = fabricRef.current!;
+
+    // Or create an instance with custom options
+    const customOptions = {
+        start: new Vec2(50, 50),
+        end: new Vec2(500, 500),
+        c1: new Vec2(150, 400),
+        c2: new Vec2(400, 200),
+    };
+    const cubicBezier = new CubicBezier(fabricRef, customOptions);
+
+    // cubicBezier.renderControlPoints(canvas);
+    // cubicBezier.renderCurve(canvas);
 };
