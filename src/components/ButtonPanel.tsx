@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import Button from "./Button";
 import { fabricRefType } from "./Canvas";
 import { cubic, linear, quad } from "./covertors";
@@ -11,7 +12,66 @@ import {
 } from "./functions";
 import { drawQuadratic } from "./utils";
 
+type canvasJSONType = {
+    version: string;
+    objects: fabric.Object[];
+};
+
 const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
+    const [frames, setFrames] = useState<canvasJSONType[]>([]);
+    const [currentFrame, setCurrentFrame] = useState<number>(0);
+
+    // # on mount only once
+    // useEffect(() => {
+    //     // memoize
+    //     addNewFrame(frames, currentFrame, fabricRef);
+    //     return () => {};
+    // }, []);
+
+    // # whenever fabricRef changes ?
+    useEffect(() => {
+        // memoize
+        updateCurrentFrame(frames, currentFrame, fabricRef);
+
+        return () => {};
+    }, [fabricRef]);
+
+    function applyOldFrame(
+        frames: canvasJSONType[],
+        idx: number,
+        fabricRef: fabricRefType
+    ) {
+        const canvas = fabricRef.current!;
+        setCurrentFrame(idx);
+        canvas.loadFromJSON(frames[idx], () =>
+            console.log("Updated current canvas")
+        );
+    }
+
+    function updateCurrentFrame(
+        frames: canvasJSONType[],
+        currentFrame: number,
+        fabricRef: fabricRefType
+    ) {
+        const canvas = fabricRef.current!;
+        const newFrames = frames.map((frame, idx) => {
+            if (idx === currentFrame) return canvas.toJSON();
+            else return frame;
+        });
+
+        setFrames(newFrames);
+    }
+
+    function addNewFrame(
+        frames: canvasJSONType[],
+        currentFrame: number,
+        fabricRef: fabricRefType
+    ) {
+        const canvas = fabricRef.current!;
+        setCurrentFrame(currentFrame + 1); // increment currentFrame
+        setFrames([...frames, canvas.toJSON()]); // add frame
+    }
+
     return (
         <div className="m-2 flex flex-wrap gap-2 w-[800px]">
             <Button name="rect" onClick={() => addRectangle(fabricRef)} />
@@ -47,6 +107,23 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
                     )
                 }
             />
+            <div className="flex rounded-md">
+                {frames.map((_, idx) => (
+                    <button
+                        key={idx}
+                        className="bg-white w-8 border-2"
+                        onClick={() => applyOldFrame(frames, idx, fabricRef)}
+                    >
+                        {idx}
+                    </button>
+                ))}
+                <button
+                    className="bg-white w-8 border-2"
+                    onClick={() => addNewFrame(frames, currentFrame, fabricRef)}
+                >
+                    +
+                </button>
+            </div>
         </div>
     );
 };
