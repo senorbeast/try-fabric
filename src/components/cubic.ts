@@ -4,50 +4,95 @@ import { fabric } from "fabric";
 export const drawCubic = (fabricRef: fabricRefType) => {
     const canvas = fabricRef.current!;
     canvas.on({
-        "object:selected": (e) => onObjectSelected(e, canvas),
-        "object:moving": (e) => onObjectMoving(e, canvas),
-        "selection:cleared": (e) => onSelectionCleared(e, canvas),
+        "object:selected": (e: fabric.IEvent<MouseEvent>) =>
+            onObjectSelected(e, canvas),
+        "object:moving": (e: fabric.IEvent<MouseEvent>) =>
+            onObjectMoving(e, canvas),
+        "selection:cleared": (e: fabric.IEvent<MouseEvent>) =>
+            onSelectionCleared(e, canvas),
     });
 
-    const line = new fabric.Path("M 65 0 C 100, 100, 200, 200, 300, 0", {
-        fill: "",
-        stroke: "black",
-        objectCaching: false,
-    });
+    const startPoint = [100, 100];
+    const controlPoint1 = [200, 100];
+    const controlPoint2 = [300, 100];
+    const endPoint = [400, 100];
 
-    line.path[0][1] = 100;
-    line.path[0][2] = 100;
-    line.path[1][1] = 200;
-    line.path[1][2] = 200;
-    line.path[1][3] = 300;
-    line.path[1][4] = 200;
-    line.path[1][5] = 400;
-    line.path[1][6] = 100;
+    const line = new fabric.Path(
+        `M ${startPoint[0]} ${startPoint[1]} C ${controlPoint1[0]}, ${controlPoint1[1]}, ${controlPoint2[0]}, ${controlPoint2[1]}, ${endPoint[0]}, ${endPoint[1]}`,
+        {
+            fill: "",
+            stroke: "black",
+            objectCaching: false,
+        }
+    );
+
+    // line.path[0][1] = 100;
+    // line.path[0][2] = 100;
+    // line.path[1][1] = 200;
+    // line.path[1][2] = 200;
+    // line.path[1][3] = 300;
+    // line.path[1][4] = 200;
+    // line.path[1][5] = 400;
+    // line.path[1][6] = 100;
 
     line.name = "cubeLine";
     canvas.add(line);
 
-    const p1 = makeCurvePoint(200, 200, null, line, null, null);
+    // Add 1st control point
+    const p1 = makeControlPoint(
+        controlPoint1[0],
+        controlPoint1[1],
+        null,
+        line,
+        null,
+        null
+    );
     p1.name = "p1";
     canvas.add(p1);
 
-    const p2 = makeCurvePoint(300, 200, null, null, line, null);
+    // Add 2nd control point
+    const p2 = makeControlPoint(
+        controlPoint2[0],
+        controlPoint2[1],
+        null,
+        null,
+        line,
+        null
+    );
     p2.name = "p2";
     canvas.add(p2);
 
-    const p0 = makeCurveCircle(100, 100, line, p1, null, null);
+    // Add start point
+    const p0 = makeEndPoint(
+        startPoint[0],
+        startPoint[1],
+        line,
+        null,
+        null,
+        null
+    );
     p0.name = "p0";
     canvas.add(p0);
 
-    const p3 = makeCurveCircle(400, 100, null, null, p2, line);
+    // Add end point
+    const p3 = makeEndPoint(endPoint[0], endPoint[1], null, null, null, line);
     p3.name = "p3";
     canvas.add(p3);
 };
 
-function makeCurveCircle(left, top, line1, line2, line3, line4) {
+type pathORNull = fabric.Path | null;
+
+function makeEndPoint(
+    left: number,
+    top: number,
+    line1: pathORNull,
+    line2: pathORNull,
+    line3: pathORNull,
+    line4: pathORNull
+) {
     const c = new fabric.Circle({
-        left: left,
-        top: top,
+        left: left - 6,
+        top: top - 6,
         strokeWidth: 5,
         radius: 12,
         fill: "#fff",
@@ -61,14 +106,19 @@ function makeCurveCircle(left, top, line1, line2, line3, line4) {
     return c;
 }
 
-function makeCurvePoint(left, top, line1, line2, line3, line4) {
+function makeControlPoint(
+    left: number,
+    top: number,
+    line1: pathORNull,
+    line2: pathORNull,
+    line3: pathORNull,
+    line4: pathORNull
+) {
     const c = new fabric.Circle({
-        left: left,
-        top: top,
-        strokeWidth: 8,
-        radius: 14,
+        left: left - 4,
+        top: top - 4,
+        radius: 8,
         fill: "#fff",
-        stroke: "#666",
     });
     c.hasBorders = c.hasControls = false;
     c.line1 = line1;
@@ -78,8 +128,8 @@ function makeCurvePoint(left, top, line1, line2, line3, line4) {
     return c;
 }
 
-function onObjectSelected(e, canvas) {
-    const activeObject = e.target;
+function onObjectSelected(e: fabric.IEvent<MouseEvent>, canvas: fabric.Canvas) {
+    const activeObject = e.target!;
     if (activeObject.name === "p0" || activeObject.name === "p3") {
         activeObject.line2.animate("opacity", "1", {
             duration: 200,
@@ -91,8 +141,11 @@ function onObjectSelected(e, canvas) {
     }
 }
 
-function onSelectionCleared(e, canvas) {
-    const activeObject = e.target;
+function onSelectionCleared(
+    e: fabric.IEvent<MouseEvent>,
+    canvas: fabric.Canvas
+) {
+    const activeObject = e.target!;
     console.log(activeObject);
     if (activeObject.name === "p0" || activeObject.name === "p3") {
         activeObject.line2.animate("opacity", "0", {
@@ -109,9 +162,9 @@ function onSelectionCleared(e, canvas) {
     }
 }
 
-function onObjectMoving(e, canvas) {
-    if (e.target.name === "p0" || e.target.name === "p3") {
-        const p = e.target;
+function onObjectMoving(e: fabric.IEvent<MouseEvent>, canvas?: fabric.Canvas) {
+    if (e.target!.name === "p0" || e.target!.name === "p3") {
+        const p = e.target!;
         if (p.line1) {
             p.line1.path[0][1] = p.left;
             p.line1.path[0][2] = p.top;
@@ -119,13 +172,13 @@ function onObjectMoving(e, canvas) {
             p.line4.path[1][5] = p.left;
             p.line4.path[1][6] = p.top;
         }
-    } else if (e.target.name === "p1") {
+    } else if (e.target!.name === "p1") {
         const p = e.target;
         if (p.line2) {
             p.line2.path[1][1] = p.left;
             p.line2.path[1][2] = p.top;
         }
-    } else if (e.target.name === "p2") {
+    } else if (e.target!.name === "p2") {
         const p = e.target;
         if (p.line3) {
             p.line3.path[1][3] = p.left;
