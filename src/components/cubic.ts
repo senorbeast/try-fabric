@@ -18,72 +18,24 @@ export const drawCubic = (fabricRef: fabricRefType) => {
         }
     );
 
-    line.path[0][1] = 100;
-    line.path[0][2] = 100;
-    line.path[1][1] = 200;
-    line.path[1][2] = 200;
-    line.path[1][3] = 300;
-    line.path[1][4] = 200;
-    line.path[1][5] = 400;
-    line.path[1][6] = 100;
+    // line.path[0][1] = 100;
+    // line.path[0][2] = 100;
+    // line.path[1][1] = 200;
+    // line.path[1][2] = 200;
+    // line.path[1][3] = 300;
+    // line.path[1][4] = 200;
+    // line.path[1][5] = 400;
+    // line.path[1][6] = 100;
 
     line.name = "cubeLine";
     canvas.add(line);
-
-    // Add 1st control point
-    const p1 = makeControlPoint(
-        controlPoint1[0],
-        controlPoint1[1],
-        null,
-        line,
-        null,
-        null
-    );
-    p1.name = "p1";
-    canvas.add(p1);
-
-    // Add 2nd control point
-    const p2 = makeControlPoint(
-        controlPoint2[0],
-        controlPoint2[1],
-        null,
-        null,
-        line,
-        null
-    );
-    p2.name = "p2";
-    canvas.add(p2);
-
-    // Add start point
-    const p0 = makeEndPoint(
-        startPoint[0],
-        startPoint[1],
-        line,
-        null,
-        null,
-        null
-    );
-    p0.name = "p0";
-    canvas.add(p0);
-
-    // Add end point
-    const p3 = makeEndPoint(endPoint[0], endPoint[1], null, null, null, line);
-    p3.name = "p3";
-    canvas.add(p3);
 
     addCBCHelpers(fabricRef);
 };
 
 type pathORNull = fabric.Path | null;
 
-function makeEndPoint(
-    left: number,
-    top: number,
-    line1: pathORNull,
-    line2: pathORNull,
-    line3: pathORNull,
-    line4: pathORNull
-) {
+function makeEndPoint(left: number, top: number) {
     const c = new fabric.Circle({
         left: left - 6,
         top: top - 6,
@@ -92,39 +44,66 @@ function makeEndPoint(
         fill: "#fff",
         stroke: "#666",
     });
-    c.hasBorders = c.hasControls = false;
-    c.line1 = line1;
-    c.line2 = line2;
-    c.line3 = line3;
-    c.line4 = line4;
+
     return c;
 }
 
-function makeControlPoint(
-    left: number,
-    top: number,
-    line1: pathORNull,
-    line2: pathORNull,
-    line3: pathORNull,
-    line4: pathORNull
-) {
+function makeControlPoint(left: number, top: number) {
     const c = new fabric.Circle({
         left: left - 4,
         top: top - 4,
         radius: 8,
         fill: "#fff",
     });
-    c.hasBorders = c.hasControls = false;
-    c.line1 = line1;
-    c.line2 = line2;
-    c.line3 = line3;
-    c.line4 = line4;
+
     return c;
 }
 
-function getReqObj(canvas: fabric.Canvas) {
-    let line, p0, p1, p2, p3;
-    canvas.getObjects().map((obj) => {
+function addPathPoints(
+    canvas: fabric.Canvas,
+    startPoint,
+    controlPoint1,
+    controlPoint2,
+    endPoint,
+    line
+) {
+    // Add 1st control point
+    const p1 = makeControlPoint(controlPoint1[0], controlPoint1[1]);
+    p1.name = "p1";
+
+    // Add 2nd control point
+    const p2 = makeControlPoint(controlPoint2[0], controlPoint2[1]);
+    p2.name = "p2";
+
+    // Add start point
+    const p0 = makeEndPoint(startPoint[0], startPoint[1]);
+    p0.name = "p0";
+
+    // Add end point
+    const p3 = makeEndPoint(endPoint[0], endPoint[1]);
+    p3.name = "p3";
+
+    linkPointsToLine(line, p0, p1, p2, p3);
+
+    canvas.add(p0);
+    canvas.add(p1);
+    canvas.add(p2);
+    canvas.add(p3);
+}
+
+function getReqObj(canvas: fabric.Canvas): {
+    line: fabric.Object;
+    p0: fabric.Object;
+    p1: fabric.Object;
+    p2: fabric.Object;
+    p3: fabric.Object;
+} {
+    let line: fabric.Object,
+        p0: fabric.Object,
+        p1: fabric.Object,
+        p2: fabric.Object,
+        p3: fabric.Object;
+    canvas.getObjects().forEach((obj) => {
         switch (obj.name) {
             case "cubeLine":
                 line = obj;
@@ -145,6 +124,8 @@ function getReqObj(canvas: fabric.Canvas) {
                 break;
         }
     });
+
+    console.log("Found all Objs", line, p0, p1, p2, p3);
     return { line, p0, p1, p2, p3 };
 }
 
@@ -166,12 +147,37 @@ export function addCBCHelpers(fabricRef: fabricRefType) {
     const { line, p0, p1, p2, p3 } = getReqObj(canvas);
 
     const path = line.path;
-    // const startPoint = [path[0][1], path[0][2]];
-    // const controlPoint1 = [path[1][1], path[1][2]];
-    // const controlPoint2 = [path[1][3], path[1][4]];
-    // const endPoint = [path[1][5], path[1][6]];
-    console.log(path);
+    const startPoint = [path[0][1], path[0][2]];
+    const controlPoint1 = [path[1][1], path[1][2]];
+    const controlPoint2 = [path[1][3], path[1][4]];
+    const endPoint = [path[1][5], path[1][6]];
+    const ptsArr = [p0, p1, p2, p3];
 
+    // remove exisintg points
+    console.log("Removed all pts", p0, p1, p2, p3);
+    canvas.remove(...ptsArr);
+    // add new points, and
+    addPathPoints(
+        canvas,
+        startPoint,
+        controlPoint1,
+        controlPoint2,
+        endPoint,
+        line
+    );
+
+    console.log(path);
+}
+
+function linkPointsToLine(line, p0, p1, p2, p3) {
+    const ptsArr = [p0, p1, p2, p3];
+    ptsArr.forEach((pt) => {
+        pt.hasBorders = pt.hasControls = false;
+        pt.line1 = null;
+        pt.line2 = null;
+        pt.line3 = null;
+        pt.line4 = null;
+    });
     // Connect existing points with the path line
     p0.line1 = line;
     p1.line2 = line;

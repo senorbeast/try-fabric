@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Button from "./Button";
 import { fabricRefType } from "./Canvas";
-import { cubic, linear, quad } from "./covertors";
+import { cubic, linear, quad } from "./interpolate";
 import { addCBCHelpers, drawCubic } from "./cubic";
 import {
     addRectangle,
@@ -10,7 +10,9 @@ import {
     animateFirstObject,
     animateOnPathC,
 } from "./functions";
-import { drawQuadratic } from "./utils";
+import { drawQuadratic } from "./quadratic";
+import _ from "lodash";
+import { deepDiff } from "./utils";
 
 type canvasJSONType = {
     version: string;
@@ -21,7 +23,8 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
     const [frames, setFrames] = useState<canvasJSONType[]>([
         // loadFirstCanvas(fabricRef),
     ]);
-    const [currentFrame, setCurrentFrame] = useState<number>(0);
+    const oldFrame = useRef<fabric.Object[]>();
+    const [currentFrame, setCurrentFrame] = useState<number>(-1);
 
     const onCanvasModified = useCallback(() => {
         console.log("Called through useCallback");
@@ -39,7 +42,7 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
 
     function loadFirstCanvas(fabricRef: fabricRefType): canvasJSONType {
         const canvas = fabricRef.current!;
-        return canvas.toJSON(["name"]);
+        return canvas.toJSON(["name", "line1", "line2", "line3", "line4"]);
     }
 
     // # whenever fabricRef changes, update frame
@@ -66,9 +69,13 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
             addCBCHelpers(fabricRef);
             // attach the controlPoints, endPoints to the path
             // attach required functions
-
-            // console.log("Updated current canvas")
+            console.log("Load canvas from JSON");
         });
+        const loadedFrame = fabricRef.current!.getObjects();
+        console.log(
+            "Compare oldFrame, loadedFrame",
+            deepDiff(oldFrame, loadedFrame)
+        );
     }
 
     // Run this whenever canvas is updated
@@ -79,7 +86,14 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
     ) {
         const canvas = fabricRef.current!;
         const newFrames = frames.map((frame, idx) => {
-            if (idx === currentFrame) return canvas.toJSON(["name"]);
+            if (idx === currentFrame)
+                return canvas.toJSON([
+                    "name",
+                    "line1",
+                    "line2",
+                    "line3",
+                    "line4",
+                ]);
             else return frame;
         });
         console.log("Update current Frames", newFrames);
@@ -95,9 +109,16 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
     ) {
         const canvas = fabricRef.current!;
         setCurrentFrame(currentFrame + 1); // increment currentFrame
-        const newFrame = [...frames, canvas.toJSON(["name"])];
-        console.log("addNewFrame", currentFrame, newFrame);
+        const newFrame = [
+            ...frames,
+            canvas.toJSON(["name", "line1", "line2", "line3", "line4"]),
+        ];
         setFrames(newFrame); // add frame
+        const oldFrame = fabricRef.current!.getObjects();
+        console.log(
+            "Compare oldFrame, savedFrame",
+            deepDiff(oldFrame, newFrame[currentFrame])
+        );
     }
 
     return (
@@ -139,14 +160,12 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
                 {frames.map((_, idx) => (
                     <button
                         key={idx}
-                        className={`bg-white w-8 border-2 ${
-                            currentFrame == idx + 1 ? "bg-purple-800" : ""
+                        className={`w-8 border-2 ${
+                            currentFrame == idx ? "bg-purple-800" : "bg-white"
                         }`}
-                        onClick={() =>
-                            applyOldFrame(frames, idx + 1, fabricRef)
-                        }
+                        onClick={() => applyOldFrame(frames, idx, fabricRef)}
                     >
-                        {idx + 1}
+                        {idx}
                     </button>
                 ))}
                 <button

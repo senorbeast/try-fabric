@@ -1,210 +1,46 @@
-// @ts-nocheck
-import { fabricRefType } from "./Canvas";
-import { fabric } from "fabric";
+import _ from "lodash";
 
-export function animateDrag(fabricRef: fabricRefType) {
-    const canvas = fabricRef.current!;
+/**
+ * Deep diff between two object-likes
+ * @param  {Object} fromObject the original object
+ * @param  {Object} toObject   the updated object
+ * @return {Object}            a new object which represents the diff
+ */
+export function deepDiff(fromObject, toObject) {
+    const changes = {};
 
-    // disable controls and set hover-cursor
-    canvas.forEachObject(function (o) {
-        o.hasBorders = o.hasControls = false;
-    });
-    canvas.hoverCursor = "pointer";
+    const buildPath = (path, obj, key) =>
+        _.isUndefined(path) ? key : `${path}.${key}`;
 
-    // mouse events
-    canvas.on("mouse:down", function (e) {
-        animate(e, 1);
-    });
-    canvas.on("mouse:up", function (e) {
-        animate(e, 0);
-    });
-
-    function animate(e: fabric.IEvent<MouseEvent>, p: 0 | 1) {
-        if (e.target) {
-            fabric.util.animate({
-                startValue: e.target.get("height"),
-                endValue:
-                    e.target.get("height")! + (p ? -10 : 50 - e.target.height!),
-                duration: 200,
-                onChange: function (v) {
-                    e.target!.height = v;
-                    canvas.renderAll();
-                },
-                onComplete: function () {
-                    e.target.setCoords();
-                },
-            });
-            fabric.util.animate({
-                startValue: e.target.get("width"),
-                endValue:
-                    e.target.get("width") + (p ? -10 : 50 - e.target.width),
-                duration: 200,
-                onChange: function (v) {
-                    e.target.width = v;
-                    canvas.renderAll();
-                },
-                onComplete: function () {
-                    e.target.setCoords();
-                },
-            });
-            fabric.util.animate({
-                startValue: e.target.get("top"),
-                endValue: e.target.get("top") + (p && 5),
-                duration: 200,
-                onChange: function (v) {
-                    e.target.top = v;
-                    canvas.renderAll();
-                },
-                onComplete: function () {
-                    e.target.setCoords();
-                },
-            });
-            fabric.util.animate({
-                startValue: e.target.get("left"),
-                endValue: e.target.get("left") + (p && 5),
-                duration: 200,
-                onChange: function (v) {
-                    e.target.left = v;
-                    canvas.renderAll();
-                },
-                onComplete: function () {
-                    e.target.setCoords();
-                },
-            });
+    const walk = (fromObject, toObject, path) => {
+        for (const key of _.keys(fromObject)) {
+            const currentPath = buildPath(path, fromObject, key);
+            if (!_.has(toObject, key)) {
+                changes[currentPath] = { from: _.get(fromObject, key) };
+            }
         }
-    }
-    canvas.renderAll();
-}
 
-// Quad
-
-export const drawQuadratic = (fabricRef: fabricRefType) => {
-    const canvas = fabricRef.current!;
-
-    canvas.on({
-        "object:selected": (e) => onObjectSelected(e, canvas),
-        "object:moving": (e) => onObjectMoving(e, canvas),
-        "selection:cleared": (e) => onSelectionCleared(e, canvas),
-    });
-
-    const line = new fabric.Path("M 65 0 Q 100, 100, 200, 0", {
-        fill: "",
-        stroke: "black",
-        objectCaching: false,
-    });
-
-    line.path[0][1] = 100;
-    line.path[0][2] = 100;
-
-    line.path[1][1] = 200;
-    line.path[1][2] = 200;
-
-    line.path[1][3] = 300;
-    line.path[1][4] = 100;
-
-    // line.selectable = false;
-    line.name = "quadLine";
-    canvas.add(line);
-
-    const p1 = makeCurvePoint(200, 200, null, line, null);
-    p1.name = "p1";
-    canvas.add(p1);
-
-    const p0 = makeCurveCircle(100, 100, line, p1, null);
-    p0.name = "p0";
-    canvas.add(p0);
-
-    const p2 = makeCurveCircle(300, 100, null, p1, line);
-    p2.name = "p2";
-    canvas.add(p2);
-};
-
-function makeCurveCircle(left, top, line1, line2, line3) {
-    const c = new fabric.Circle({
-        left: left,
-        top: top,
-        strokeWidth: 5,
-        radius: 12,
-        fill: "#fff",
-        stroke: "#666",
-    });
-
-    c.hasBorders = c.hasControls = false;
-
-    c.line1 = line1;
-    c.line2 = line2;
-    c.line3 = line3;
-
-    return c;
-}
-
-function makeCurvePoint(left, top, line1, line2, line3) {
-    const c = new fabric.Circle({
-        left: left,
-        top: top,
-        strokeWidth: 8,
-        radius: 14,
-        fill: "#fff",
-        stroke: "#666",
-    });
-
-    c.hasBorders = c.hasControls = false;
-
-    c.line1 = line1;
-    c.line2 = line2;
-    c.line3 = line3;
-
-    return c;
-}
-
-function onObjectSelected(e, canvas) {
-    const activeObject = e.target;
-    if (activeObject.name == "p0" || activeObject.name == "p2") {
-        activeObject.line2.animate("opacity", "1", {
-            duration: 200,
-            onChange: canvas.renderAll.bind(canvas),
-        });
-        activeObject.line2.selectable = true;
-    } else {
-        console.log(activeObject);
-    }
-}
-
-function onSelectionCleared(e, canvas) {
-    const activeObject = e.target;
-    console.log(activeObject);
-    if (activeObject.name == "p0" || activeObject.name == "p2") {
-        activeObject.line2.animate("opacity", "0", {
-            duration: 200,
-            onChange: canvas.renderAll.bind(canvas),
-        });
-        activeObject.line2.selectable = false;
-    } else if (activeObject.name == "p1") {
-        activeObject.animate("opacity", "0", {
-            duration: 200,
-            onChange: canvas.renderAll.bind(canvas),
-        });
-        activeObject.selectable = false;
-    }
-}
-
-function onObjectMoving(e, canvas) {
-    if (e.target.name == "p0" || e.target.name == "p2") {
-        const p = e.target;
-
-        if (p.line1) {
-            p.line1.path[0][1] = p.left;
-            p.line1.path[0][2] = p.top;
-        } else if (p.line3) {
-            p.line3.path[1][3] = p.left;
-            p.line3.path[1][4] = p.top;
+        for (const [key, to] of _.entries(toObject)) {
+            const currentPath = buildPath(path, toObject, key);
+            if (!_.has(fromObject, key)) {
+                changes[currentPath] = { to };
+            } else {
+                const from = _.get(fromObject, key);
+                if (!_.isEqual(from, to)) {
+                    if (_.isObjectLike(to) && _.isObjectLike(from)) {
+                        walk(from, to, currentPath);
+                    } else {
+                        changes[currentPath] = { from, to };
+                    }
+                }
+            }
         }
-    } else if (e.target.name == "p1") {
-        const p = e.target;
+    };
 
-        if (p.line2) {
-            p.line2.path[1][1] = p.left;
-            p.line2.path[1][2] = p.top;
-        }
-    }
+    walk(fromObject, toObject);
+
+    return changes;
 }
+
+// mom I'm on lodash
+_.mixin({ deepDiff });

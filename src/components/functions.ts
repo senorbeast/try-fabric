@@ -1,7 +1,6 @@
 import { fabric } from "fabric";
 import { fabricRefType } from "./Canvas";
-import { interpolatePath } from "./covertors";
-import CubicBezier, { Vec2 } from "./cubic_beizer";
+import { interpolatePath } from "./interpolate";
 
 export {
     initFabric,
@@ -16,6 +15,7 @@ export {
     animateObjectAlongPath,
     resetPos,
     logObject,
+    animateDrag,
     drawCubicBeizer,
     animateOnPathC,
 };
@@ -286,10 +286,9 @@ const resetPos = (fabricRef: fabricRefType) => {
 };
 
 const logObject = (fabricRef: fabricRefType) => {
-    // Use first object
-    const firstObj = fabricRef.current!.getObjects()[0];
+    const allObjs = fabricRef.current!.getObjects();
 
-    console.log(firstObj);
+    console.log(allObjs);
 };
 
 const drawCubicBeizer = (fabricRef: fabricRefType) => {
@@ -306,3 +305,77 @@ const drawCubicBeizer = (fabricRef: fabricRefType) => {
     cubicBezier.renderCurve(canvas);
     cubicBezier.renderControlPoints(canvas);
 };
+
+function animateDrag(fabricRef: fabricRefType) {
+    const canvas = fabricRef.current!;
+
+    // disable controls and set hover-cursor
+    canvas.forEachObject(function (o) {
+        o.hasBorders = o.hasControls = false;
+    });
+    canvas.hoverCursor = "pointer";
+
+    // mouse events
+    canvas.on("mouse:down", function (e) {
+        animate(e, 1);
+    });
+    canvas.on("mouse:up", function (e) {
+        animate(e, 0);
+    });
+
+    function animate(e: fabric.IEvent<MouseEvent>, p: 0 | 1) {
+        if (e.target) {
+            fabric.util.animate({
+                startValue: e.target.get("height"),
+                endValue:
+                    e.target.get("height")! + (p ? -10 : 50 - e.target.height!),
+                duration: 200,
+                onChange: function (v) {
+                    e.target!.height = v;
+                    canvas.renderAll();
+                },
+                onComplete: function () {
+                    e.target.setCoords();
+                },
+            });
+            fabric.util.animate({
+                startValue: e.target.get("width"),
+                endValue:
+                    e.target.get("width") + (p ? -10 : 50 - e.target.width),
+                duration: 200,
+                onChange: function (v) {
+                    e.target.width = v;
+                    canvas.renderAll();
+                },
+                onComplete: function () {
+                    e.target.setCoords();
+                },
+            });
+            fabric.util.animate({
+                startValue: e.target.get("top"),
+                endValue: e.target.get("top") + (p && 5),
+                duration: 200,
+                onChange: function (v) {
+                    e.target.top = v;
+                    canvas.renderAll();
+                },
+                onComplete: function () {
+                    e.target.setCoords();
+                },
+            });
+            fabric.util.animate({
+                startValue: e.target.get("left"),
+                endValue: e.target.get("left") + (p && 5),
+                duration: 200,
+                onChange: function (v) {
+                    e.target.left = v;
+                    canvas.renderAll();
+                },
+                onComplete: function () {
+                    e.target.setCoords();
+                },
+            });
+        }
+    }
+    canvas.renderAll();
+}
