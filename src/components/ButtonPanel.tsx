@@ -67,16 +67,13 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
         canvas.loadFromJSON(frames[idx], () => {
             // run required functions for bezier function to work
             addCBCHelpers(fabricRef);
-            // attach the controlPoints, endPoints to the path
-            // attach required functions
-            console.log("Load canvas from JSON");
             canvas.renderAll.bind(canvas);
         });
-        const loadedFrame = fabricRef.current!.getObjects();
-        console.log(
-            "Compare oldFrame, loadedFrame",
-            deepDiff(oldFrame, loadedFrame)
-        );
+        // const loadedFrame = fabricRef.current!.getObjects();
+        // console.log(
+        //     "Compare oldFrame, loadedFrame",
+        //     deepDiff(oldFrame, loadedFrame)
+        // );
     }
 
     // Run this whenever canvas is updated
@@ -105,11 +102,11 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
         setCurrentFrame(currentFrame + 1); // increment currentFrame
         const newFrame = [...frames, canvas.toJSON(extraProps)];
         setFrames(newFrame); // add frame
-        const oldFrame = fabricRef.current!.getObjects();
-        console.log(
-            "Compare oldFrame, savedFrame",
-            deepDiff(oldFrame, newFrame[currentFrame])
-        );
+        // const oldFrame = fabricRef.current!.getObjects();
+        // console.log(
+        //     "Compare oldFrame, savedFrame",
+        //     deepDiff(oldFrame, newFrame[currentFrame])
+        // );
     }
 
     return (

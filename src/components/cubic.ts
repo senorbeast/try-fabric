@@ -52,7 +52,6 @@ export const drawCubic = (fabricRef: fabricRefType) => {
     );
     linkPointsToLine(line, p0, p1, p2, p3);
     bindEventsToCanvas(canvas);
-
     [p0, p1, p2, p3].map((o) => canvas.add(o));
 };
 
@@ -153,7 +152,7 @@ function getReqObj(canvas: fabric.Canvas) {
         }
     });
 
-    console.log("Found all Objs", line, p0, p1, p2, p3);
+    // console.log("Found all Objs", line, p0, p1, p2, p3);
     const returnObj = {
         line: line,
         points: [p0, p1, p2, p3],
@@ -172,37 +171,41 @@ function bindEventsToCanvas(canvas: fabric.Canvas) {
     });
 }
 
-export function addCBCHelpers(fabricRef: fabricRefType) {
+export function addCBCHelpers(fabricRef: fabricRefType, replace?: boolean) {
     // This is required all canvas JSON is loaded,
     // these objects/functionality is not stored in the json
 
     const canvas = fabricRef.current!;
-    bindEventsToCanvas(canvas);
-
-    // Read from the path
     const { line, points } = getReqObj(canvas);
+    if (replace) {
+        console.log("Replacing points");
+        // Replace old points with new
+        // Extract details
+        const path = line.path;
+        const startPoint = [path[0][1], path[0][2]];
+        const controlPoint1 = [path[1][1], path[1][2]];
+        const controlPoint2 = [path[1][3], path[1][4]];
+        const endPoint = [path[1][5], path[1][6]];
 
-    const path = line.path;
-    const startPoint = [path[0][1], path[0][2]];
-    const controlPoint1 = [path[1][1], path[1][2]];
-    const controlPoint2 = [path[1][3], path[1][4]];
-    const endPoint = [path[1][5], path[1][6]];
+        canvas.remove(...points);
+        const [p0, p1, p2, p3] = addPathPoints(
+            canvas,
+            startPoint,
+            controlPoint1,
+            controlPoint2,
+            endPoint,
+            line
+        );
+        linkPointsToLine(line, p0, p1, p2, p3);
+        [p0, p1, p2, p3].map((o) => canvas.add(o));
+    } else {
+        console.log("Linking existing points");
+        // Link existing points
+        const [p0, p1, p2, p3] = points;
+        linkPointsToLine(line, p0, p1, p2, p3);
+    }
 
-    // remove exisintg points
-    // canvas.remove(...points);
-    // const [p0, p1, p2, p3] = addPathPoints(
-    //     canvas,
-    //     startPoint,
-    //     controlPoint1,
-    //     controlPoint2,
-    //     endPoint,
-    //     line
-    // );
-    const [p0, p1, p2, p3] = points;
-    linkPointsToLine(line, p0, p1, p2, p3);
     bindEventsToCanvas(canvas);
-
-    // [p0, p1, p2, p3].map((o) => canvas.add(o));
 }
 
 function onObjectSelected(e: fabric.IEvent<MouseEvent>, canvas: fabric.Canvas) {
