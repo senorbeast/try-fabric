@@ -12,7 +12,6 @@ import {
 } from "./functions";
 import { drawQuadratic } from "./quadratic";
 import _ from "lodash";
-import { deepDiff } from "./utils";
 
 type canvasJSONType = {
     version: string;
@@ -110,61 +109,109 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
     }
 
     return (
-        <div className="m-2 flex flex-wrap gap-2 w-[800px]">
-            <Button name="rect" onClick={() => addRectangle(fabricRef)} />
-            {/* <Button name="path" onClick={() => addPath(fabricRef)} /> */}
-            {/* <Button name="resetPos" onClick={() => resetPos(fabricRef)} /> */}
-            <Button
-                name="animateOnPathC"
-                onClick={() => animateOnPathC(fabricRef)}
-            />
-            <Button name="logObject" onClick={() => logObject(fabricRef)} />
-            <Button
-                name="cubicAnimate"
-                onClick={() => animateObjectAlongPath(fabricRef, cubic)}
-            />
-            <Button
-                name="quadAnimate"
-                onClick={() => animateObjectAlongPath(fabricRef, quad)}
-            />
-            <Button
-                name="linearAnimate"
-                onClick={() => animateObjectAlongPath(fabricRef, linear)}
-            />
-            <Button
-                name="drawQuadratic"
-                onClick={() => drawQuadratic(fabricRef)}
-            />
-            <Button name="drawCubic" onClick={() => drawCubic(fabricRef)} />
-            <Button
-                name="from-to-line"
-                onClick={() =>
-                    animateFirstObject(fabricRef, 600, 600, 300, 300, 500, () =>
-                        console.log("Done")
-                    )
-                }
-            />
-            <div className="flex rounded-md">
-                {frames.map((_, idx) => (
+        <div className="">
+            {/* Basic + Beizers Row */}
+            <div className="flex ">
+                <div className="m-2 flex flex-wrap gap-2 justify-start items-center">
+                    <p className="text-white">Basics:</p>
+                    <Button
+                        className="bg-purple-400"
+                        name="rect"
+                        onClick={() => addRectangle(fabricRef)}
+                    />
+                    <Button
+                        name="logObject"
+                        onClick={() => logObject(fabricRef)}
+                    />
+                </div>
+                <div className="m-2 flex flex-wrap gap-2 justify-start items-center">
+                    <p className="text-white">Beizers/Lines:</p>
+                    <Button
+                        name="drawQuadratic"
+                        onClick={() => drawQuadratic(fabricRef)}
+                    />
+                    <Button
+                        name="drawCubic"
+                        onClick={() => drawCubic(fabricRef)}
+                    />
+                </div>
+            </div>
+            {/* Animate */}
+            <div className="m-2 flex flex-wrap gap-2 w-[800px] justify-start items-center">
+                <p className="text-white">Animate:</p>
+
+                {/* <Button name="path" onClick={() => addPath(fabricRef)} /> */}
+                {/* <Button name="resetPos" onClick={() => resetPos(fabricRef)} /> */}
+                <Button
+                    name="animateOnPathC"
+                    onClick={() => animateOnPathC(fabricRef)}
+                />
+
+                <Button
+                    name="cubicAnimate"
+                    onClick={() => animateObjectAlongPath(fabricRef, cubic)}
+                />
+                <Button
+                    name="quadAnimate"
+                    onClick={() => animateObjectAlongPath(fabricRef, quad)}
+                />
+                <Button
+                    name="linearAnimate"
+                    onClick={() => animateObjectAlongPath(fabricRef, linear)}
+                />
+                <Button
+                    name="from-to-line"
+                    onClick={() =>
+                        animateFirstObject(
+                            fabricRef,
+                            600,
+                            600,
+                            300,
+                            300,
+                            500,
+                            () => console.log("Done")
+                        )
+                    }
+                />
+            </div>
+            {/* Frames */}
+            <div className="m-2 flex flex-wrap gap-2 justify-start items-center">
+                <p className="text-white">Frames:</p>
+                <div className="flex rounded-md">
+                    {frames.map((_, idx) => (
+                        <button
+                            key={idx}
+                            className={`w-8 border-2 ${
+                                currentFrame == idx
+                                    ? "bg-purple-800"
+                                    : "bg-white"
+                            }`}
+                            onClick={() =>
+                                applyOldFrame(frames, idx, fabricRef)
+                            }
+                        >
+                            {idx}
+                        </button>
+                    ))}
                     <button
-                        key={idx}
-                        className={`w-8 border-2 ${
-                            currentFrame == idx ? "bg-purple-800" : "bg-white"
-                        }`}
-                        onClick={() => applyOldFrame(frames, idx, fabricRef)}
+                        className="bg-white w-8 border-2"
+                        onClick={() =>
+                            addNewFrame(frames, currentFrame, fabricRef)
+                        }
                     >
-                        {idx}
+                        +
                     </button>
-                ))}
-                <button
-                    className="bg-white w-8 border-2"
-                    onClick={() => addNewFrame(frames, currentFrame, fabricRef)}
-                >
-                    +
-                </button>
-                <p className="text-white m-1">
-                    Current Frame No: {currentFrame}
-                </p>
+                    <p className="text-white m-1">
+                        Current Frame No: {currentFrame}
+                    </p>
+                </div>
+                {frames.length > 0 ? (
+                    <>
+                        <p className="text-white">Animate:</p>
+                        <Button name="▶" onClick={() => {}} />
+                        <Button name="⏸" onClick={() => {}} />{" "}
+                    </>
+                ) : null}
             </div>
         </div>
     );

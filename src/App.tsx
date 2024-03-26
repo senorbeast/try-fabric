@@ -2,7 +2,7 @@ import Canvas from "./components/Canvas";
 
 function App() {
     return (
-        <div className="bg-slate-950 flex-col w-screen h-screen">
+        <div className="bg-slate-950 flex-col">
             <h1 className="flex justify-center text-2xl text-white">
                 Fabricjs - React
             </h1>
