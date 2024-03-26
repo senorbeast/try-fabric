@@ -1,4 +1,4 @@
-import { PointType } from "./functions";
+import { PointType } from "./common";
 
 export const quad: (string | number)[][] = [
     ["M", 50, 400],

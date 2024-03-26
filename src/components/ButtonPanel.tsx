@@ -1,17 +1,18 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Button from "./Button";
 import { fabricRefType } from "./Canvas";
-import { cubic, linear, quad } from "./interpolate";
-import { addCBCHelpers, drawCubic, extraProps } from "./cubic";
+import { cubic, linear, quad } from "./fabric_functions/interpolate";
+import { addCBCHelpers, drawCubic, extraProps } from "./fabric_functions/cubic";
 import {
     addRectangle,
     logObject,
     animateObjectAlongPath,
     animateFirstObject,
     animateOnPathC,
-} from "./functions";
-import { drawQuadratic } from "./quadratic";
+} from "./fabric_functions/common";
+import { drawQuadratic } from "./fabric_functions/quadratic";
 import _ from "lodash";
+import { drawLine } from "./fabric_functions/line";
 
 type canvasJSONType = {
     version: string;
@@ -92,13 +93,9 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
     }
 
     // after tapping +
-    function addNewFrame(
-        frames: canvasJSONType[],
-        currentFrame: number,
-        fabricRef: fabricRefType
-    ) {
+    function addNewFrame(frames: canvasJSONType[], fabricRef: fabricRefType) {
         const canvas = fabricRef.current!;
-        setCurrentFrame(currentFrame + 1); // increment currentFrame
+        setCurrentFrame(frames.length);
         const newFrame = [...frames, canvas.toJSON(extraProps)];
         setFrames(newFrame); // add frame
         // const oldFrame = fabricRef.current!.getObjects();
@@ -133,6 +130,10 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
                     <Button
                         name="drawCubic"
                         onClick={() => drawCubic(fabricRef)}
+                    />
+                    <Button
+                        name="drawLine"
+                        onClick={() => drawLine(fabricRef)}
                     />
                 </div>
             </div>
@@ -183,7 +184,7 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
                             key={idx}
                             className={`w-8 border-2 ${
                                 currentFrame == idx
-                                    ? "bg-purple-800"
+                                    ? "bg-purple-400"
                                     : "bg-white"
                             }`}
                             onClick={() =>
@@ -195,9 +196,7 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
                     ))}
                     <button
                         className="bg-white w-8 border-2"
-                        onClick={() =>
-                            addNewFrame(frames, currentFrame, fabricRef)
-                        }
+                        onClick={() => addNewFrame(frames, fabricRef)}
                     >
                         +
                     </button>
@@ -205,7 +204,7 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
                         Current Frame No: {currentFrame}
                     </p>
                 </div>
-                {frames.length > 0 ? (
+                {frames.length > 1 ? (
                     <>
                         <p className="text-white">Animate:</p>
                         <Button name="▶" onClick={() => {}} />

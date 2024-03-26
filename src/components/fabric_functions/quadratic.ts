@@ -1,4 +1,4 @@
-import { fabricRefType } from "./Canvas";
+import { fabricRefType } from "../Canvas";
 import { fabric } from "fabric";
 
 // Quad

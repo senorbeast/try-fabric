@@ -1,4 +1,4 @@
-import type { fabricRefType } from "./Canvas";
+import type { fabricRefType } from "../Canvas";
 import { fabric } from "fabric";
 
 export const extraProps = [
@@ -57,11 +57,11 @@ export const drawCubic = (fabricRef: fabricRefType) => {
 
 type pathORNull = fabric.Path | null;
 
-function makeEndPoint(left: number, top: number) {
+export function makeEndPoint(left: number, top: number) {
     const c = new fabric.Circle({
-        left: left - 6,
-        top: top - 6,
-        strokeWidth: 5,
+        left: left - 16,
+        top: top - 16,
+        strokeWidth: 4,
         radius: 12,
         fill: "#fff",
         stroke: "#666",
@@ -72,8 +72,8 @@ function makeEndPoint(left: number, top: number) {
 
 function makeControlPoint(left: number, top: number) {
     const c = new fabric.Circle({
-        left: left - 4,
-        top: top - 4,
+        left: left - 8,
+        top: top - 8,
         radius: 8,
         fill: "#fff",
     });
@@ -208,7 +208,10 @@ export function addCBCHelpers(fabricRef: fabricRefType, replace?: boolean) {
     bindEventsToCanvas(canvas);
 }
 
-function onObjectSelected(e: fabric.IEvent<MouseEvent>, canvas: fabric.Canvas) {
+export function onObjectSelected(
+    e: fabric.IEvent<MouseEvent>,
+    canvas: fabric.Canvas
+) {
     const activeObject = e.target!;
     if (activeObject.name === "p0" || activeObject.name === "p3") {
         activeObject.line2.animate("opacity", "1", {
@@ -221,7 +224,7 @@ function onObjectSelected(e: fabric.IEvent<MouseEvent>, canvas: fabric.Canvas) {
     }
 }
 
-function onSelectionCleared(
+export function onSelectionCleared(
     e: fabric.IEvent<MouseEvent>,
     canvas: fabric.Canvas
 ) {
@@ -243,26 +246,28 @@ function onSelectionCleared(
 }
 
 function onObjectMoving(e: fabric.IEvent<MouseEvent>, canvas?: fabric.Canvas) {
+    const endPointOffset = 16;
+    const controlPointOffset = 8;
     if (e.target!.name === "p0" || e.target!.name === "p3") {
         const p = e.target!;
         if (p.line1) {
-            p.line1.path[0][1] = p.left;
-            p.line1.path[0][2] = p.top;
+            p.line1.path[0][1] = p.left + endPointOffset;
+            p.line1.path[0][2] = p.top + endPointOffset;
         } else if (p.line4) {
-            p.line4.path[1][5] = p.left;
-            p.line4.path[1][6] = p.top;
+            p.line4.path[1][5] = p.left + endPointOffset;
+            p.line4.path[1][6] = p.top + endPointOffset;
         }
     } else if (e.target!.name === "p1") {
         const p = e.target;
         if (p.line2) {
-            p.line2.path[1][1] = p.left;
-            p.line2.path[1][2] = p.top;
+            p.line2.path[1][1] = p.left + controlPointOffset;
+            p.line2.path[1][2] = p.top + controlPointOffset;
         }
     } else if (e.target!.name === "p2") {
         const p = e.target;
         if (p.line3) {
-            p.line3.path[1][3] = p.left;
-            p.line3.path[1][4] = p.top;
+            p.line3.path[1][3] = p.left + controlPointOffset;
+            p.line3.path[1][4] = p.top + controlPointOffset;
         }
     }
 }

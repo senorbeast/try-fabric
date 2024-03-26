@@ -1,7 +1,7 @@
 import { fabric } from "fabric";
 import { useEffect, useRef } from "react";
 import ButtonPanel from "./ButtonPanel";
-import { initFabric, disposeFabric } from "./functions";
+import { initFabric, disposeFabric } from "./fabric_functions/common";
 
 // TODO: don't use fabricRef.current!
 

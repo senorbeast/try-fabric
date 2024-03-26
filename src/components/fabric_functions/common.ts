@@ -1,5 +1,5 @@
 import { fabric } from "fabric";
-import { fabricRefType } from "./Canvas";
+import { fabricRefType } from "../Canvas";
 import { interpolatePath } from "./interpolate";
 
 export {
