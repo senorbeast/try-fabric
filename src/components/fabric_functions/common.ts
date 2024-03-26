@@ -16,7 +16,7 @@ export {
     resetPos,
     logObject,
     animateDrag,
-    drawCubicBeizer,
+    imageObject,
     animateOnPathC,
 };
 
@@ -291,19 +291,18 @@ const logObject = (fabricRef: fabricRefType) => {
     console.log(allObjs);
 };
 
-const drawCubicBeizer = (fabricRef: fabricRefType) => {
+const imageObject = (fabricRef: fabricRefType, imgId: string) => {
     const canvas = fabricRef.current!;
-
-    // Or create an instance with custom options
-    const customOptions = {
-        start: new Vec2(50, 50),
-        end: new Vec2(500, 500),
-        c1: new Vec2(150, 400),
-        c2: new Vec2(400, 200),
-    };
-    const cubicBezier = new CubicBezier(fabricRef, customOptions);
-    cubicBezier.renderCurve(canvas);
-    cubicBezier.renderControlPoints(canvas);
+    const imgElement = document.getElementById(imgId);
+    const imgInstance = new fabric.Image(imgElement, {
+        left: 100,
+        top: 100,
+        angle: 0,
+        opacity: 0.5,
+        width: 32,
+        height: 32,
+    });
+    canvas.add(imgInstance);
 };
 
 function animateDrag(fabricRef: fabricRefType) {
