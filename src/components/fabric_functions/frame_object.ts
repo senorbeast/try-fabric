@@ -1,15 +1,14 @@
 import type { fabricRefType } from "../Canvas";
 import { fabric } from "fabric";
-import { makeEndPoint, onObjectSelected, onSelectionCleared } from "./cubic";
+import { onObjectSelected, onSelectionCleared } from "./cubic";
+import { imageObject } from "./common";
+import { getReqObjByIds } from "./helpers";
 
-export const frameObject = (
-    fabricRef: fabricRefType,
-    Object: fabric.Object
-) => {
+export const frameObject = (fabricRef: fabricRefType) => {
     const canvas = fabricRef.current!;
 
     const startPoint = [100, 100];
-    const endPoint = [400, 100];
+    const endPoint = [100, 100];
 
     const line = new fabric.Path(
         `M ${startPoint[0]} ${startPoint[1]} L ${endPoint[0]} ${endPoint[1]}`,
@@ -17,6 +16,8 @@ export const frameObject = (
             fill: "",
             stroke: "black",
             objectCaching: false,
+            strokeUniform: true,
+            strokeDashArray: [5, 5],
         }
     );
 
@@ -25,7 +26,7 @@ export const frameObject = (
     line.path[1][1] = endPoint[0];
     line.path[1][2] = endPoint[1];
 
-    line.name = "line";
+    line.name = "frame_line";
     canvas.add(line);
 
     const [p0, p3] = addEndPoints(startPoint, endPoint);
@@ -39,14 +40,23 @@ function addEndPoints(
     endPoint: number[]
 ): fabric.Object[] {
     // Add start point
-    const p0 = makeEndPoint(startPoint[0], startPoint[1]);
+    const p0 = makeCustomEndPoint(startPoint[0], startPoint[1]);
     p0.name = "p0";
 
     // Add end point
-    const p3 = makeEndPoint(endPoint[0], endPoint[1]);
+    const p3 = makeCustomEndPoint(endPoint[0], endPoint[1]);
     p3.name = "p3";
 
     return [p0, p3];
+}
+
+function makeCustomEndPoint(left: number, top: number) {
+    const c = imageObject("my-image");
+    c.set({
+        left: left - 16,
+        top: top - 16,
+    });
+    return c;
 }
 
 function linkPointsToLine(line, p0, p3) {
@@ -61,6 +71,13 @@ function linkPointsToLine(line, p0, p3) {
     // Connect existing points with the path line
     p0.line1 = line;
     p3.line4 = line;
+}
+
+export function runAfterJSONLoad(fabricRef: fabricRefType) {
+    const canvas = fabricRef.current!;
+    const [line, p0, p3] = getReqObjByIds(canvas, ["frame_line", "p0", "p3"]);
+    linkPointsToLine(line, p0, p3);
+    bindEventsToCanvas(canvas);
 }
 
 function bindEventsToCanvas(canvas: fabric.Canvas) {

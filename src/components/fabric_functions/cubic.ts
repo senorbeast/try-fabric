@@ -1,5 +1,6 @@
 import type { fabricRefType } from "../Canvas";
 import { fabric } from "fabric";
+import { getReqObjByIds } from "./helpers";
 
 export const extraProps = [
     "name",
@@ -124,6 +125,7 @@ function linkPointsToLine(line, p0, p1, p2, p3) {
     p3.line4 = line;
 }
 
+//! Deprecated instead use getReqObjByIds
 function getReqObj(canvas: fabric.Canvas) {
     let line: fabric.Object,
         p0: fabric.Object,
@@ -176,7 +178,14 @@ export function addCBCHelpers(fabricRef: fabricRefType, replace?: boolean) {
     // these objects/functionality is not stored in the json
 
     const canvas = fabricRef.current!;
-    const { line, points } = getReqObj(canvas);
+    // const { line, points } = getReqObj(canvas);
+    const [line, p0, p1, p2, p3] = getReqObjByIds(canvas, [
+        "cubeLine",
+        "p0",
+        "p1",
+        "p2",
+        "p3",
+    ]);
     if (replace) {
         console.log("Replacing points");
         // Replace old points with new
@@ -201,7 +210,7 @@ export function addCBCHelpers(fabricRef: fabricRefType, replace?: boolean) {
     } else {
         console.log("Linking existing points");
         // Link existing points
-        const [p0, p1, p2, p3] = points;
+        // const [p0, p1, p2, p3] = points;
         linkPointsToLine(line, p0, p1, p2, p3);
     }
 

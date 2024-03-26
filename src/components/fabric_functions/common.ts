@@ -16,6 +16,7 @@ export {
     resetPos,
     logObject,
     animateDrag,
+    addImageObject,
     imageObject,
     animateOnPathC,
 };
@@ -291,7 +292,7 @@ const logObject = (fabricRef: fabricRefType) => {
     console.log(allObjs);
 };
 
-const imageObject = (fabricRef: fabricRefType, imgId: string) => {
+const addImageObject = (fabricRef: fabricRefType, imgId: string) => {
     const canvas = fabricRef.current!;
     const imgElement = document.getElementById(imgId);
     const imgInstance = new fabric.Image(imgElement, {
@@ -303,6 +304,19 @@ const imageObject = (fabricRef: fabricRefType, imgId: string) => {
         height: 32,
     });
     canvas.add(imgInstance);
+};
+
+const imageObject = (imgId: string): fabric.Image => {
+    const imgElement = document.getElementById(imgId);
+    const imgInstance = new fabric.Image(imgElement, {
+        left: 100,
+        top: 100,
+        angle: 0,
+        opacity: 0.5,
+        width: 32,
+        height: 32,
+    });
+    return imgInstance;
 };
 
 function animateDrag(fabricRef: fabricRefType) {
