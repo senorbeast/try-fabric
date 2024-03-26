@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Button from "./Button";
 import { fabricRefType } from "./Canvas";
 import { cubic, linear, quad } from "./interpolate";
-import { addCBCHelpers, drawCubic } from "./cubic";
+import { addCBCHelpers, drawCubic, extraProps } from "./cubic";
 import {
     addRectangle,
     logObject,
@@ -42,7 +42,7 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
 
     function loadFirstCanvas(fabricRef: fabricRefType): canvasJSONType {
         const canvas = fabricRef.current!;
-        return canvas.toJSON(["name", "line1", "line2", "line3", "line4"]);
+        return canvas.toJSON(extraProps);
     }
 
     // # whenever fabricRef changes, update frame
@@ -70,6 +70,7 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
             // attach the controlPoints, endPoints to the path
             // attach required functions
             console.log("Load canvas from JSON");
+            canvas.renderAll.bind(canvas);
         });
         const loadedFrame = fabricRef.current!.getObjects();
         console.log(
@@ -86,14 +87,7 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
     ) {
         const canvas = fabricRef.current!;
         const newFrames = frames.map((frame, idx) => {
-            if (idx === currentFrame)
-                return canvas.toJSON([
-                    "name",
-                    "line1",
-                    "line2",
-                    "line3",
-                    "line4",
-                ]);
+            if (idx === currentFrame) return canvas.toJSON(extraProps);
             else return frame;
         });
         console.log("Update current Frames", newFrames);
@@ -109,10 +103,7 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
     ) {
         const canvas = fabricRef.current!;
         setCurrentFrame(currentFrame + 1); // increment currentFrame
-        const newFrame = [
-            ...frames,
-            canvas.toJSON(["name", "line1", "line2", "line3", "line4"]),
-        ];
+        const newFrame = [...frames, canvas.toJSON(extraProps)];
         setFrames(newFrame); // add frame
         const oldFrame = fabricRef.current!.getObjects();
         console.log(
