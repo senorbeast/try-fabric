@@ -11,7 +11,6 @@ function getReqObjByIds(canvas: fabric.Canvas, ids: string[]) {
         });
         if (result.length == index) result.push(null);
     });
-    console.log(result);
 
     return result;
 }

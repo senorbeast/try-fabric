@@ -28,7 +28,7 @@ export const drawLine = (fabricRef: fabricRefType) => {
 
     const [p0, p3] = addEndPoints(startPoint, endPoint);
     linkPointsToLine(line, p0, p3);
-    bindEventsToCanvas(canvas);
+    bindLineEvents(canvas);
     [p0, p3].map((o) => canvas.add(o));
 };
 
@@ -65,10 +65,10 @@ export function runAfterJSONLoadLine(fabricRef: fabricRefType) {
     const canvas = fabricRef.current!;
     const [line, p0, p3] = getReqObjByIds(canvas, ["line", "p0", "p3"]);
     linkPointsToLine(line, p0, p3);
-    bindEventsToCanvas(canvas);
+    bindLineEvents(canvas);
 }
 
-function bindEventsToCanvas(canvas: fabric.Canvas) {
+function bindLineEvents(canvas: fabric.Canvas) {
     canvas.on({
         "object:selected": (e: fabric.IEvent<MouseEvent>) =>
             onObjectSelected(e, canvas),

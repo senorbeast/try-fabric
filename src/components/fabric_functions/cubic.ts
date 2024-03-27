@@ -52,7 +52,7 @@ export const drawCubic = (fabricRef: fabricRefType) => {
         line
     );
     linkPointsToLine(line, p0, p1, p2, p3);
-    bindEventsToCanvas(canvas);
+    bindCubicEvents(canvas);
     [p0, p1, p2, p3].map((o) => canvas.add(o));
 };
 
@@ -162,7 +162,7 @@ function getReqObj(canvas: fabric.Canvas) {
     return returnObj;
 }
 
-function bindEventsToCanvas(canvas: fabric.Canvas) {
+function bindCubicEvents(canvas: fabric.Canvas) {
     canvas.on({
         "object:selected": (e: fabric.IEvent<MouseEvent>) =>
             onObjectSelected(e, canvas),
@@ -214,7 +214,7 @@ export function addCBCHelpers(fabricRef: fabricRefType, replace?: boolean) {
         linkPointsToLine(line, p0, p1, p2, p3);
     }
 
-    bindEventsToCanvas(canvas);
+    bindCubicEvents(canvas);
 }
 
 export function onObjectSelected(
@@ -254,7 +254,10 @@ export function onSelectionCleared(
     }
 }
 
-function onObjectMoving(e: fabric.IEvent<MouseEvent>, canvas?: fabric.Canvas) {
+export function onObjectMoving(
+    e: fabric.IEvent<MouseEvent>,
+    canvas?: fabric.Canvas
+) {
     const endPointOffset = 16;
     const controlPointOffset = 8;
     if (e.target!.name === "p0" || e.target!.name === "p3") {

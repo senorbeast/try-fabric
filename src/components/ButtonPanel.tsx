@@ -193,15 +193,15 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
             {/* Frames */}
             <div className="m-2 flex flex-wrap gap-2 justify-start items-center">
                 <p className="text-white">Frames:</p>
-                <div className="flex rounded-md">
+                <div className="flex">
                     {frames.map((_, idx) => (
                         <button
                             key={idx}
                             className={`w-8 border-2 ${
-                                currentFrame == idx
-                                    ? "bg-purple-400"
-                                    : "bg-white"
-                            }`}
+                                currentFrame > idx ? "bg-green-400" : "bg-white"
+                            }
+                            ${currentFrame == idx ? "font-bold" : ""}
+                            `}
                             onClick={() =>
                                 applyOldFrame(frames, idx, fabricRef)
                             }
