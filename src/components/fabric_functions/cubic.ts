@@ -173,14 +173,18 @@ function bindCubicEvents(canvas: fabric.Canvas) {
     });
 }
 
-export function addCBCHelpers(fabricRef: fabricRefType, replace?: boolean) {
+export function addCBCHelpers(
+    fabricRef: fabricRefType,
+    lineName: string,
+    replace?: boolean
+) {
     // This is required all canvas JSON is loaded,
     // these objects/functionality is not stored in the json
 
     const canvas = fabricRef.current!;
     // const { line, points } = getReqObj(canvas);
     const [line, p0, p1, p2, p3] = getReqObjByIds(canvas, [
-        "cubeLine",
+        lineName,
         "p0",
         "p1",
         "p2",
@@ -237,8 +241,9 @@ export function onSelectionCleared(
     e: fabric.IEvent<MouseEvent>,
     canvas: fabric.Canvas
 ) {
-    const activeObject = e.target!;
+    const activeObject = e.target;
     console.log(activeObject);
+    if (activeObject == null || activeObject == undefined) return null;
     if (activeObject.name === "p0" || activeObject.name === "p3") {
         activeObject.line2.animate("opacity", "0", {
             duration: 200,

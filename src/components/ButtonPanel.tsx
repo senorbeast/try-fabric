@@ -15,6 +15,7 @@ import { drawQuadratic } from "./fabric_functions/quadratic";
 import _ from "lodash";
 import { drawLine, runAfterJSONLoadLine } from "./fabric_functions/line";
 import { frameObject, runAfterJSONLoad } from "./fabric_functions/frame_object";
+import { cbcToLineForNewFrame } from "./fabric_functions/helpers";
 
 type canvasJSONType = {
     version: string;
@@ -68,7 +69,8 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
         setCurrentFrame(idx);
         canvas.loadFromJSON(frames[idx], () => {
             // run required functions for bezier function to work
-            addCBCHelpers(fabricRef);
+            addCBCHelpers(fabricRef, "frame_line");
+            // addCBCHelpers(fabricRef, false, "cubeLine");
             // runAfterJSONLoad(fabricRef);
             // runAfterJSONLoadLine(fabricRef);
             canvas.renderAll.bind(canvas);
@@ -102,6 +104,8 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
         setCurrentFrame(frames.length);
         const newFrame = [...frames, canvas.toJSON(extraProps)];
         setFrames(newFrame); // add frame
+        // cbcToLineForNewFrame(canvas);
+
         // const oldFrame = fabricRef.current!.getObjects();
         // console.log(
         //     "Compare oldFrame, savedFrame",
@@ -198,7 +202,9 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
                         <button
                             key={idx}
                             className={`w-8 border-2 ${
-                                currentFrame > idx ? "bg-green-400" : "bg-white"
+                                frames.length - 1 > idx
+                                    ? "bg-green-400"
+                                    : "bg-white"
                             }
                             ${currentFrame == idx ? "font-bold" : ""}
                             `}
@@ -231,7 +237,14 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
                 <p className="text-white">Tactic Obj:</p>
                 <Button
                     name="frameObject"
-                    onClick={() => frameObject(fabricRef)}
+                    onClick={() =>
+                        frameObject(
+                            fabricRef,
+                            [100, 100],
+                            [100, 100],
+                            "frame_line"
+                        )
+                    }
                 />
             </div>
         </div>

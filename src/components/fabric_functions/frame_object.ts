@@ -4,11 +4,16 @@ import { onObjectMoving, onObjectSelected, onSelectionCleared } from "./cubic";
 import { imageObject } from "./common";
 import { getReqObjByIds } from "./helpers";
 
-export const frameObject = (fabricRef: fabricRefType) => {
+export const frameObject = (
+    fabricRef: fabricRefType,
+    startPoint: [number, number],
+    endPoint: [number, number],
+    name: string
+) => {
     const canvas = fabricRef.current!;
 
-    const startPoint = [100, 100];
-    const endPoint = [100, 100];
+    // const startPoint = [100, 100];
+    // const endPoint = [100, 100];
 
     const line = new fabric.Path(
         `M ${startPoint[0]} ${startPoint[1]} L ${endPoint[0]} ${endPoint[1]}`,
@@ -26,7 +31,7 @@ export const frameObject = (fabricRef: fabricRefType) => {
     line.path[1][1] = endPoint[0];
     line.path[1][2] = endPoint[1];
 
-    line.name = "frame_line";
+    line.name = name;
     canvas.add(line);
 
     const [p0, p3] = makeEndPoints(startPoint, endPoint);
@@ -154,7 +159,6 @@ function onObjectMouseUp(e: fabric.IEvent<MouseEvent>, canvas: fabric.Canvas) {
         // add p1, p2 controls points, make it a beizer curve
 
         const path = line!.path;
-        const startPoint = [path[0][1], path[0][2]];
         // points inbetween of the line
         const controlPoint1 = [150, 100];
         const controlPoint2 = [200, 100];
@@ -169,7 +173,7 @@ function onObjectMouseUp(e: fabric.IEvent<MouseEvent>, canvas: fabric.Canvas) {
             endPoint[0],
             endPoint[1],
         ];
-        canvas.renderCanvas.bind(canvas);
+
         const [p1, p2] = makeControlsPoints(controlPoint1, controlPoint2);
         linkControlPointsToLine(line, p1, p2);
 
@@ -179,7 +183,7 @@ function onObjectMouseUp(e: fabric.IEvent<MouseEvent>, canvas: fabric.Canvas) {
         });
 
         [p1, p2].map((o) => canvas.add(o));
-        canvas.renderCanvas.bind(canvas);
+        canvas.renderAll();
     }
 }
 
@@ -204,7 +208,7 @@ function onObjectMouseDown(
             "object:moving": (e: fabric.IEvent<MouseEvent>) =>
                 onFOMovingLine(e, canvas),
         });
-        canvas.renderCanvas.bind(canvas);
+        canvas.renderAll();
     }
 }
 
