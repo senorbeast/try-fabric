@@ -1,6 +1,8 @@
-import { frameObject } from "./frame_object";
+import { canvasJSONType } from "../ButtonPanel";
+import { fabricRefType } from "../Canvas";
+import { animateObjectAlongPath } from "./common";
 
-export { getReqObjByIds, cbcToLineForNewFrame };
+export { getReqObjByIds, cbcToLineForNewFrame, animateOverFrames };
 
 function getReqObjByIds(canvas: fabric.Canvas, ids: string[]) {
     const result: (fabric.Object | null)[] = [];
@@ -56,3 +58,31 @@ function getEndPoint(line: fabric.Object): [number, number] {
 // new-Frame
 // remove eventListeners, old line/curve
 // replace them with fO on endPoint, on single point + use old ids/names
+
+function animateOverFrames(fabricRef: fabricRefType, frames: canvasJSONType[]) {
+    const allPaths: (string | number)[][][] = [];
+    console.log(frames);
+
+    // Fill in paths across frames
+    frames.forEach((frame) => {
+        frame.objects.forEach((obj) => {
+            if (obj.name == "frame_line") {
+                allPaths.push(obj.path);
+            }
+        });
+    });
+
+    console.log(allPaths);
+
+    // animate
+    let currentFrame = 0;
+    const sequenceAnimation = () => {
+        if (currentFrame < frames.length) {
+            animateObjectAlongPath(fabricRef, allPaths[currentFrame], () => {
+                currentFrame++;
+                sequenceAnimation();
+            });
+        }
+    };
+    sequenceAnimation();
+}

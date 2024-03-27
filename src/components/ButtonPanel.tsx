@@ -15,9 +15,12 @@ import { drawQuadratic } from "./fabric_functions/quadratic";
 import _ from "lodash";
 import { drawLine, runAfterJSONLoadLine } from "./fabric_functions/line";
 import { frameObject, runAfterJSONLoad } from "./fabric_functions/frame_object";
-import { cbcToLineForNewFrame } from "./fabric_functions/helpers";
+import {
+    animateOverFrames,
+    cbcToLineForNewFrame,
+} from "./fabric_functions/helpers";
 
-type canvasJSONType = {
+export type canvasJSONType = {
     version: string;
     objects: fabric.Object[];
 };
@@ -228,7 +231,12 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
                 {frames.length > 1 ? (
                     <>
                         <p className="text-white">Animate:</p>
-                        <Button name="▶" onClick={() => {}} />
+                        <Button
+                            name="▶"
+                            onClick={() => {
+                                animateOverFrames(fabricRef, frames);
+                            }}
+                        />
                         <Button name="⏸" onClick={() => {}} />{" "}
                     </>
                 ) : null}

@@ -206,7 +206,7 @@ function animateObjectAlongPath(
     ) {
         points.push(interpolatePath(path, percentage));
     }
-    console.log(points);
+    // console.log(points);
     const numPoints = points.length;
 
     let currentIndex = 0;
