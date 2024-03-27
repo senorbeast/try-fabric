@@ -2,7 +2,7 @@ import type { fabricRefType } from "../Canvas";
 import { fabric } from "fabric";
 import { onObjectMoving, onObjectSelected, onSelectionCleared } from "./cubic";
 import { imageObject } from "./common";
-import { getReqObjByIds } from "./helpers";
+import { findEquidistantPoints, getReqObjByIds } from "./helpers";
 
 export const frameObject = (
     fabricRef: fabricRefType,
@@ -91,6 +91,7 @@ function makeControlPoint(left: number, top: number) {
 }
 
 function linkEndPointsToLine(line, p0, p3) {
+    console.log("Linking points to line");
     const ptsArr = [p0, p3];
     ptsArr.forEach((pt) => {
         pt.hasBorders = pt.hasControls = false;
@@ -136,7 +137,7 @@ export function runAfterJSONLoad(fabricRef: fabricRefType) {
     bindFOEvents(canvas);
 }
 
-function bindFOEvents(canvas: fabric.Canvas) {
+export function bindFOEvents(canvas: fabric.Canvas) {
     canvas.on({
         "object:selected": (e: fabric.IEvent<MouseEvent>) =>
             onObjectSelected(e, canvas),
@@ -159,10 +160,12 @@ function onObjectMouseUp(e: fabric.IEvent<MouseEvent>, canvas: fabric.Canvas) {
         // add p1, p2 controls points, make it a beizer curve
 
         const path = line!.path;
-        // points inbetween of the line
-        const controlPoint1 = [150, 100];
-        const controlPoint2 = [200, 100];
-        const endPoint = [path[1][5], path[1][6]];
+        const startPoint: [number, number] = [path[0][1], path[0][2]];
+        const endPoint: [number, number] = [path[1][5], path[1][6]];
+        const [controlPoint1, controlPoint2] = findEquidistantPoints(
+            startPoint,
+            endPoint
+        );
 
         line.path[1] = [
             "C",

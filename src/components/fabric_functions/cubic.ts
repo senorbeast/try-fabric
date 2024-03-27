@@ -243,7 +243,7 @@ export function onSelectionCleared(
 ) {
     const activeObject = e.target;
     console.log(activeObject);
-    if (activeObject == null || activeObject == undefined) return null;
+    // if (activeObject == null || activeObject == undefined) return null;
     if (activeObject.name === "p0" || activeObject.name === "p3") {
         activeObject.line2.animate("opacity", "0", {
             duration: 200,
