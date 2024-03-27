@@ -8,6 +8,7 @@ export {
     animateOverFrames,
     findEquidistantPoints,
     mapControlPointsOnCurve,
+    calculateControlPoints,
 };
 
 function getReqObjByIds(canvas: fabric.Canvas, ids: string[]) {
@@ -182,4 +183,32 @@ function mapControlPointsOnCurve(
     );
 
     return [point1, point2];
+}
+
+// Function to calculate control points for a cubic Bézier curve
+function calculateControlPoints(
+    start: PointType,
+    end: PointType,
+    control1: PointType,
+    control2: PointType
+): [PointType, PointType] {
+    const [x0, y0] = start;
+    const [x3, y3] = end;
+    const [x1, y1] = control1;
+    const [x2, y2] = control2;
+
+    const dx1 = x1 - x0;
+    const dy1 = y1 - y0;
+    const dx2 = x2 - x3;
+    const dy2 = y2 - y3;
+
+    const xc1 = x0 + dx1 / 3;
+    const yc1 = y0 + dy1 / 3;
+    const xc2 = x3 - dx2 / 3;
+    const yc2 = y3 - dy2 / 3;
+
+    return [
+        [xc1, yc1],
+        [xc2, yc2],
+    ];
 }

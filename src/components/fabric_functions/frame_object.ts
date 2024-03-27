@@ -1,6 +1,6 @@
 import type { fabricRefType } from "../Canvas";
 import { fabric } from "fabric";
-import { onObjectMoving, onObjectSelected, onSelectionCleared } from "./cubic";
+import { onObjectSelected, onSelectionCleared } from "./cubic";
 import { imageObject } from "./common";
 import { findEquidistantPoints, getReqObjByIds } from "./helpers";
 
@@ -240,3 +240,31 @@ function onFOMovingLine(e: fabric.IEvent<MouseEvent>, canvas?: fabric.Canvas) {
 
 //# Frame stuff
 // for next frame load, line into previous frames' endPoint
+
+function onObjectMoving(e: fabric.IEvent<MouseEvent>, canvas?: fabric.Canvas) {
+    const endPointOffset = 16;
+    const controlPointOffset = 8;
+
+    if (e.target!.name === "p0" || e.target!.name === "p3") {
+        const p = e.target!;
+        if (p.line1) {
+            p.line1.path[0][1] = p.left + endPointOffset;
+            p.line1.path[0][2] = p.top + endPointOffset;
+        } else if (p.line4) {
+            p.line4.path[1][5] = p.left + endPointOffset;
+            p.line4.path[1][6] = p.top + endPointOffset;
+        }
+    } else if (e.target!.name === "p1") {
+        const p = e.target;
+        if (p.line2) {
+            p.line2.path[1][1] = p.left + controlPointOffset;
+            p.line2.path[1][2] = p.top + controlPointOffset;
+        }
+    } else if (e.target!.name === "p2") {
+        const p = e.target;
+        if (p.line3) {
+            p.line3.path[1][3] = p.left + controlPointOffset;
+            p.line3.path[1][4] = p.top + controlPointOffset;
+        }
+    }
+}
