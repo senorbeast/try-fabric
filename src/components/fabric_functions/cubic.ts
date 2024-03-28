@@ -12,6 +12,8 @@ export const extraProps = [
     "path",
     "hasBorders",
     "hasControls",
+    "height",
+    "width",
 ];
 
 export const drawCubic = (fabricRef: fabricRefType) => {
@@ -226,6 +228,8 @@ export function addCBCHelpers(
         [p0, p1, p2, p3].map((o) => canvas.add(o));
     } else {
         console.log("Linking existing points");
+        line!.height = 0;
+        line!.width = 0;
         // Link existing points
         // const [p0, p1, p2, p3] = points;
         linkPointsToLine(line, p0, p1, p2, p3);

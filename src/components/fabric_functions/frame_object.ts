@@ -4,6 +4,9 @@ import { onObjectSelected, onSelectionCleared } from "./cubic";
 import { imageObject } from "./common";
 import { findEquidistantPoints, getReqObjByIds } from "./helpers";
 
+const endPointOffset = 0;
+const controlPointOffset = 0;
+
 export const frameObject = (
     fabricRef: fabricRefType,
     startPoint: [number, number],
@@ -35,6 +38,19 @@ export const frameObject = (
     canvas.add(line);
 
     const [p0, p3] = makeEndPoints(startPoint, endPoint);
+
+    // make the initial point and path unmovable
+    p0.selectable = false;
+    p0.evented = false;
+    line.evented = false;
+    line.selectable = false;
+    p0.lockMovementX = true;
+    p0.lockMovementY = true;
+    line.lockMovementX = true;
+    line.lockMovementY = true;
+    line.hasControls = line.hasBorders = false;
+    p0.hasControls = p0.hasBorders = false;
+
     linkEndPointsToLine(line, p0, p3);
     bindFOEvents(canvas);
     [p0, p3].map((o) => canvas.add(o));
@@ -139,6 +155,8 @@ export function runAfterJSONLoad(fabricRef: fabricRefType) {
 export function bindFOEvents(canvas: fabric.Canvas) {
     // TODO: remove this workaround
     // fix for loading cbc, after line properly
+    // canvas.__eventListeners = {};
+
     canvas.on({
         "object:moving": (e: fabric.IEvent<MouseEvent>) =>
             onObjectMoving(e, canvas),
@@ -188,9 +206,7 @@ function onObjectMouseUp(e: fabric.IEvent<MouseEvent>, canvas: fabric.Canvas) {
             "object:moving": (e: fabric.IEvent<MouseEvent>) =>
                 onObjectMoving(e, canvas),
         });
-        canvas.add(p1);
-        canvas.add(p2);
-        // [(p1, p2)].map((o) => canvas.add(o));
+        [p1, p2].map((o) => canvas.add(o));
         canvas.renderAll.bind(canvas);
     }
 }
@@ -220,7 +236,6 @@ function onObjectMouseDown(
 }
 
 function onFOMovingLine(e: fabric.IEvent<MouseEvent>, canvas?: fabric.Canvas) {
-    const endPointOffset = 16;
     if (e.target!.name === "p0" || e.target!.name === "p3") {
         const p = e.target!;
         if (p.line1) {
@@ -246,9 +261,6 @@ function onFOMovingLine(e: fabric.IEvent<MouseEvent>, canvas?: fabric.Canvas) {
 // for next frame load, line into previous frames' endPoint
 
 function onObjectMoving(e: fabric.IEvent<MouseEvent>, canvas?: fabric.Canvas) {
-    const endPointOffset = 16;
-    const controlPointOffset = 8;
-
     if (e.target!.name === "p0" || e.target!.name === "p3") {
         const p = e.target!;
         if (p.line1) {
