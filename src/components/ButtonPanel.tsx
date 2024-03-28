@@ -132,6 +132,14 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
                         name="logObject"
                         onClick={() => logObject(fabricRef)}
                     />
+                    <Button
+                        name="logEvents"
+                        onClick={() => {
+                            const canvas = fabricRef.current!;
+                            console.log(canvas__eventListeners);
+                        }}
+                    />
+
                     <button
                         className=""
                         onClick={() => addImageObject(fabricRef, "my-image")}

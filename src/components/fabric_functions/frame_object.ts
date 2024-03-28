@@ -137,6 +137,13 @@ export function runAfterJSONLoad(fabricRef: fabricRefType) {
 }
 
 export function bindFOEvents(canvas: fabric.Canvas) {
+    // TODO: remove this workaround
+    // fix for loading cbc, after line properly
+    canvas.on({
+        "object:moving": (e: fabric.IEvent<MouseEvent>) =>
+            onObjectMoving(e, canvas),
+    });
+
     canvas.on({
         "object:selected": (e: fabric.IEvent<MouseEvent>) =>
             onObjectSelected(e, canvas),
@@ -177,14 +184,14 @@ function onObjectMouseUp(e: fabric.IEvent<MouseEvent>, canvas: fabric.Canvas) {
 
         const [p1, p2] = makeControlsPoints(controlPoint1, controlPoint2);
         linkControlPointsToLine(line, p1, p2);
-
         canvas.on({
             "object:moving": (e: fabric.IEvent<MouseEvent>) =>
                 onObjectMoving(e, canvas),
         });
-
-        [p1, p2].map((o) => canvas.add(o));
-        canvas.renderAll();
+        canvas.add(p1);
+        canvas.add(p2);
+        // [(p1, p2)].map((o) => canvas.add(o));
+        canvas.renderAll.bind(canvas);
     }
 }
 
@@ -208,7 +215,7 @@ function onObjectMouseDown(
             "object:moving": (e: fabric.IEvent<MouseEvent>) =>
                 onFOMovingLine(e, canvas),
         });
-        canvas.renderAll();
+        canvas.renderAll.bind(canvas);
     }
 }
 
