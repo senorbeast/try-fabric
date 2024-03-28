@@ -255,6 +255,10 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
                         )
                     }
                 />
+                <Button
+                    name="newFrameLine"
+                    onClick={() => cbcToLineForNewFrame(fabricRef)}
+                />
             </div>
         </div>
     );

@@ -1,6 +1,7 @@
 import { canvasJSONType } from "../ButtonPanel";
 import { fabricRefType } from "../Canvas";
 import { animateObjectAlongPath } from "./common";
+import { frameObject } from "./frame_object";
 
 export {
     getReqObjByIds,
@@ -39,13 +40,13 @@ function cbcToLineForNewFrame(fabricRef: fabricRefType) {
         "p2",
         "p3",
     ]);
-    // const endPoint = getEndPoint(line);
-    // const name = line?.name;
+    const endPoint = getEndPoint(line);
+    console.log(line, endPoint);
+    const name = line?.name;
     // //TODO: safely remove object and its listeners
-    // canvas.remove(line, p0, p1, p2, p3);
-    // canvas.removeListeners();
+    canvas.remove(line, p0, p1, p2, p3);
     // canvas.clear();
-    // frameObject(fabricRef, endPoint, endPoint, name);
+    frameObject(fabricRef, endPoint, endPoint, name);
 }
 
 function getEndPoint(line: fabric.Object): [number, number] {

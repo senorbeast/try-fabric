@@ -91,7 +91,6 @@ function makeControlPoint(left: number, top: number) {
 }
 
 function linkEndPointsToLine(line, p0, p3) {
-    console.log("Linking points to line");
     const ptsArr = [p0, p3];
     ptsArr.forEach((pt) => {
         pt.hasBorders = pt.hasControls = false;
@@ -153,12 +152,12 @@ export function bindFOEvents(canvas: fabric.Canvas) {
 }
 
 // Convert Line to Cubic Beizer
+// !FIX: This event is triggered multiple times
 function onObjectMouseUp(e: fabric.IEvent<MouseEvent>, canvas: fabric.Canvas) {
-    console.log("on object mouse up");
     const [line] = getReqObjByIds(canvas, ["frame_line", "p0", "p3"]);
-    if (e.target!.name == "p3") {
+    const [p1, p2] = getReqObjByIds(canvas, ["p1", "p2"]);
+    if (e.target!.name == "p3" && (p1 == null || p2 == null)) {
         // add p1, p2 controls points, make it a beizer curve
-
         const path = line!.path;
         const startPoint: [number, number] = [path[0][1], path[0][2]];
         const endPoint: [number, number] = [path[1][5], path[1][6]];
@@ -166,7 +165,6 @@ function onObjectMouseUp(e: fabric.IEvent<MouseEvent>, canvas: fabric.Canvas) {
             startPoint,
             endPoint
         );
-
         line.path[1] = [
             "C",
             controlPoint1[0],
@@ -195,7 +193,6 @@ function onObjectMouseDown(
     e: fabric.IEvent<MouseEvent>,
     canvas: fabric.Canvas
 ) {
-    console.log("on object mouse down");
     if (e.target!.name == "p3") {
         // remove p1, p2 controls points, make it a line
         const [line, p1, p2] = getReqObjByIds(canvas, [
