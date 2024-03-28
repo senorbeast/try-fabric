@@ -136,7 +136,7 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
                         name="logEvents"
                         onClick={() => {
                             const canvas = fabricRef.current!;
-                            console.log(canvas__eventListeners);
+                            console.log(canvas.__eventListeners);
                         }}
                     />
 
