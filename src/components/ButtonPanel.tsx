@@ -73,8 +73,8 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
         canvas.loadFromJSON(frames[idx], () => {
             // run required functions for bezier function to work
             // addCBCHelpers(fabricRef, "frame_line");
-            runAfterJSONLoad(fabricRef);
-            // addCBCHelpers(fabricRef, false, "cubeLine");
+            // runAfterJSONLoad(fabricRef);
+            addCBCHelpers(fabricRef, "cubeLine");
             // runAfterJSONLoad(fabricRef);
             // runAfterJSONLoadLine(fabricRef);
             canvas.renderAll.bind(canvas);
