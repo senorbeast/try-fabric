@@ -216,8 +216,18 @@ export function bindFOEvents(fabricRef: fabricRefType) {
 // Convert Line to Cubic Beizer
 // !FIX: This event is triggered multiple times
 function onObjectMouseUp(e: fabric.IEvent<MouseEvent>, canvas: fabric.Canvas) {
+    // When endpoint released
+    replaceLineWithCurve(e, "", canvas);
+}
+
+function replaceLineWithCurve(
+    e: fabric.IEvent<MouseEvent>,
+    commonID: string,
+    canvas: fabric.Canvas
+) {
     const [line] = getReqObjByIds(canvas, ["frame_line", "p0", "p3"]);
     const [p1, p2] = getReqObjByIds(canvas, ["p1", "p2"]);
+    // When endpoint released
     if (e.target!.name == "p3" && (p1 == null || p2 == null)) {
         // add p1, p2 controls points, make it a beizer curve
         const path = line!.path;
@@ -256,22 +266,22 @@ function onObjectMouseDown(
     const [store] = getReqObjByIds(canvas, ["invisibleStore"]);
     console.log("CF", store!.currentFrame);
     if (e.target!.name == "p3") {
-        // remove p1, p2 controls points, make it a line
-        const [line, p1, p2] = getReqObjByIds(canvas, [
-            "frame_line",
-            "p1",
-            "p2",
-        ]);
-        const path = line.path;
-        const endPoint = [path[1][5], path[1][6]];
-        canvas.remove(p1, p2);
-        line.path[1] = ["L", endPoint[0], endPoint[1]];
-        canvas.on({
-            "object:moving": (e: fabric.IEvent<MouseEvent>) =>
-                onFOMovingLine(e, canvas),
-        });
-        canvas.renderAll.bind(canvas);
+        replaceCurveWithLine("", canvas);
     }
+}
+
+function replaceCurveWithLine(commonID: string, canvas: fabric.Canvas) {
+    // remove p1, p2 controls points, make it a line
+    const [line, p1, p2] = getReqObjByIds(canvas, ["frame_line", "p1", "p2"]);
+    const path = line.path;
+    const endPoint = [path[1][5], path[1][6]];
+    canvas.remove(p1, p2);
+    line.path[1] = ["L", endPoint[0], endPoint[1]];
+    canvas.on({
+        "object:moving": (e: fabric.IEvent<MouseEvent>) =>
+            onFOMovingLine(e, canvas),
+    });
+    canvas.renderAll.bind(canvas);
 }
 
 function onFOMovingLine(e: fabric.IEvent<MouseEvent>, canvas?: fabric.Canvas) {

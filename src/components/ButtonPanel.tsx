@@ -51,6 +51,7 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
         return () => {};
     }, []);
 
+    // Store currentFrame to canvas object
     useEffect(() => {
         if (fabricRef.current) {
             const canvas = fabricRef.current!;
