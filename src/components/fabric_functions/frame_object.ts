@@ -4,8 +4,36 @@ import { onObjectSelected, onSelectionCleared } from "./cubic";
 import { imageObject } from "./common";
 import { findEquidistantPoints, getReqObjByIds } from "./helpers";
 
-const endPointOffset = 0;
-const controlPointOffset = 0;
+const endPointOffset = 16;
+const controlPointOffset = 8;
+
+const unMovableOptions: fabric.IObjectOptions = {
+    evented: false,
+    selectable: false,
+    lockMovementX: true,
+    lockMovementY: true,
+    hasControls: false,
+    hasBorders: false,
+};
+const commonOptions: fabric.IObjectOptions = {
+    commonID: "someUUID",
+    initialFrame: -1,
+    currentType: "point",
+};
+
+export const extraProps = [
+    "name",
+    "line1",
+    "line2",
+    "line3",
+    "line4",
+    "objectCaching",
+    "path",
+    "height",
+    "width",
+    ...Object.keys(commonOptions),
+    ...Object.keys(unMovableOptions),
+];
 
 export const frameObject = (
     fabricRef: fabricRefType,
@@ -14,10 +42,21 @@ export const frameObject = (
     name: string
 ) => {
     const canvas = fabricRef.current!;
+    const line = makeLinePath(startPoint, endPoint, name);
+    const [p0, p3] = makeEndPoints(startPoint, endPoint);
 
-    // const startPoint = [100, 100];
-    // const endPoint = [100, 100];
+    p0.set({ ...commonOptions, ...unMovableOptions });
 
+    linkEndPointsToLine(line, p0, p3);
+    bindFOEvents(canvas);
+    [line, p0, p3].map((o) => canvas.add(o));
+};
+
+function makeLinePath(
+    startPoint: [number, number],
+    endPoint: [number, number],
+    name: string
+): fabric.Path {
     const line = new fabric.Path(
         `M ${startPoint[0]} ${startPoint[1]} L ${endPoint[0]} ${endPoint[1]}`,
         {
@@ -34,27 +73,14 @@ export const frameObject = (
     line.path[1][1] = endPoint[0];
     line.path[1][2] = endPoint[1];
 
-    line.name = name;
-    canvas.add(line);
+    line.set({
+        name: name,
+        ...commonOptions,
+        ...unMovableOptions,
+    });
 
-    const [p0, p3] = makeEndPoints(startPoint, endPoint);
-
-    // make the initial point and path unmovable
-    p0.selectable = false;
-    p0.evented = false;
-    line.evented = false;
-    line.selectable = false;
-    p0.lockMovementX = true;
-    p0.lockMovementY = true;
-    line.lockMovementX = true;
-    line.lockMovementY = true;
-    line.hasControls = line.hasBorders = false;
-    p0.hasControls = p0.hasBorders = false;
-
-    linkEndPointsToLine(line, p0, p3);
-    bindFOEvents(canvas);
-    [p0, p3].map((o) => canvas.add(o));
-};
+    return line;
+}
 
 function makeEndPoints(
     startPoint: number[],
@@ -106,7 +132,11 @@ function makeControlPoint(left: number, top: number) {
     return c;
 }
 
-function linkEndPointsToLine(line, p0, p3) {
+function linkEndPointsToLine(
+    line: fabric.Path,
+    p0: fabric.Object,
+    p3: fabric.Object
+) {
     const ptsArr = [p0, p3];
     ptsArr.forEach((pt) => {
         pt.hasBorders = pt.hasControls = false;
@@ -120,7 +150,11 @@ function linkEndPointsToLine(line, p0, p3) {
     p3.line4 = line;
 }
 
-function linkControlPointsToLine(line, p1, p2) {
+function linkControlPointsToLine(
+    line: fabric.Path,
+    p1: fabric.Object,
+    p2: fabric.Object
+) {
     const ptsArr = [p1, p2];
     ptsArr.forEach((pt) => {
         pt.hasBorders = pt.hasControls = false;
@@ -134,7 +168,7 @@ function linkControlPointsToLine(line, p1, p2) {
     p2.line3 = line;
 }
 
-function unLinkControlPointsFromLine(p1, p2) {
+function unLinkControlPointsFromLine(p1: fabric.Object, p2: fabric.Object) {
     const ptsArr = [p1, p2];
     ptsArr.forEach((pt) => {
         pt.hasBorders = pt.hasControls = false;
@@ -152,11 +186,12 @@ export function runAfterJSONLoad(fabricRef: fabricRefType) {
     bindFOEvents(canvas);
 }
 
+type objectCurrentType = "point" | "line" | "curve";
+
 export function bindFOEvents(canvas: fabric.Canvas) {
     // TODO: remove this workaround
     // fix for loading cbc, after line properly
     // canvas.__eventListeners = {};
-
     canvas.on({
         "object:moving": (e: fabric.IEvent<MouseEvent>) =>
             onObjectMoving(e, canvas),

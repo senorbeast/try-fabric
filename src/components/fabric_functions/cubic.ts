@@ -2,20 +2,6 @@ import type { fabricRefType } from "../Canvas";
 import { fabric } from "fabric";
 import { calculateControlPoints, getReqObjByIds } from "./helpers";
 
-export const extraProps = [
-    "name",
-    "line1",
-    "line2",
-    "line3",
-    "line4",
-    "objectCaching",
-    "path",
-    "hasBorders",
-    "hasControls",
-    "height",
-    "width",
-];
-
 export const drawCubic = (fabricRef: fabricRefType) => {
     const canvas = fabricRef.current!;
 
@@ -52,10 +38,10 @@ export const drawCubic = (fabricRef: fabricRefType) => {
         endPoint
     );
 
-    // const newCP1 = makeControlPoint(cp1[0], cp1[1]);
-    // newCP1.name = "newCP1";
-    // const newCP2 = makeControlPoint(cp2[0], cp2[1]);
-    // newCP2.name = "newCP2";
+    const newCP1 = makeControlPoint(cp1[0], cp1[1]);
+    newCP1.name = "newCP1";
+    const newCP2 = makeControlPoint(cp2[0], cp2[1]);
+    newCP2.name = "newCP2";
 
     const [p0, p1, p2, p3] = addPathPoints(
         canvas,
@@ -67,8 +53,8 @@ export const drawCubic = (fabricRef: fabricRefType) => {
     );
     linkPointsToLine(line, p0, p1, p2, p3);
     bindCubicEvents(canvas);
-    [p0, p1, p2, p3].map((o) => canvas.add(o));
-    // [p0, p1, p2, p3, newCP1, newCP2].map((o) => canvas.add(o));
+    // [p0, p1, p2, p3].map((o) => canvas.add(o));
+    [p0, p1, p2, p3, newCP1, newCP2].map((o) => canvas.add(o));
 };
 
 type pathORNull = fabric.Path | null;
@@ -279,28 +265,28 @@ function onObjectMoving(e: fabric.IEvent<MouseEvent>, canvas?: fabric.Canvas) {
     const endPointOffset = 16;
     const controlPointOffset = 8;
 
-    // // const { line, points } = getReqObj(canvas);
-    // const [line, newCP1, newCP2] = getReqObjByIds(canvas!, [
-    //     "cubeLine",
-    //     "newCP1",
-    //     "newCP2",
-    // ]);
-    // const path = line.path;
-    // const startPoint = [path[0][1], path[0][2]];
-    // const controlPoint1 = [path[1][1], path[1][2]];
-    // const controlPoint2 = [path[1][3], path[1][4]];
-    // const endPoint = [path[1][5], path[1][6]];
+    // const { line, points } = getReqObj(canvas);
+    const [line, newCP1, newCP2] = getReqObjByIds(canvas!, [
+        "cubeLine",
+        "newCP1",
+        "newCP2",
+    ]);
+    const path = line.path;
+    const startPoint = [path[0][1], path[0][2]];
+    const controlPoint1 = [path[1][1], path[1][2]];
+    const controlPoint2 = [path[1][3], path[1][4]];
+    const endPoint = [path[1][5], path[1][6]];
 
-    // const [cp1, cp2] = calculateControlPoints(
-    //     startPoint,
-    //     controlPoint1,
-    //     controlPoint2,
-    //     endPoint
-    // );
-    // console.log(newCP1, newCP2);
-    // newCP1.set({ left: cp1[0], top: cp1[1] });
-    // newCP2.set({ left: cp2[0], top: cp2[1] });
-    // canvas?.renderAll.bind(canvas);
+    const [cp1, cp2] = calculateControlPoints(
+        startPoint,
+        controlPoint1,
+        controlPoint2,
+        endPoint
+    );
+    console.log(newCP1, newCP2);
+    newCP1.set({ left: cp1[0], top: cp1[1] });
+    newCP2.set({ left: cp2[0], top: cp2[1] });
+    canvas?.renderAll.bind(canvas);
 
     if (e.target!.name === "p0" || e.target!.name === "p3") {
         const p = e.target!;

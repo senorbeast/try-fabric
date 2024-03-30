@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Button from "./Button";
 import { fabricRefType } from "./Canvas";
 import { cubic, linear, quad } from "./fabric_functions/interpolate";
-import { addCBCHelpers, drawCubic, extraProps } from "./fabric_functions/cubic";
+import { addCBCHelpers, drawCubic } from "./fabric_functions/cubic";
 import {
     addRectangle,
     logObject,
@@ -14,7 +14,11 @@ import {
 import { drawQuadratic } from "./fabric_functions/quadratic";
 import _ from "lodash";
 import { drawLine, runAfterJSONLoadLine } from "./fabric_functions/line";
-import { frameObject, runAfterJSONLoad } from "./fabric_functions/frame_object";
+import {
+    extraProps,
+    frameObject,
+    runAfterJSONLoad,
+} from "./fabric_functions/frame_object";
 import {
     animateOverFrames,
     cbcToLineForNewFrame,
