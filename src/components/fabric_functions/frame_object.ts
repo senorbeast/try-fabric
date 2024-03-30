@@ -31,6 +31,7 @@ export const extraProps = [
     "path",
     "height",
     "width",
+    "currentFrame",
     ...Object.keys(commonOptions),
     ...Object.keys(unMovableOptions),
 ];
@@ -48,7 +49,7 @@ export const frameObject = (
     p0.set({ ...commonOptions, ...unMovableOptions });
 
     linkEndPointsToLine(line, p0, p3);
-    bindFOEvents(canvas);
+    bindFOEvents(fabricRef);
     [line, p0, p3].map((o) => canvas.add(o));
 };
 
@@ -188,10 +189,11 @@ export function runAfterJSONLoad(fabricRef: fabricRefType) {
 
 type objectCurrentType = "point" | "line" | "curve";
 
-export function bindFOEvents(canvas: fabric.Canvas) {
+export function bindFOEvents(fabricRef: fabricRefType) {
     // TODO: remove this workaround
     // fix for loading cbc, after line properly
     // canvas.__eventListeners = {};
+    const canvas = fabricRef.current!;
     canvas.on({
         "object:moving": (e: fabric.IEvent<MouseEvent>) =>
             onObjectMoving(e, canvas),
@@ -251,6 +253,8 @@ function onObjectMouseDown(
     e: fabric.IEvent<MouseEvent>,
     canvas: fabric.Canvas
 ) {
+    const [store] = getReqObjByIds(canvas, ["invisibleStore"]);
+    console.log("CF", store!.currentFrame);
     if (e.target!.name == "p3") {
         // remove p1, p2 controls points, make it a line
         const [line, p1, p2] = getReqObjByIds(canvas, [

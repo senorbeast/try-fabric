@@ -22,6 +22,7 @@ import {
 import {
     animateOverFrames,
     cbcToLineForNewFrame,
+    getReqObjByIds,
 } from "./fabric_functions/helpers";
 
 export type canvasJSONType = {
@@ -49,6 +50,17 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
         }
         return () => {};
     }, []);
+
+    useEffect(() => {
+        if (fabricRef.current) {
+            const canvas = fabricRef.current!;
+            const [store] = getReqObjByIds(canvas, ["invisibleStore"]);
+            if (store) {
+                store.currentFrame = currentFrame;
+            }
+        }
+        return () => {};
+    }, [currentFrame, fabricRef]);
 
     function loadFirstCanvas(fabricRef: fabricRefType): canvasJSONType {
         const canvas = fabricRef.current!;
