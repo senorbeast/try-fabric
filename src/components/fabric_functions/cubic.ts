@@ -1,6 +1,6 @@
 import type { fabricRefType } from "../Canvas";
 import { fabric } from "fabric";
-import { calculateControlPoints, getReqObjByIds } from "./helpers";
+import { calculateControlPoints, getReqObjByNames } from "./helpers";
 
 export const drawCubic = (fabricRef: fabricRefType) => {
     const canvas = fabricRef.current!;
@@ -147,7 +147,7 @@ export function addCBCHelpers(
 
     const canvas = fabricRef.current!;
     // const { line, points } = getReqObj(canvas);
-    const [line, p0, p1, p2, p3] = getReqObjByIds(canvas, [
+    const [line, p0, p1, p2, p3] = getReqObjByNames(canvas, [
         lineName,
         "p0",
         "p1",
@@ -229,7 +229,7 @@ function onObjectMoving(e: fabric.IEvent<MouseEvent>, canvas?: fabric.Canvas) {
     const controlPointOffset = 8;
 
     // const { line, points } = getReqObj(canvas);
-    const [line, newCP1, newCP2] = getReqObjByIds(canvas!, [
+    const [line, newCP1, newCP2] = getReqObjByNames(canvas!, [
         "cubeLine",
         "newCP1",
         "newCP2",

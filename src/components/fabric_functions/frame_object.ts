@@ -2,7 +2,7 @@ import type { fabricRefType } from "../Canvas";
 import { fabric } from "fabric";
 import { onObjectSelected, onSelectionCleared } from "./cubic";
 import { imageObject } from "./common";
-import { findEquidistantPoints, getReqObjByIds } from "./helpers";
+import { findEquidistantPoints, getReqObjByNames } from "./helpers";
 
 const endPointOffset = 16;
 const controlPointOffset = 8;
@@ -44,7 +44,7 @@ export const frameObject = (
 ) => {
     const canvas = fabricRef.current!;
 
-    const [store] = getReqObjByIds(canvas, ["invisibleStore"]);
+    const [store] = getReqObjByNames(canvas, ["invisibleStore"]);
     console.log("CF", store!.currentFrame);
 
     const line = makeLinePath(startPoint, endPoint, name);
@@ -186,7 +186,7 @@ function unLinkControlPointsFromLine(p1: fabric.Object, p2: fabric.Object) {
 
 export function runAfterJSONLoad(fabricRef: fabricRefType) {
     const canvas = fabricRef.current!;
-    const [line, p0, p3] = getReqObjByIds(canvas, ["frame_line", "p0", "p3"]);
+    const [line, p0, p3] = getReqObjByNames(canvas, ["frame_line", "p0", "p3"]);
     linkEndPointsToLine(line, p0, p3);
     bindFOEvents(canvas);
 }
@@ -229,8 +229,8 @@ function replaceLineWithCurve(
     commonID: string,
     canvas: fabric.Canvas
 ) {
-    const [line] = getReqObjByIds(canvas, ["frame_line", "p0", "p3"]);
-    const [p1, p2] = getReqObjByIds(canvas, ["p1", "p2"]);
+    const [line] = getReqObjByNames(canvas, ["frame_line", "p0", "p3"]);
+    const [p1, p2] = getReqObjByNames(canvas, ["p1", "p2"]);
     // When endpoint released
     if (e.target!.name == "p3" && (p1 == null || p2 == null)) {
         // add p1, p2 controls points, make it a beizer curve
@@ -274,7 +274,7 @@ function onObjectMouseDown(
 
 function replaceCurveWithLine(commonID: string, canvas: fabric.Canvas) {
     // remove p1, p2 controls points, make it a line
-    const [line, p1, p2] = getReqObjByIds(canvas, ["frame_line", "p1", "p2"]);
+    const [line, p1, p2] = getReqObjByNames(canvas, ["frame_line", "p1", "p2"]);
     const path = line.path;
     const endPoint = [path[1][5], path[1][6]];
     canvas.remove(p1, p2);

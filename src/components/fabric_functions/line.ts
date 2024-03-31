@@ -1,7 +1,7 @@
 import type { fabricRefType } from "../Canvas";
 import { fabric } from "fabric";
 import { makeEndPoint, onObjectSelected, onSelectionCleared } from "./cubic";
-import { getReqObjByIds } from "./helpers";
+import { getReqObjByNames } from "./helpers";
 
 export const drawLine = (fabricRef: fabricRefType) => {
     const canvas = fabricRef.current!;
@@ -63,7 +63,7 @@ function linkPointsToLine(line, p0, p3) {
 
 export function runAfterJSONLoadLine(fabricRef: fabricRefType) {
     const canvas = fabricRef.current!;
-    const [line, p0, p3] = getReqObjByIds(canvas, ["line", "p0", "p3"]);
+    const [line, p0, p3] = getReqObjByNames(canvas, ["line", "p0", "p3"]);
     linkPointsToLine(line, p0, p3);
     bindLineEvents(canvas);
 }

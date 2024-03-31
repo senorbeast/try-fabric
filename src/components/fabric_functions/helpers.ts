@@ -4,7 +4,8 @@ import { animateObjectAlongPath } from "./common";
 import { frameObject } from "./frame_object";
 
 export {
-    getReqObjByIds,
+    getReqObjBy,
+    getReqObjByNames,
     cbcToLineForNewFrame,
     animateOverFrames,
     findEquidistantPoints,
@@ -12,18 +13,36 @@ export {
     calculateControlPoints,
 };
 
-function getReqObjByIds(canvas: fabric.Canvas, ids: string[]) {
+function getReqObjByNames(
+    canvas: fabric.Canvas,
+    ids: string[],
+    objects?: fabric.Object[]
+) {
     const result: (fabric.Object | null)[] = [];
+    const filterObjects = objects ?? canvas.getObjects();
 
     ids.forEach((id, index) => {
-        canvas.getObjects().forEach((obj) => {
+        filterObjects.forEach((obj) => {
             if (id == obj.name) {
                 result.push(obj);
             }
         });
         if (result.length == index) result.push(null);
     });
+    return result;
+}
 
+function getReqObjBy(
+    canvas: fabric.Canvas,
+    key: string,
+    value: string
+): (fabric.Object | null)[] {
+    const result: (fabric.Object | null)[] = [];
+    canvas.getObjects().forEach((obj) => {
+        if (value == obj[key]) {
+            result.push(obj);
+        }
+    });
     return result;
 }
 
@@ -33,7 +52,7 @@ function getReqObjByIds(canvas: fabric.Canvas, ids: string[]) {
 function cbcToLineForNewFrame(fabricRef: fabricRefType) {
     const canvas = fabricRef.current!;
     // Get id/name and endPoint for currentFrame
-    const [line, p0, p1, p2, p3] = getReqObjByIds(canvas, [
+    const [line, p0, p1, p2, p3] = getReqObjByNames(canvas, [
         "frame_line",
         "p0",
         "p1",
@@ -73,11 +92,13 @@ function animateOverFrames(fabricRef: fabricRefType, frames: canvasJSONType[]) {
 
     // Fill in paths across frames
     frames.forEach((frame) => {
-        frame.objects.forEach((obj) => {
-            if (obj.name == "frame_line") {
-                allPaths.push(obj.path);
-            }
-        });
+        if (frame !== undefined) {
+            frame.objects.forEach((obj) => {
+                if (obj.name == "frame_line") {
+                    allPaths.push(obj.path);
+                }
+            });
+        }
     });
 
     console.log(allPaths);

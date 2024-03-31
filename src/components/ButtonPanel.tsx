@@ -18,7 +18,7 @@ import { extraProps, frameObject } from "./fabric_functions/frame_object";
 import {
     animateOverFrames,
     cbcToLineForNewFrame,
-    getReqObjByIds,
+    getReqObjByNames,
 } from "./fabric_functions/helpers";
 
 export type canvasJSONType = {
@@ -53,7 +53,7 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
         console.log("UE CF", currentFrame);
         if (fabricRef.current) {
             const canvas = fabricRef.current!;
-            const [store] = getReqObjByIds(canvas, ["invisibleStore"]);
+            const [store] = getReqObjByNames(canvas, ["invisibleStore"]);
             if (store) {
                 store.currentFrame = currentFrame;
             }

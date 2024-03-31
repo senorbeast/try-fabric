@@ -1,6 +1,7 @@
 import { fabric } from "fabric";
 import { fabricRefType } from "../Canvas";
 import { interpolatePath } from "./interpolate";
+import { getReqObjByNames } from "./helpers";
 
 export {
     initFabric,
@@ -210,7 +211,7 @@ function animateObjectAlongPath(
     const canvas = fabricRef.current!;
 
     // Use first object
-    const firstObj = fabricRef.current!.getObjects()[0];
+    const [firstObj] = getReqObjByNames(canvas, ["rect"]);
 
     // points on path
     const points: PointType[] = [];
