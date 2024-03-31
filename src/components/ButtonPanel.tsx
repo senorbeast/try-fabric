@@ -13,12 +13,8 @@ import {
 } from "./fabric_functions/common";
 import { drawQuadratic } from "./fabric_functions/quadratic";
 import _ from "lodash";
-import { drawLine, runAfterJSONLoadLine } from "./fabric_functions/line";
-import {
-    extraProps,
-    frameObject,
-    runAfterJSONLoad,
-} from "./fabric_functions/frame_object";
+import { drawLine } from "./fabric_functions/line";
+import { extraProps, frameObject } from "./fabric_functions/frame_object";
 import {
     animateOverFrames,
     cbcToLineForNewFrame,
@@ -32,10 +28,10 @@ export type canvasJSONType = {
 
 const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
     const [frames, setFrames] = useState<canvasJSONType[]>([
-        // loadFirstCanvas(fabricRef),
+        loadFirstCanvas(fabricRef),
     ]);
-    const oldFrame = useRef<fabric.Object[]>();
-    const [currentFrame, setCurrentFrame] = useState<number>(-1);
+    const [currentFrame, setCurrentFrame] = useState<number>(0);
+    const [pause, setPause] = useState<boolean>(false);
 
     const onCanvasModified = useCallback(() => {
         // console.log("Called through useCallback");
@@ -48,11 +44,13 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
         if (fabricRef.current) {
             loadFirstCanvas(fabricRef);
         }
+        console.log(frames);
         return () => {};
-    }, []);
+    }, [fabricRef]);
 
     // Store currentFrame to canvas object
     useEffect(() => {
+        console.log("UE CF", currentFrame);
         if (fabricRef.current) {
             const canvas = fabricRef.current!;
             const [store] = getReqObjByIds(canvas, ["invisibleStore"]);
@@ -65,7 +63,9 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
 
     function loadFirstCanvas(fabricRef: fabricRefType): canvasJSONType {
         const canvas = fabricRef.current!;
-        return canvas.toJSON(extraProps);
+        if (canvas) {
+            return canvas.toJSON(extraProps);
+        }
     }
 
     // # whenever fabricRef changes, update frame
@@ -250,9 +250,7 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
                     >
                         +
                     </button>
-                    <p className="text-white m-1">
-                        Current Frame No: {currentFrame}
-                    </p>
+                    <p className="text-white">CurrentFrame:{currentFrame}</p>
                 </div>
                 {frames.length > 1 ? (
                     <>

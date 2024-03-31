@@ -23,7 +23,7 @@ export {
 
 const initFabric = (fabricRef: fabricRefType) => {
     fabricRef.current = new fabric.Canvas("canvas", {
-        height: 800,
+        height: 600,
         width: 800,
         selection: false,
     });
@@ -42,7 +42,7 @@ const invisibleStore = (fabricRef: fabricRefType) => {
         height: 0,
         fill: "white",
         name: "invisibleStore",
-        currentFrame: "-1",
+        currentFrame: "0",
     });
     fabricRef.current!.add(invisibleStore);
 };

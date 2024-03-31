@@ -19,12 +19,12 @@ const Canvas = () => {
     }, []);
 
     return (
-        <div className="flex-col w-full h-full">
-            <ButtonPanel fabricRef={fabricRef} />
+        <div className="flex-col w-full h-screen bg-black">
             <div className="bg-slate-600 w-fit h-fit flex">
                 {/* Works without ref, since fabricjs create a upper canvas */}
                 <canvas id="canvas" />
             </div>
+            <ButtonPanel fabricRef={fabricRef} />
         </div>
     );
 };

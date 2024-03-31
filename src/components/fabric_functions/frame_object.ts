@@ -43,6 +43,10 @@ export const frameObject = (
     name: string
 ) => {
     const canvas = fabricRef.current!;
+
+    const [store] = getReqObjByIds(canvas, ["invisibleStore"]);
+    console.log("CF", store!.currentFrame);
+
     const line = makeLinePath(startPoint, endPoint, name);
     const [p0, p3] = makeEndPoints(startPoint, endPoint);
 
@@ -263,8 +267,6 @@ function onObjectMouseDown(
     e: fabric.IEvent<MouseEvent>,
     canvas: fabric.Canvas
 ) {
-    const [store] = getReqObjByIds(canvas, ["invisibleStore"]);
-    console.log("CF", store!.currentFrame);
     if (e.target!.name == "p3") {
         replaceCurveWithLine("", canvas);
     }

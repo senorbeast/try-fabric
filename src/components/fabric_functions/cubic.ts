@@ -126,43 +126,6 @@ function linkPointsToLine(line, p0, p1, p2, p3) {
     p3.line4 = line;
 }
 
-//! Deprecated instead use getReqObjByIds
-function getReqObj(canvas: fabric.Canvas) {
-    let line: fabric.Object,
-        p0: fabric.Object,
-        p1: fabric.Object,
-        p2: fabric.Object,
-        p3: fabric.Object;
-    canvas.getObjects().forEach((obj) => {
-        switch (obj.name) {
-            case "cubeLine":
-                line = obj;
-                break;
-            case "p0":
-                p0 = obj;
-                break;
-            case "p1":
-                p1 = obj;
-                break;
-            case "p2":
-                p2 = obj;
-                break;
-            case "p3":
-                p3 = obj;
-                break;
-            default:
-                break;
-        }
-    });
-
-    // console.log("Found all Objs", line, p0, p1, p2, p3);
-    const returnObj = {
-        line: line,
-        points: [p0, p1, p2, p3],
-    };
-    return returnObj;
-}
-
 function bindCubicEvents(canvas: fabric.Canvas) {
     canvas.on({
         "object:selected": (e: fabric.IEvent<MouseEvent>) =>
