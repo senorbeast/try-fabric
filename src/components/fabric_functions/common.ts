@@ -330,7 +330,6 @@ const imageObject = (imgId: string): fabric.Image => {
         left: 100,
         top: 100,
         angle: 0,
-        opacity: 0.5,
         width: 32,
         height: 32,
     });

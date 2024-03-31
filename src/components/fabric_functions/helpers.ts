@@ -6,6 +6,7 @@ import { frameObject } from "./frame_object";
 export {
     getReqObjBy,
     getReqObjByNames,
+    setObjsOptions,
     cbcToLineForNewFrame,
     animateOverFrames,
     findEquidistantPoints,
@@ -44,6 +45,15 @@ function getReqObjBy(
         }
     });
     return result;
+}
+
+function setObjsOptions(
+    objects: fabric.Object[],
+    options: fabric.IObjectOptions
+) {
+    objects.forEach((obj) => {
+        obj.set(options);
+    });
 }
 
 // For each new frame, old cbc FO, are converted to line FO,

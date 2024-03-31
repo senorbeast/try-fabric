@@ -2,7 +2,11 @@ import type { fabricRefType } from "../Canvas";
 import { fabric } from "fabric";
 import { onObjectSelected, onSelectionCleared } from "./cubic";
 import { imageObject } from "./common";
-import { findEquidistantPoints, getReqObjByNames } from "./helpers";
+import {
+    findEquidistantPoints,
+    getReqObjByNames,
+    setObjsOptions,
+} from "./helpers";
 
 const endPointOffset = 16;
 const controlPointOffset = 8;
@@ -17,7 +21,7 @@ const unMovableOptions: fabric.IObjectOptions = {
 };
 const commonOptions: fabric.IObjectOptions = {
     commonID: "someUUID",
-    initialFrame: -1,
+    initialFrame: 0,
     currentType: "point",
 };
 
@@ -40,22 +44,38 @@ export const frameObject = (
     fabricRef: fabricRefType,
     startPoint: [number, number],
     endPoint: [number, number],
+    commonID: string,
     name: string
 ) => {
     const canvas = fabricRef.current!;
 
     const [store] = getReqObjByNames(canvas, ["invisibleStore"]);
-    console.log("CF", store!.currentFrame);
+    const currentFrame = store!.currentFrame;
 
-    const line = makeLinePath(startPoint, endPoint, name);
     const [p0, p3] = makeEndPoints(startPoint, endPoint);
+    p0.set({ opacity: 0.5, ...commonOptions, ...unMovableOptions });
+    canvas.add(p3);
 
-    p0.set({ ...commonOptions, ...unMovableOptions });
+    setObjsOptions([p0, p3], { initialFrame: currentFrame });
 
-    linkEndPointsToLine(line, p0, p3);
-    bindFOEvents(fabricRef);
-    [line, p0, p3].map((o) => canvas.add(o));
+    if (currentFrame > 0 && currentFrame > initialFrame) {
+        updatePointToLine(fabricRef, startPoint, endPoint, p0, p3);
+    }
 };
+
+function updatePointToLine(
+    fabricRef: fabricRefType,
+    startPoint: [number, number],
+    endPoint: [number, number],
+    p0: fabric.Object,
+    p3: fabric.Object
+) {
+    const canvas = fabricRef.current!;
+    const line = makeLinePath(startPoint, endPoint, "frame_line");
+    linkEndPointsToLine(line, p0, p3);
+    setObjsOptions([line, p0, p3], { currentType: "line" });
+    [line, p0].map((o) => canvas.add(o));
+}
 
 function makeLinePath(
     startPoint: [number, number],
@@ -221,10 +241,10 @@ export function bindFOEvents(fabricRef: fabricRefType) {
 // !FIX: This event is triggered multiple times
 function onObjectMouseUp(e: fabric.IEvent<MouseEvent>, canvas: fabric.Canvas) {
     // When endpoint released
-    replaceLineWithCurve(e, "", canvas);
+    updateLineToCurve(e, "", canvas);
 }
 
-function replaceLineWithCurve(
+function updateLineToCurve(
     e: fabric.IEvent<MouseEvent>,
     commonID: string,
     canvas: fabric.Canvas
@@ -268,11 +288,11 @@ function onObjectMouseDown(
     canvas: fabric.Canvas
 ) {
     if (e.target!.name == "p3") {
-        replaceCurveWithLine("", canvas);
+        updateCurveToLine("", canvas);
     }
 }
 
-function replaceCurveWithLine(commonID: string, canvas: fabric.Canvas) {
+function updateCurveToLine(commonID: string, canvas: fabric.Canvas) {
     // remove p1, p2 controls points, make it a line
     const [line, p1, p2] = getReqObjByNames(canvas, ["frame_line", "p1", "p2"]);
     const path = line.path;
