@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Button from "./Button";
 import { fabricRefType } from "./Canvas";
 import { cubic, linear, quad } from "./fabric_functions/interpolate";
@@ -44,13 +44,12 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
         if (fabricRef.current) {
             loadFirstCanvas(fabricRef);
         }
-        console.log(frames);
+
         return () => {};
     }, [fabricRef]);
 
     // Store currentFrame to canvas object
     useEffect(() => {
-        console.log("UE CF", currentFrame);
         if (fabricRef.current) {
             const canvas = fabricRef.current!;
             const [store] = getReqObjByNames(canvas, ["invisibleStore"]);
@@ -274,13 +273,11 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
                             fabricRef,
                             [100, 100],
                             [100, 100],
-                            "frame_line"
+                            "someUUID",
+                            "frame_line",
+                            true
                         )
                     }
-                />
-                <Button
-                    name="newFrameLine"
-                    onClick={() => cbcToLineForNewFrame(fabricRef)}
                 />
             </div>
         </div>

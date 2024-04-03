@@ -61,7 +61,6 @@ function setObjsOptions(
 // keep same ids/names
 function cbcToLineForNewFrame(fabricRef: fabricRefType) {
     const canvas = fabricRef.current!;
-    // Get id/name and endPoint for currentFrame
     const [line, p0, p1, p2, p3] = getReqObjByNames(canvas, [
         "frame_line",
         "p0",
@@ -69,13 +68,18 @@ function cbcToLineForNewFrame(fabricRef: fabricRefType) {
         "p2",
         "p3",
     ]);
-    const endPoint = getEndPoint(line);
-    console.log(line, endPoint);
-    const name = line?.name;
+
+    const endPoint = [p3.left, p3.top];
+
+    // // Get id/name and endPoint for currentFrame
+
+    // const endPoint = getEndPoint(line);
+    // console.log(line, endPoint);
+    // const name = line?.name!;
     // //TODO: safely remove object and its listeners
     canvas.remove(line, p0, p1, p2, p3);
     // canvas.clear();
-    frameObject(fabricRef, endPoint, endPoint, name);
+    frameObject(fabricRef, endPoint, endPoint, "someUUID", "frame_line", false);
 }
 
 function getEndPoint(line: fabric.Object): [number, number] {

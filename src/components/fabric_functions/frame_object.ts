@@ -19,6 +19,14 @@ const unMovableOptions: fabric.IObjectOptions = {
     hasControls: false,
     hasBorders: false,
 };
+
+export const customAttributes = [
+    "commonID",
+    "initialFrame",
+    "currentType",
+    "currentFrame",
+];
+
 const commonOptions: fabric.IObjectOptions = {
     commonID: "someUUID",
     initialFrame: 0,
@@ -35,7 +43,8 @@ export const extraProps = [
     "path",
     "height",
     "width",
-    "currentFrame",
+    "initialFrame",
+    ...customAttributes,
     ...Object.keys(commonOptions),
     ...Object.keys(unMovableOptions),
 ];
@@ -45,7 +54,8 @@ export const frameObject = (
     startPoint: [number, number],
     endPoint: [number, number],
     commonID: string,
-    name: string
+    name: string,
+    newObject: boolean
 ) => {
     const canvas = fabricRef.current!;
 
@@ -54,13 +64,27 @@ export const frameObject = (
 
     const [p0, p3] = makeEndPoints(startPoint, endPoint);
     p0.set({ opacity: 0.5, ...commonOptions, ...unMovableOptions });
-    canvas.add(p3);
+    p3.set({ hasBorders: false, hasControls: false });
+    setObjsOptions([p0, p3], {
+        commonID: commonID,
+    });
 
-    setObjsOptions([p0, p3], { initialFrame: currentFrame });
-
-    if (currentFrame > 0 && currentFrame > initialFrame) {
-        updatePointToLine(fabricRef, startPoint, endPoint, p0, p3);
+    if (newObject) {
+        setObjsOptions([p0, p3], {
+            initialFrame: currentFrame,
+            currentType: "point",
+        });
+        console.log("new object", currentFrame);
+        // TODO: use prototype to add custom attrs
+    } else {
+        const initialFrame = p3["initialFrame"];
+        console.log("should make line", currentFrame, initialFrame);
+        if (currentFrame > 0) {
+            updatePointToLine(fabricRef, startPoint, endPoint, p0, p3);
+        }
+        bindFOEvents(fabricRef);
     }
+    canvas.add(p3);
 };
 
 function updatePointToLine(
@@ -218,16 +242,12 @@ export function bindFOEvents(fabricRef: fabricRefType) {
     // fix for loading cbc, after line properly
     // canvas.__eventListeners = {};
     const canvas = fabricRef.current!;
-    canvas.on({
-        "object:moving": (e: fabric.IEvent<MouseEvent>) =>
-            onObjectMoving(e, canvas),
-    });
 
     canvas.on({
         "object:selected": (e: fabric.IEvent<MouseEvent>) =>
             onObjectSelected(e, canvas),
         "object:moving": (e: fabric.IEvent<MouseEvent>) =>
-            onFOMovingLine(e, canvas),
+            onObjectMoving(e, canvas),
         "selection:cleared": (e: fabric.IEvent<MouseEvent>) =>
             onSelectionCleared(e, canvas),
         "mouse:up": (e: fabric.IEvent<MouseEvent>) =>
@@ -238,7 +258,6 @@ export function bindFOEvents(fabricRef: fabricRefType) {
 }
 
 // Convert Line to Cubic Beizer
-// !FIX: This event is triggered multiple times
 function onObjectMouseUp(e: fabric.IEvent<MouseEvent>, canvas: fabric.Canvas) {
     // When endpoint released
     updateLineToCurve(e, "", canvas);
@@ -273,10 +292,7 @@ function updateLineToCurve(
 
         const [p1, p2] = makeControlsPoints(controlPoint1, controlPoint2);
         linkControlPointsToLine(line, p1, p2);
-        canvas.on({
-            "object:moving": (e: fabric.IEvent<MouseEvent>) =>
-                onObjectMoving(e, canvas),
-        });
+        setObjsOptions([e.target!], { currentType: "curve" });
         [p1, p2].map((o) => canvas.add(o));
         canvas.renderAll.bind(canvas);
     }
@@ -287,7 +303,7 @@ function onObjectMouseDown(
     e: fabric.IEvent<MouseEvent>,
     canvas: fabric.Canvas
 ) {
-    if (e.target!.name == "p3") {
+    if (e.target!.name == "p3" && e.target!.currentType == "curve") {
         updateCurveToLine("", canvas);
     }
 }
@@ -299,23 +315,49 @@ function updateCurveToLine(commonID: string, canvas: fabric.Canvas) {
     const endPoint = [path[1][5], path[1][6]];
     canvas.remove(p1, p2);
     line.path[1] = ["L", endPoint[0], endPoint[1]];
-    canvas.on({
-        "object:moving": (e: fabric.IEvent<MouseEvent>) =>
-            onFOMovingLine(e, canvas),
-    });
+    setObjsOptions([e.target!], { currentType: "line" });
     canvas.renderAll.bind(canvas);
 }
 
-function onFOMovingLine(e: fabric.IEvent<MouseEvent>, canvas?: fabric.Canvas) {
-    if (e.target!.name === "p0" || e.target!.name === "p3") {
-        const p = e.target!;
-        if (p.line1) {
-            p.line1.path[0][1] = p.left + endPointOffset;
-            p.line1.path[0][2] = p.top + endPointOffset;
-        } else if (p.line4) {
-            p.line4.path[1][1] = p.left + endPointOffset;
-            p.line4.path[1][2] = p.top + endPointOffset;
+function onObjectMoving(e: fabric.IEvent<MouseEvent>, canvas?: fabric.Canvas) {
+    if (e.target!.currentType === "curve") {
+        if (e.target!.name === "p0" || e.target!.name === "p3") {
+            const p = e.target!;
+            if (p.line1) {
+                p.line1.path[0][1] = p.left + endPointOffset;
+                p.line1.path[0][2] = p.top + endPointOffset;
+            } else if (p.line4) {
+                p.line4.path[1][5] = p.left + endPointOffset;
+                p.line4.path[1][6] = p.top + endPointOffset;
+            }
+        } else if (e.target!.name === "p1") {
+            const p = e.target;
+            if (p.line2) {
+                p.line2.path[1][1] = p.left + controlPointOffset;
+                p.line2.path[1][2] = p.top + controlPointOffset;
+            }
+        } else if (e.target!.name === "p2") {
+            const p = e.target;
+            if (p.line3) {
+                p.line3.path[1][3] = p.left + controlPointOffset;
+                p.line3.path[1][4] = p.top + controlPointOffset;
+            }
         }
+    } else if (e.target!.currentType === "line") {
+        if (e.target!.name === "p0" || e.target!.name === "p3") {
+            const p = e.target!;
+            if (p.line1) {
+                p.line1.path[0][1] = p.left + endPointOffset;
+                p.line1.path[0][2] = p.top + endPointOffset;
+            } else if (p.line4) {
+                p.line4.path[1][1] = p.left + endPointOffset;
+                p.line4.path[1][2] = p.top + endPointOffset;
+            }
+        }
+    } else if (e.target!.currentType === "point") {
+        // console.log("Current type is point");
+    } else {
+        console.log("Current type is not point/line/curve");
     }
 }
 
@@ -330,28 +372,3 @@ function onFOMovingLine(e: fabric.IEvent<MouseEvent>, canvas?: fabric.Canvas) {
 
 //# Frame stuff
 // for next frame load, line into previous frames' endPoint
-
-function onObjectMoving(e: fabric.IEvent<MouseEvent>, canvas?: fabric.Canvas) {
-    if (e.target!.name === "p0" || e.target!.name === "p3") {
-        const p = e.target!;
-        if (p.line1) {
-            p.line1.path[0][1] = p.left + endPointOffset;
-            p.line1.path[0][2] = p.top + endPointOffset;
-        } else if (p.line4) {
-            p.line4.path[1][5] = p.left + endPointOffset;
-            p.line4.path[1][6] = p.top + endPointOffset;
-        }
-    } else if (e.target!.name === "p1") {
-        const p = e.target;
-        if (p.line2) {
-            p.line2.path[1][1] = p.left + controlPointOffset;
-            p.line2.path[1][2] = p.top + controlPointOffset;
-        }
-    } else if (e.target!.name === "p2") {
-        const p = e.target;
-        if (p.line3) {
-            p.line3.path[1][3] = p.left + controlPointOffset;
-            p.line3.path[1][4] = p.top + controlPointOffset;
-        }
-    }
-}

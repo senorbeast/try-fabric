@@ -2,6 +2,7 @@ import { fabric } from "fabric";
 import { fabricRefType } from "../Canvas";
 import { interpolatePath } from "./interpolate";
 import { getReqObjByNames } from "./helpers";
+import { customAttributes } from "./frame_object";
 
 export {
     initFabric,
@@ -29,6 +30,17 @@ const initFabric = (fabricRef: fabricRefType) => {
         selection: false,
     });
     invisibleStore(fabricRef);
+
+    // Update toObject, for custom attributes
+
+    const originalToObject = fabric.Object.prototype.toObject;
+    const myAdditional = ["id", ...customAttributes];
+    fabric.Object.prototype.toObject = function (additionalProperties) {
+        return originalToObject.call(
+            this,
+            myAdditional.concat(additionalProperties || "")
+        );
+    };
 };
 
 const disposeFabric = (fabricRef: fabricRefType) => {
