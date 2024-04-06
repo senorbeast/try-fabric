@@ -1,5 +1,6 @@
 import type { fabricRefType } from "../Canvas";
-import { fabric } from "fabric";
+import fabric from "./custom_attribute";
+
 import { onObjectSelected, onSelectionCleared } from "./cubic";
 import { imageObject } from "./common";
 import {
@@ -55,7 +56,8 @@ export const frameObject = (
     endPoint: [number, number],
     commonID: string,
     name: string,
-    newObject: boolean
+    newObject: boolean,
+    oldOptions: fabric.IObjectOptions
 ) => {
     const canvas = fabricRef.current!;
 
@@ -74,17 +76,25 @@ export const frameObject = (
             initialFrame: currentFrame,
             currentType: "point",
         });
+        bindFOEvents(fabricRef);
         console.log("new object", currentFrame);
         // TODO: use prototype to add custom attrs
-    } else {
+    } else if (p3.currentType != "line" || p3.currentType != "curve") {
         const initialFrame = p3["initialFrame"];
         console.log("should make line", currentFrame, initialFrame);
         if (currentFrame > 0) {
-            updatePointToLine(fabricRef, startPoint, endPoint, p0, p3);
+            updatePointToLine(
+                fabricRef,
+                startPoint,
+                endPoint,
+                p0,
+                p3,
+                oldOptions
+            );
         }
-        bindFOEvents(fabricRef);
     }
     canvas.add(p3);
+    canvas.renderAll();
 };
 
 function updatePointToLine(
@@ -92,13 +102,16 @@ function updatePointToLine(
     startPoint: [number, number],
     endPoint: [number, number],
     p0: fabric.Object,
-    p3: fabric.Object
+    p3: fabric.Object,
+    oldOptions: fabric.IObjectOptions
 ) {
     const canvas = fabricRef.current!;
     const line = makeLinePath(startPoint, endPoint, "frame_line");
     linkEndPointsToLine(line, p0, p3);
-    setObjsOptions([line, p0, p3], { currentType: "line" });
+    console.log("objs, updatePointToLine", line, p0, p3);
+    setObjsOptions([line, p0, p3], { currentType: "line", ...oldOptions });
     [line, p0].map((o) => canvas.add(o));
+    canvas.renderAll();
 }
 
 function makeLinePath(
@@ -181,7 +194,7 @@ function makeControlPoint(left: number, top: number) {
     return c;
 }
 
-function linkEndPointsToLine(
+export function linkEndPointsToLine(
     line: fabric.Path,
     p0: fabric.Object,
     p3: fabric.Object
@@ -199,7 +212,7 @@ function linkEndPointsToLine(
     p3.line4 = line;
 }
 
-function linkControlPointsToLine(
+export function linkControlPointsToLine(
     line: fabric.Path,
     p1: fabric.Object,
     p2: fabric.Object
@@ -232,7 +245,52 @@ export function runAfterJSONLoad(fabricRef: fabricRefType) {
     const canvas = fabricRef.current!;
     const [line, p0, p3] = getReqObjByNames(canvas, ["frame_line", "p0", "p3"]);
     linkEndPointsToLine(line, p0, p3);
-    bindFOEvents(canvas);
+    bindFOEvents(fabricRef);
+}
+
+export function runAfterJSONLoad2(
+    fabricRef: fabricRefType,
+    lineName: string,
+    replace?: boolean
+) {
+    // This is required all canvas JSON is loaded,
+    // these objects/functionality is not stored in the json
+
+    const canvas = fabricRef.current!;
+    // const { line, points } = getReqObj(canvas);
+    const [line, p0, p1, p2, p3] = getReqObjByNames(canvas, [
+        lineName,
+        "p0",
+        "p1",
+        "p2",
+        "p3",
+    ]);
+
+    console.log("Linking existing points");
+    line!.height = 0;
+    line!.width = 0;
+    // Link existing points
+    // const [p0, p1, p2, p3] = points;
+    linkPointsToLine(line, p0, p1, p2, p3);
+    // bindCubicEvents(canvas);
+    bindFOEvents(fabricRef);
+    canvas.renderAll();
+}
+
+function linkPointsToLine(line, p0, p1, p2, p3) {
+    const ptsArr = [p0, p1, p2, p3];
+    ptsArr.forEach((pt) => {
+        pt.hasBorders = pt.hasControls = false;
+        pt.line1 = null;
+        pt.line2 = null;
+        pt.line3 = null;
+        pt.line4 = null;
+    });
+    // Connect existing points with the path line
+    p0.line1 = line;
+    p1.line2 = line;
+    p2.line3 = line;
+    p3.line4 = line;
 }
 
 type objectCurrentType = "point" | "line" | "curve";
@@ -271,30 +329,32 @@ function updateLineToCurve(
     const [line] = getReqObjByNames(canvas, ["frame_line", "p0", "p3"]);
     const [p1, p2] = getReqObjByNames(canvas, ["p1", "p2"]);
     // When endpoint released
-    if (e.target!.name == "p3" && (p1 == null || p2 == null)) {
-        // add p1, p2 controls points, make it a beizer curve
-        const path = line!.path;
-        const startPoint: [number, number] = [path[0][1], path[0][2]];
-        const endPoint: [number, number] = [path[1][5], path[1][6]];
-        const [controlPoint1, controlPoint2] = findEquidistantPoints(
-            startPoint,
-            endPoint
-        );
-        line.path[1] = [
-            "C",
-            controlPoint1[0],
-            controlPoint1[1],
-            controlPoint2[0],
-            controlPoint2[1],
-            endPoint[0],
-            endPoint[1],
-        ];
+    if (line) {
+        if (e.target!.name == "p3" && (p1 == null || p2 == null)) {
+            // add p1, p2 controls points, make it a beizer curve
+            const path = line!.path;
+            const startPoint: [number, number] = [path[0][1], path[0][2]];
+            const endPoint: [number, number] = [path[1][5], path[1][6]];
+            const [controlPoint1, controlPoint2] = findEquidistantPoints(
+                startPoint,
+                endPoint
+            );
+            line.path[1] = [
+                "C",
+                controlPoint1[0],
+                controlPoint1[1],
+                controlPoint2[0],
+                controlPoint2[1],
+                endPoint[0],
+                endPoint[1],
+            ];
 
-        const [p1, p2] = makeControlsPoints(controlPoint1, controlPoint2);
-        linkControlPointsToLine(line, p1, p2);
-        setObjsOptions([e.target!], { currentType: "curve" });
-        [p1, p2].map((o) => canvas.add(o));
-        canvas.renderAll.bind(canvas);
+            const [p1, p2] = makeControlsPoints(controlPoint1, controlPoint2);
+            linkControlPointsToLine(line, p1, p2);
+            setObjsOptions([e.target!], { currentType: "curve" });
+            [p1, p2].map((o) => canvas.add(o));
+            canvas.renderAll.bind(canvas);
+        }
     }
 }
 
@@ -311,53 +371,83 @@ function onObjectMouseDown(
 function updateCurveToLine(commonID: string, canvas: fabric.Canvas) {
     // remove p1, p2 controls points, make it a line
     const [line, p1, p2] = getReqObjByNames(canvas, ["frame_line", "p1", "p2"]);
-    const path = line.path;
-    const endPoint = [path[1][5], path[1][6]];
-    canvas.remove(p1, p2);
-    line.path[1] = ["L", endPoint[0], endPoint[1]];
-    setObjsOptions([e.target!], { currentType: "line" });
-    canvas.renderAll.bind(canvas);
+    if (line) {
+        const path = line.path;
+        const endPoint = [path[1][5], path[1][6]];
+        canvas.remove(p1, p2);
+        line.path[1] = ["L", endPoint[0], endPoint[1]];
+        setObjsOptions([e.target!], { currentType: "line" });
+        canvas.renderAll.bind(canvas);
+    }
 }
 
 function onObjectMoving(e: fabric.IEvent<MouseEvent>, canvas?: fabric.Canvas) {
-    if (e.target!.currentType === "curve") {
-        if (e.target!.name === "p0" || e.target!.name === "p3") {
-            const p = e.target!;
-            if (p.line1) {
-                p.line1.path[0][1] = p.left + endPointOffset;
-                p.line1.path[0][2] = p.top + endPointOffset;
-            } else if (p.line4) {
-                p.line4.path[1][5] = p.left + endPointOffset;
-                p.line4.path[1][6] = p.top + endPointOffset;
-            }
-        } else if (e.target!.name === "p1") {
-            const p = e.target;
-            if (p.line2) {
-                p.line2.path[1][1] = p.left + controlPointOffset;
-                p.line2.path[1][2] = p.top + controlPointOffset;
-            }
-        } else if (e.target!.name === "p2") {
-            const p = e.target;
-            if (p.line3) {
-                p.line3.path[1][3] = p.left + controlPointOffset;
-                p.line3.path[1][4] = p.top + controlPointOffset;
-            }
-        }
-    } else if (e.target!.currentType === "line") {
-        if (e.target!.name === "p0" || e.target!.name === "p3") {
-            const p = e.target!;
-            if (p.line1) {
-                p.line1.path[0][1] = p.left + endPointOffset;
-                p.line1.path[0][2] = p.top + endPointOffset;
-            } else if (p.line4) {
-                p.line4.path[1][1] = p.left + endPointOffset;
-                p.line4.path[1][2] = p.top + endPointOffset;
-            }
-        }
-    } else if (e.target!.currentType === "point") {
+    const [store] = getReqObjByNames(canvas, ["invisibleStore"]);
+    const currentFrame = store!.currentFrame;
+    console.log("Current frame is", currentFrame);
+
+    const initialFrame = e.target!.initialFrame;
+    const currentType = e.target!.currentType;
+
+    if (initialFrame == currentFrame) {
+        currentType == "point";
         // console.log("Current type is point");
+    } else if (initialFrame < currentFrame) {
+        // Line or Curve
+        if (currentType == "line") {
+            onObjectMovingForLine(e, endPointOffset);
+        } else if (currentType == "curve") {
+            onObjectMovingForCurve(e, controlPointOffset, endPointOffset);
+        } else {
+            console.log("Can't decide between line and curve");
+        }
     } else {
-        console.log("Current type is not point/line/curve");
+        console.log("Impossible");
+    }
+}
+
+function onObjectMovingForLine(
+    e: fabric.IEvent<MouseEvent>,
+    endPointOffset: number
+) {
+    if (e.target!.name === "p0" || e.target!.name === "p3") {
+        const p = e.target!;
+        if (p.line1) {
+            p.line1.path[0][1] = p.left + endPointOffset;
+            p.line1.path[0][2] = p.top + endPointOffset;
+        } else if (p.line4) {
+            p.line4.path[1][1] = p.left + endPointOffset;
+            p.line4.path[1][2] = p.top + endPointOffset;
+        }
+    }
+}
+
+function onObjectMovingForCurve(
+    e: fabric.IEvent<MouseEvent>,
+    controlPointOffset: number,
+    endPointOffset: number
+) {
+    if (e.target!.name === "p0" || e.target!.name === "p3") {
+        const p = e.target!;
+        if (p.line1) {
+            p.line1.path[0][1] = p.left + endPointOffset;
+            p.line1.path[0][2] = p.top + endPointOffset;
+        } else if (p.line4) {
+            p.line4.path[1][5] = p.left + endPointOffset;
+            p.line4.path[1][6] = p.top + endPointOffset;
+        }
+    } else if (e.target!.name === "p1") {
+        const p = e.target;
+        if (p.line2) {
+            p.line2.path[1][1] = p.left + controlPointOffset;
+            p.line2.path[1][2] = p.top + controlPointOffset;
+        }
+    } else if (e.target!.name === "p2") {
+        const p = e.target;
+        if (p.line3) {
+            p.line3.path[1][3] = p.left + controlPointOffset;
+            p.line3.path[1][4] = p.top + controlPointOffset;
+        }
     }
 }
 

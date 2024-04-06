@@ -1,5 +1,5 @@
 import type { fabricRefType } from "../Canvas";
-import { fabric } from "fabric";
+import fabric from "./custom_attribute";
 import { makeEndPoint, onObjectSelected, onSelectionCleared } from "./cubic";
 import { getReqObjByNames } from "./helpers";
 

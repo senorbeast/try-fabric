@@ -2,12 +2,13 @@ import { canvasJSONType } from "../ButtonPanel";
 import { fabricRefType } from "../Canvas";
 import { animateObjectAlongPath } from "./common";
 import { frameObject } from "./frame_object";
+import fabric from "./custom_attribute";
 
 export {
     getReqObjBy,
     getReqObjByNames,
     setObjsOptions,
-    cbcToLineForNewFrame,
+    newObjectForNewFrame,
     animateOverFrames,
     findEquidistantPoints,
     mapControlPointsOnCurve,
@@ -59,7 +60,7 @@ function setObjsOptions(
 // For each new frame, old cbc FO, are converted to line FO,
 // starting at end point of cbc
 // keep same ids/names
-function cbcToLineForNewFrame(fabricRef: fabricRefType) {
+function newObjectForNewFrame(fabricRef: fabricRefType) {
     const canvas = fabricRef.current!;
     const [line, p0, p1, p2, p3] = getReqObjByNames(canvas, [
         "frame_line",
@@ -71,15 +72,25 @@ function cbcToLineForNewFrame(fabricRef: fabricRefType) {
 
     const endPoint = [p3.left, p3.top];
 
-    // // Get id/name and endPoint for currentFrame
+    const oldOptions: fabric.IUtilObject = {
+        initialFrame: p3.initialFrame,
+    };
 
-    // const endPoint = getEndPoint(line);
-    // console.log(line, endPoint);
-    // const name = line?.name!;
-    // //TODO: safely remove object and its listeners
+    console.log("In newObjectForNewFrame", oldOptions);
+
     canvas.remove(line, p0, p1, p2, p3);
-    // canvas.clear();
-    frameObject(fabricRef, endPoint, endPoint, "someUUID", "frame_line", false);
+
+    //TODO: need to load old objects attribute in new frame
+
+    frameObject(
+        fabricRef,
+        endPoint,
+        endPoint,
+        "someUUID",
+        "frame_line",
+        false,
+        oldOptions
+    );
 }
 
 function getEndPoint(line: fabric.Object): [number, number] {

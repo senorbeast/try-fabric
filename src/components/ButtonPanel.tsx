@@ -14,10 +14,15 @@ import {
 import { drawQuadratic } from "./fabric_functions/quadratic";
 import _ from "lodash";
 import { drawLine } from "./fabric_functions/line";
-import { extraProps, frameObject } from "./fabric_functions/frame_object";
+import {
+    bindFOEvents,
+    extraProps,
+    frameObject,
+    runAfterJSONLoad2,
+} from "./fabric_functions/frame_object";
 import {
     animateOverFrames,
-    cbcToLineForNewFrame,
+    newObjectForNewFrame,
     getReqObjByNames,
 } from "./fabric_functions/helpers";
 
@@ -88,7 +93,8 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
         setCurrentFrame(idx);
         canvas.loadFromJSON(frames[idx], () => {
             // run required functions for bezier function to work
-            addCBCHelpers(fabricRef, "frame_line");
+            // addCBCHelpers(fabricRef, "frame_line");
+            runAfterJSONLoad2(fabricRef, "frame_line");
             // runAfterJSONLoad(fabricRef);
             // addCBCHelpers(fabricRef, "cubeLine");
             // runAfterJSONLoad(fabricRef);
@@ -124,7 +130,7 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
         setCurrentFrame(frames.length);
         const newFrame = [...frames, canvas.toJSON(extraProps)];
         setFrames(newFrame); // add frame
-        cbcToLineForNewFrame(fabricRef);
+        newObjectForNewFrame(fabricRef);
 
         // const oldFrame = fabricRef.current!.getObjects();
         // console.log(
@@ -275,7 +281,8 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
                             [100, 100],
                             "someUUID",
                             "frame_line",
-                            true
+                            true,
+                            {}
                         )
                     }
                 />

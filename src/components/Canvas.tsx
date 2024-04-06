@@ -1,4 +1,5 @@
-import { fabric } from "fabric";
+import fabric from "./fabric_functions/custom_attribute";
+
 import { useEffect, useRef } from "react";
 import ButtonPanel from "./ButtonPanel";
 import { initFabric, disposeFabric } from "./fabric_functions/common";
