@@ -2,7 +2,7 @@ import { fabric } from "fabric";
 import { fabricRefType } from "../Canvas";
 import { interpolatePath } from "./interpolate";
 import { getReqObjByNames } from "./helpers";
-import { bindFOEvents, customAttributes } from "./frame_object";
+import { bindFOEvents } from "./final_functions/events";
 
 export {
     initFabric,

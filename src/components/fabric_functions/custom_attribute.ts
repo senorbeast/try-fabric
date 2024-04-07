@@ -1,5 +1,5 @@
 import { fabric } from "fabric";
-import { customAttributes } from "./frame_object";
+import { customAttributes } from "./final_functions/constants";
 
 const originalToObject = fabric.Object.prototype.toObject;
 const myAdditional = ["id", ...customAttributes];
@@ -15,7 +15,7 @@ const descriptor = Object.getOwnPropertyDescriptor(
     fabric.Object.prototype,
     "toObject"
 );
-console.log("Object writable ?", descriptor.writable); // false
+// console.log("Object writable ?", descriptor.writable); // false
 
 // fabric.Object.prototype.toObject = (function (toObject) {
 //     return function () {

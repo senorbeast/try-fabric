@@ -15,7 +15,6 @@ import { drawQuadratic } from "./fabric_functions/quadratic";
 import _ from "lodash";
 import { drawLine } from "./fabric_functions/line";
 import {
-    extraProps,
     frameObject,
     newObjectForNewFrame,
     runAfterJSONLoad2,
@@ -24,6 +23,7 @@ import {
     animateOverFrames,
     getReqObjByNames,
 } from "./fabric_functions/helpers";
+import { extraProps } from "./fabric_functions/final_functions/constants";
 
 export type canvasJSONType = {
     version: string;

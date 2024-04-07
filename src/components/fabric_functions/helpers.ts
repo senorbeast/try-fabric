@@ -7,6 +7,7 @@ import fabric from "./custom_attribute";
 export {
     getReqObjBy,
     getReqObjByNames,
+    getReqObjByNamesForID,
     setObjsOptions,
     animateOverFrames,
     findEquidistantPoints,
@@ -25,6 +26,26 @@ function getReqObjByNames(
     ids.forEach((id, index) => {
         filterObjects.forEach((obj) => {
             if (id == obj.name) {
+                result.push(obj);
+            }
+        });
+        if (result.length == index) result.push(null);
+    });
+    return result;
+}
+
+function getReqObjByNamesForID(
+    canvas: fabric.Canvas,
+    commonID: string,
+    names: string[],
+    objects?: fabric.Object[]
+) {
+    const result: (fabric.Object | null)[] = [];
+    const filterObjects = objects ?? canvas.getObjects();
+
+    names.forEach((name, index) => {
+        filterObjects.forEach((obj) => {
+            if (name == obj.name && commonID == obj.commonID) {
                 result.push(obj);
             }
         });
