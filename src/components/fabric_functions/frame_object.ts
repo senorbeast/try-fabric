@@ -103,9 +103,9 @@ function updatePointToLine(
     linkEndPointsToLine(line, p0, p3);
     console.log("objs, updatePointToLine", line, p0, p3);
     setObjsOptions([line, p0, p3], { currentType: "line", ...oldOptions });
-    // [line, p0].map((o) => canvas.add(o));
-    canvas.add(line);
-    canvas.add(p0);
+    [line, p0].map((o) => canvas.add(o));
+    // canvas.add(line);
+    // canvas.add(p0);
     canvas.renderAll();
 }
 
@@ -347,13 +347,17 @@ function updateLineToCurve(
                 endPoint[0],
                 endPoint[1],
             ];
+            const initialFrame = line.initialFrame;
 
             const [p1, p2] = makeControlsPoints(controlPoint1, controlPoint2);
             linkControlPointsToLine(line, p1, p2);
-            setObjsOptions([e.target!, p1, p2], { currentType: "curve" });
-            // [p1, p2].map((o) => canvas.add(o));
-            canvas.add(p1);
-            canvas.add(p2);
+            setObjsOptions([e.target!, p1, p2], {
+                currentType: "curve",
+                initialFrame: initialFrame,
+            });
+            [p1, p2].map((o) => canvas.add(o));
+            // canvas.add(p1);
+            // canvas.add(p2);
             canvas.renderAll.bind(canvas);
         }
     }
@@ -378,7 +382,9 @@ function updateCurveToLine(e, commonID: string, canvas: fabric.Canvas) {
         const endPoint = [path[1][5], path[1][6]];
         canvas.remove(p1, p2);
         line.path[1] = ["L", endPoint[0], endPoint[1]];
-        setObjsOptions([e.target!], { currentType: "line" });
+        setObjsOptions([e.target!], {
+            currentType: "line",
+        });
         canvas.renderAll.bind(canvas);
     }
 }
@@ -389,7 +395,7 @@ function onObjectMoving(e: fabric.IEvent<MouseEvent>, canvas?: fabric.Canvas) {
 
     const initialFrame = e.target!.initialFrame;
     const currentType = e.target!.currentType;
-    console.log("Current frame is", currentFrame, currentType);
+    console.log("Current frame is", currentFrame, initialFrame, currentType);
 
     if (initialFrame == currentFrame) {
         currentType == "point";
