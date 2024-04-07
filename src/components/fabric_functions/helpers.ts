@@ -8,7 +8,6 @@ export {
     getReqObjBy,
     getReqObjByNames,
     setObjsOptions,
-    newObjectForNewFrame,
     animateOverFrames,
     findEquidistantPoints,
     mapControlPointsOnCurve,
@@ -60,38 +59,6 @@ function setObjsOptions(
 // For each new frame, old cbc FO, are converted to line FO,
 // starting at end point of cbc
 // keep same ids/names
-function newObjectForNewFrame(fabricRef: fabricRefType) {
-    const canvas = fabricRef.current!;
-    const [line, p0, p1, p2, p3] = getReqObjByNames(canvas, [
-        "frame_line",
-        "p0",
-        "p1",
-        "p2",
-        "p3",
-    ]);
-
-    const endPoint = [p3.left, p3.top];
-
-    const oldOptions: fabric.IUtilObject = {
-        initialFrame: p3.initialFrame,
-    };
-
-    console.log("In newObjectForNewFrame", oldOptions);
-
-    canvas.remove(line, p0, p1, p2, p3);
-
-    //TODO: need to load old objects attribute in new frame
-
-    frameObject(
-        fabricRef,
-        endPoint,
-        endPoint,
-        "someUUID",
-        "frame_line",
-        false,
-        oldOptions
-    );
-}
 
 function getEndPoint(line: fabric.Object): [number, number] {
     const path = line.path;

@@ -1,5 +1,6 @@
 import type { fabricRefType } from "../Canvas";
 import fabric from "./custom_attribute";
+import { v4 as uuidv4 } from "uuid";
 
 import { onObjectSelected, onSelectionCleared } from "./cubic";
 import { imageObject } from "./common";
@@ -54,7 +55,6 @@ export const frameObject = (
     fabricRef: fabricRefType,
     startPoint: [number, number],
     endPoint: [number, number],
-    commonID: string,
     name: string,
     newObject: boolean,
     oldOptions: fabric.IObjectOptions
@@ -67,38 +67,69 @@ export const frameObject = (
     const [p0, p3] = makeEndPoints(startPoint, endPoint);
     p0.set({ opacity: 0.5, ...commonOptions, ...unMovableOptions });
     p3.set({ hasBorders: false, hasControls: false });
-    setObjsOptions([p0, p3], {
-        commonID: commonID,
-    });
 
     if (newObject) {
         setObjsOptions([p0, p3], {
             initialFrame: currentFrame,
             currentType: "point",
+            commonID: uuidv4(),
         });
-        bindFOEvents(fabricRef);
         console.log("new object", currentFrame);
         // TODO: use prototype to add custom attrs
     } else if (p3.currentType != "line" || p3.currentType != "curve") {
         const initialFrame = p3["initialFrame"];
         console.log("should make line", currentFrame, initialFrame);
         // if (currentFrame > 0) {
-        updatePointToLine(fabricRef, startPoint, endPoint, p0, p3, oldOptions);
+        updatePointToLine(fabricRef, p0, p3, oldOptions);
         // }
     }
     canvas.add(p3);
     canvas.renderAll();
 };
 
+export function newObjectForNewFrame(fabricRef: fabricRefType) {
+    const canvas = fabricRef.current!;
+    const [line, p0, p1, p2, p3] = getReqObjByNames(canvas, [
+        "frame_line",
+        "p0",
+        "p1",
+        "p2",
+        "p3",
+    ]);
+
+    const endPoint = [p3.left, p3.top];
+
+    const oldOptions: fabric.IUtilObject = {
+        initialFrame: p3.initialFrame,
+        commonID: p3.commonID,
+    };
+
+    console.log("In newObjectForNewFrame", oldOptions);
+
+    canvas.remove(line, p0, p1, p2, p3);
+
+    //TODO: need to load old objects attribute in new frame
+    // if (p3.currentType == "point") {
+    // } else if (p3.currentType == "line" || p3.currentType == "curve") {
+    // }
+    frameObject(fabricRef, endPoint, endPoint, "frame_line", false, oldOptions);
+}
+
 function updatePointToLine(
     fabricRef: fabricRefType,
-    startPoint: [number, number],
-    endPoint: [number, number],
     p0: fabric.Object,
     p3: fabric.Object,
     oldOptions: fabric.IObjectOptions
 ) {
     const canvas = fabricRef.current!;
+    const startPoint = [p0.left + endPointOffset, p0.top + endPointOffset] as [
+        number,
+        number
+    ];
+    const endPoint = [p3.left + endPointOffset, p3.top + endPointOffset] as [
+        number,
+        number
+    ];
     const line = makeLinePath(startPoint, endPoint, "frame_line");
     linkEndPointsToLine(line, p0, p3);
     console.log("objs, updatePointToLine", line, p0, p3);
@@ -157,8 +188,8 @@ function makeEndPoints(
 function makeCustomEndPoint(left: number, top: number) {
     const c = imageObject("my-image");
     c.set({
-        left: left - 16,
-        top: top - 16,
+        left: left - endPointOffset,
+        top: top - endPointOffset,
     });
     return c;
 }
@@ -368,6 +399,7 @@ function onObjectMouseDown(
     e: fabric.IEvent<MouseEvent>,
     canvas: fabric.Canvas
 ) {
+    console.log("mousedown", e);
     if (e.target!.name == "p3" && e.target!.currentType == "curve") {
         updateCurveToLine(e, "", canvas);
     }
@@ -395,7 +427,13 @@ function onObjectMoving(e: fabric.IEvent<MouseEvent>, canvas?: fabric.Canvas) {
 
     const initialFrame = e.target!.initialFrame;
     const currentType = e.target!.currentType;
-    console.log("Current frame is", currentFrame, initialFrame, currentType);
+    console.log(
+        "Current frame is",
+        currentFrame,
+        initialFrame,
+        currentType,
+        e.target!.commonID
+    );
 
     if (initialFrame == currentFrame) {
         currentType == "point";

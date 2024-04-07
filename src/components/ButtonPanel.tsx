@@ -15,14 +15,13 @@ import { drawQuadratic } from "./fabric_functions/quadratic";
 import _ from "lodash";
 import { drawLine } from "./fabric_functions/line";
 import {
-    bindFOEvents,
     extraProps,
     frameObject,
+    newObjectForNewFrame,
     runAfterJSONLoad2,
 } from "./fabric_functions/frame_object";
 import {
     animateOverFrames,
-    newObjectForNewFrame,
     getReqObjByNames,
 } from "./fabric_functions/helpers";
 
@@ -279,7 +278,6 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
                             fabricRef,
                             [100, 100],
                             [100, 100],
-                            "someUUID",
                             "frame_line",
                             true,
                             {}
