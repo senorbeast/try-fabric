@@ -81,6 +81,7 @@ function updateLineToCurve(
             setObjsOptions([e.target!, p1, p2], {
                 currentType: "curve",
                 initialFrame: initialFrame,
+                commonID: commonID,
             });
             [p1, p2].map((o) => canvas.add(o));
             // canvas.add(p1);
@@ -105,7 +106,11 @@ function onObjectMouseDown(
     }
 }
 
-function updateCurveToLine(e, commonID: string, canvas: fabric.Canvas) {
+function updateCurveToLine(
+    e: fabric.IEvent<MouseEvent>,
+    commonID: string,
+    canvas: fabric.Canvas
+) {
     // remove p1, p2 controls points, make it a line
     console.log("UpdateCurveToLine");
 
