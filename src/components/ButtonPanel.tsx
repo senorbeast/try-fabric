@@ -73,15 +73,15 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
     }
 
     // # whenever fabricRef changes, update frame
-    useEffect(() => {
-        const canvas = fabricRef.current!;
-        // TODO: why canvas not available ?
-        if (canvas) {
-            canvas.on("object:modified", onCanvasModified);
-        }
+    // useEffect(() => {
+    //     const canvas = fabricRef.current!;
+    //     // TODO: why canvas not available ?
+    //     if (canvas) {
+    //         canvas.on("object:modified", onCanvasModified);
+    //     }
 
-        return () => {};
-    }, [fabricRef, onCanvasModified]);
+    //     return () => {};
+    // }, [fabricRef, onCanvasModified]);
 
     // when we tap old frames
     function applyOldFrame(

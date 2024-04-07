@@ -82,16 +82,9 @@ export const frameObject = (
     } else if (p3.currentType != "line" || p3.currentType != "curve") {
         const initialFrame = p3["initialFrame"];
         console.log("should make line", currentFrame, initialFrame);
-        if (currentFrame > 0) {
-            updatePointToLine(
-                fabricRef,
-                startPoint,
-                endPoint,
-                p0,
-                p3,
-                oldOptions
-            );
-        }
+        // if (currentFrame > 0) {
+        updatePointToLine(fabricRef, startPoint, endPoint, p0, p3, oldOptions);
+        // }
     }
     canvas.add(p3);
     canvas.renderAll();
@@ -110,7 +103,9 @@ function updatePointToLine(
     linkEndPointsToLine(line, p0, p3);
     console.log("objs, updatePointToLine", line, p0, p3);
     setObjsOptions([line, p0, p3], { currentType: "line", ...oldOptions });
-    [line, p0].map((o) => canvas.add(o));
+    // [line, p0].map((o) => canvas.add(o));
+    canvas.add(line);
+    canvas.add(p0);
     canvas.renderAll();
 }
 
@@ -328,17 +323,21 @@ function updateLineToCurve(
 ) {
     const [line] = getReqObjByNames(canvas, ["frame_line", "p0", "p3"]);
     const [p1, p2] = getReqObjByNames(canvas, ["p1", "p2"]);
+
     // When endpoint released
     if (line) {
         if (e.target!.name == "p3" && (p1 == null || p2 == null)) {
             // add p1, p2 controls points, make it a beizer curve
             const path = line!.path;
             const startPoint: [number, number] = [path[0][1], path[0][2]];
-            const endPoint: [number, number] = [path[1][5], path[1][6]];
+            //TODO: How did p15, p16 work earlier ?
+            const endPoint: [number, number] = [path[1][1], path[1][2]];
             const [controlPoint1, controlPoint2] = findEquidistantPoints(
                 startPoint,
                 endPoint
             );
+            console.log("UpdateLineToCurveInside", endPoint);
+
             line.path[1] = [
                 "C",
                 controlPoint1[0],
@@ -351,8 +350,10 @@ function updateLineToCurve(
 
             const [p1, p2] = makeControlsPoints(controlPoint1, controlPoint2);
             linkControlPointsToLine(line, p1, p2);
-            setObjsOptions([e.target!], { currentType: "curve" });
-            [p1, p2].map((o) => canvas.add(o));
+            setObjsOptions([e.target!, p1, p2], { currentType: "curve" });
+            // [p1, p2].map((o) => canvas.add(o));
+            canvas.add(p1);
+            canvas.add(p2);
             canvas.renderAll.bind(canvas);
         }
     }
@@ -364,12 +365,13 @@ function onObjectMouseDown(
     canvas: fabric.Canvas
 ) {
     if (e.target!.name == "p3" && e.target!.currentType == "curve") {
-        updateCurveToLine("", canvas);
+        updateCurveToLine(e, "", canvas);
     }
 }
 
-function updateCurveToLine(commonID: string, canvas: fabric.Canvas) {
+function updateCurveToLine(e, commonID: string, canvas: fabric.Canvas) {
     // remove p1, p2 controls points, make it a line
+    console.log("UpdateCurveToLine");
     const [line, p1, p2] = getReqObjByNames(canvas, ["frame_line", "p1", "p2"]);
     if (line) {
         const path = line.path;
@@ -384,15 +386,15 @@ function updateCurveToLine(commonID: string, canvas: fabric.Canvas) {
 function onObjectMoving(e: fabric.IEvent<MouseEvent>, canvas?: fabric.Canvas) {
     const [store] = getReqObjByNames(canvas, ["invisibleStore"]);
     const currentFrame = store!.currentFrame;
-    console.log("Current frame is", currentFrame);
 
     const initialFrame = e.target!.initialFrame;
     const currentType = e.target!.currentType;
+    console.log("Current frame is", currentFrame, currentType);
 
     if (initialFrame == currentFrame) {
         currentType == "point";
         // console.log("Current type is point");
-    } else if (initialFrame < currentFrame) {
+    } else {
         // Line or Curve
         if (currentType == "line") {
             onObjectMovingForLine(e, endPointOffset);
@@ -401,8 +403,6 @@ function onObjectMoving(e: fabric.IEvent<MouseEvent>, canvas?: fabric.Canvas) {
         } else {
             console.log("Can't decide between line and curve");
         }
-    } else {
-        console.log("Impossible");
     }
 }
 

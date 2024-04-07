@@ -25,7 +25,7 @@ export {
 
 const initFabric = (fabricRef: fabricRefType) => {
     fabricRef.current = new fabric.Canvas("canvas", {
-        height: 600,
+        height: 500,
         width: 800,
         selection: false,
     });
