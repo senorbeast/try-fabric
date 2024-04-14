@@ -2,6 +2,7 @@ import { fabric } from "fabric";
 import { fabricRefType } from "../Canvas";
 import { interpolatePath } from "./interpolate";
 import { getReqObjByNames } from "./helpers";
+import { bindFOEvents } from "./final_functions/events";
 
 export {
     initFabric,
@@ -24,11 +25,12 @@ export {
 
 const initFabric = (fabricRef: fabricRefType) => {
     fabricRef.current = new fabric.Canvas("canvas", {
-        height: 600,
+        height: 500,
         width: 800,
         selection: false,
     });
     invisibleStore(fabricRef);
+    bindFOEvents(fabricRef);
 };
 
 const disposeFabric = (fabricRef: fabricRefType) => {
@@ -44,6 +46,7 @@ const invisibleStore = (fabricRef: fabricRefType) => {
         fill: "white",
         name: "invisibleStore",
         currentFrame: "0",
+        fOIds: [],
     });
     fabricRef.current!.add(invisibleStore);
 };
@@ -330,7 +333,6 @@ const imageObject = (imgId: string): fabric.Image => {
         left: 100,
         top: 100,
         angle: 0,
-        opacity: 0.5,
         width: 32,
         height: 32,
     });

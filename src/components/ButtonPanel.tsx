@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Button from "./Button";
 import { fabricRefType } from "./Canvas";
 import { cubic, linear, quad } from "./fabric_functions/interpolate";
@@ -14,12 +14,16 @@ import {
 import { drawQuadratic } from "./fabric_functions/quadratic";
 import _ from "lodash";
 import { drawLine } from "./fabric_functions/line";
-import { extraProps, frameObject } from "./fabric_functions/frame_object";
+import {
+    frameObject,
+    newObjectForNewFrame,
+    runAfterJSONLoad2,
+} from "./fabric_functions/frame_object";
 import {
     animateOverFrames,
-    cbcToLineForNewFrame,
     getReqObjByNames,
 } from "./fabric_functions/helpers";
+import { extraProps } from "./fabric_functions/final_functions/constants";
 
 export type canvasJSONType = {
     version: string;
@@ -44,13 +48,12 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
         if (fabricRef.current) {
             loadFirstCanvas(fabricRef);
         }
-        console.log(frames);
+
         return () => {};
     }, [fabricRef]);
 
     // Store currentFrame to canvas object
     useEffect(() => {
-        console.log("UE CF", currentFrame);
         if (fabricRef.current) {
             const canvas = fabricRef.current!;
             const [store] = getReqObjByNames(canvas, ["invisibleStore"]);
@@ -69,15 +72,15 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
     }
 
     // # whenever fabricRef changes, update frame
-    useEffect(() => {
-        const canvas = fabricRef.current!;
-        // TODO: why canvas not available ?
-        if (canvas) {
-            canvas.on("object:modified", onCanvasModified);
-        }
+    // useEffect(() => {
+    //     const canvas = fabricRef.current!;
+    //     // TODO: why canvas not available ?
+    //     if (canvas) {
+    //         canvas.on("object:modified", onCanvasModified);
+    //     }
 
-        return () => {};
-    }, [fabricRef, onCanvasModified]);
+    //     return () => {};
+    // }, [fabricRef, onCanvasModified]);
 
     // when we tap old frames
     function applyOldFrame(
@@ -89,7 +92,8 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
         setCurrentFrame(idx);
         canvas.loadFromJSON(frames[idx], () => {
             // run required functions for bezier function to work
-            addCBCHelpers(fabricRef, "frame_line");
+            // addCBCHelpers(fabricRef, "frame_line");
+            runAfterJSONLoad2(fabricRef, "frame_line");
             // runAfterJSONLoad(fabricRef);
             // addCBCHelpers(fabricRef, "cubeLine");
             // runAfterJSONLoad(fabricRef);
@@ -125,7 +129,7 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
         setCurrentFrame(frames.length);
         const newFrame = [...frames, canvas.toJSON(extraProps)];
         setFrames(newFrame); // add frame
-        cbcToLineForNewFrame(fabricRef);
+        newObjectForNewFrame(fabricRef);
 
         // const oldFrame = fabricRef.current!.getObjects();
         // console.log(
@@ -274,13 +278,11 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
                             fabricRef,
                             [100, 100],
                             [100, 100],
-                            "frame_line"
+                            "frame_line",
+                            true,
+                            {}
                         )
                     }
-                />
-                <Button
-                    name="newFrameLine"
-                    onClick={() => cbcToLineForNewFrame(fabricRef)}
                 />
             </div>
         </div>

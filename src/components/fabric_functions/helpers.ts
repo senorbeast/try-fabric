@@ -2,11 +2,13 @@ import { canvasJSONType } from "../ButtonPanel";
 import { fabricRefType } from "../Canvas";
 import { animateObjectAlongPath } from "./common";
 import { frameObject } from "./frame_object";
+import fabric from "./custom_attribute";
 
 export {
     getReqObjBy,
     getReqObjByNames,
-    cbcToLineForNewFrame,
+    getReqObjByNamesForID,
+    setObjsOptions,
     animateOverFrames,
     findEquidistantPoints,
     mapControlPointsOnCurve,
@@ -32,6 +34,26 @@ function getReqObjByNames(
     return result;
 }
 
+function getReqObjByNamesForID(
+    canvas: fabric.Canvas,
+    commonID: string,
+    names: string[],
+    objects?: fabric.Object[]
+) {
+    const result: (fabric.Object | null)[] = [];
+    const filterObjects = objects ?? canvas.getObjects();
+
+    names.forEach((name, index) => {
+        filterObjects.forEach((obj) => {
+            if (name == obj.name && commonID == obj.commonID) {
+                result.push(obj);
+            }
+        });
+        if (result.length == index) result.push(null);
+    });
+    return result;
+}
+
 function getReqObjBy(
     canvas: fabric.Canvas,
     key: string,
@@ -46,27 +68,33 @@ function getReqObjBy(
     return result;
 }
 
+type ObjectList = (fabric.Object | null)[];
+
+function getReqObjGroups(canvas: fabric.Canvas): Record<string, ObjectList> {
+    const objCollection: Record<string, ObjectList> = {};
+    canvas.getObjects().forEach((obj) => {
+        if (obj["commonID"]) {
+            if (!objCollection[obj["commonID"]]) {
+                objCollection[obj["commonID"]] = [];
+            }
+            objCollection[obj["commonID"]].push(obj);
+        }
+    });
+    return objCollection;
+}
+
+function setObjsOptions(
+    objects: fabric.Object[],
+    options: fabric.IObjectOptions
+) {
+    objects.forEach((obj) => {
+        obj.set(options);
+    });
+}
+
 // For each new frame, old cbc FO, are converted to line FO,
 // starting at end point of cbc
 // keep same ids/names
-function cbcToLineForNewFrame(fabricRef: fabricRefType) {
-    const canvas = fabricRef.current!;
-    // Get id/name and endPoint for currentFrame
-    const [line, p0, p1, p2, p3] = getReqObjByNames(canvas, [
-        "frame_line",
-        "p0",
-        "p1",
-        "p2",
-        "p3",
-    ]);
-    const endPoint = getEndPoint(line);
-    console.log(line, endPoint);
-    const name = line?.name;
-    // //TODO: safely remove object and its listeners
-    canvas.remove(line, p0, p1, p2, p3);
-    // canvas.clear();
-    frameObject(fabricRef, endPoint, endPoint, name);
-}
 
 function getEndPoint(line: fabric.Object): [number, number] {
     const path = line.path;

@@ -1,303 +1,150 @@
 import type { fabricRefType } from "../Canvas";
-import { fabric } from "fabric";
-import { onObjectSelected, onSelectionCleared } from "./cubic";
-import { imageObject } from "./common";
-import { findEquidistantPoints, getReqObjByNames } from "./helpers";
+import { fabric } from "./custom_attribute";
+import { v4 as uuidv4 } from "uuid";
 
-const endPointOffset = 16;
-const controlPointOffset = 8;
-
-const unMovableOptions: fabric.IObjectOptions = {
-    evented: false,
-    selectable: false,
-    lockMovementX: true,
-    lockMovementY: true,
-    hasControls: false,
-    hasBorders: false,
-};
-const commonOptions: fabric.IObjectOptions = {
-    commonID: "someUUID",
-    initialFrame: -1,
-    currentType: "point",
-};
-
-export const extraProps = [
-    "name",
-    "line1",
-    "line2",
-    "line3",
-    "line4",
-    "objectCaching",
-    "path",
-    "height",
-    "width",
-    "currentFrame",
-    ...Object.keys(commonOptions),
-    ...Object.keys(unMovableOptions),
-];
+import {
+    getReqObjByNames,
+    getReqObjByNamesForID,
+    setObjsOptions,
+} from "./helpers";
+import {
+    linkEndPointsToLine,
+    linkPointsToLine,
+} from "./final_functions/linkage";
+import {
+    makeEndPoints,
+    updatePointToLine,
+} from "./final_functions/makeUpdateObjects";
+import { unMovableOptions } from "./final_functions/constants";
 
 export const frameObject = (
     fabricRef: fabricRefType,
     startPoint: [number, number],
     endPoint: [number, number],
-    name: string
+    name: string,
+    newObject: boolean,
+    oldOptions: fabric.IObjectOptions
 ) => {
     const canvas = fabricRef.current!;
 
     const [store] = getReqObjByNames(canvas, ["invisibleStore"]);
-    console.log("CF", store!.currentFrame);
+    const currentFrame = store!.currentFrame;
 
-    const line = makeLinePath(startPoint, endPoint, name);
     const [p0, p3] = makeEndPoints(startPoint, endPoint);
+    p0.set({ opacity: 0.5, ...unMovableOptions });
+    p3.set({ hasBorders: false, hasControls: false });
 
-    p0.set({ ...commonOptions, ...unMovableOptions });
-
-    linkEndPointsToLine(line, p0, p3);
-    bindFOEvents(fabricRef);
-    [line, p0, p3].map((o) => canvas.add(o));
+    // Make only a point, when its a new object
+    if (newObject) {
+        const newCommonID: string = uuidv4();
+        setObjsOptions([p0, p3], {
+            initialFrame: currentFrame,
+            currentType: "point",
+            commonID: newCommonID,
+        });
+        store?.set({ fOIds: [...store["fOIds"], newCommonID] });
+        // console.log("new object", currentFrame);
+        // Create line-curve for subsequent newFrames
+    } else if (p3.currentType != "line" || p3.currentType != "curve") {
+        const initialFrame = p3["initialFrame"];
+        console.log("should make line", currentFrame, initialFrame);
+        // if (currentFrame > 0) {
+        updatePointToLine(fabricRef, p0, p3, oldOptions);
+        // }
+    }
+    canvas.add(p3);
+    canvas.renderAll();
 };
 
-function makeLinePath(
-    startPoint: [number, number],
-    endPoint: [number, number],
-    name: string
-): fabric.Path {
-    const line = new fabric.Path(
-        `M ${startPoint[0]} ${startPoint[1]} L ${endPoint[0]} ${endPoint[1]}`,
-        {
-            fill: "",
-            stroke: "black",
-            objectCaching: false,
-            strokeUniform: true,
-            strokeDashArray: [5, 5],
-        }
+export function newObjectForNewFrame(fabricRef: fabricRefType) {
+    const canvas = fabricRef.current!;
+
+    const [store] = getReqObjByNames(canvas, ["invisibleStore"]);
+    const fOIds = store.fOIds as string[];
+
+    // TODO: Optimise by filtering objects with id, in one pass: objects[][]
+    fOIds.forEach((fOId) => {
+        rmOldObjAddNewObj(fabricRef, fOId);
+    });
+}
+
+function rmOldObjAddNewObj(
+    fabricRef: fabricRefType,
+    commonID: string,
+    objects?: fabric.Object[]
+) {
+    const canvas = fabricRef.current!;
+    const [line, p0, p1, p2, p3] = getReqObjByNamesForID(
+        canvas,
+        commonID,
+        ["frame_line", "p0", "p1", "p2", "p3"],
+        objects
     );
 
-    line.path[0][1] = startPoint[0];
-    line.path[0][2] = startPoint[1];
-    line.path[1][1] = endPoint[0];
-    line.path[1][2] = endPoint[1];
+    console.log("p3", p3);
 
-    line.set({
-        name: name,
-        ...commonOptions,
-        ...unMovableOptions,
-    });
+    const endPoint: [number, number] = [p3.left, p3.top];
 
-    return line;
-}
+    const oldOptions: fabric.IObjectOptions = {
+        initialFrame: p3.initialFrame,
+        commonID: p3.commonID,
+    };
 
-function makeEndPoints(
-    startPoint: number[],
-    endPoint: number[]
-): fabric.Object[] {
-    // Add start point
-    const p0 = makeCustomEndPoint(startPoint[0], startPoint[1]);
-    p0.name = "p0";
-
-    // Add end point
-    const p3 = makeCustomEndPoint(endPoint[0], endPoint[1]);
-    p3.name = "p3";
-
-    return [p0, p3];
-}
-
-function makeCustomEndPoint(left: number, top: number) {
-    const c = imageObject("my-image");
-    c.set({
-        left: left - 16,
-        top: top - 16,
-    });
-    return c;
-}
-
-function makeControlsPoints(
-    controlPoint1: number[],
-    controlPoint2: number[]
-): fabric.Object[] {
-    // Add 1st control point
-    const p1 = makeControlPoint(controlPoint1[0], controlPoint1[1]);
-    p1.name = "p1";
-
-    // Add 2nd control point
-    const p2 = makeControlPoint(controlPoint2[0], controlPoint2[1]);
-    p2.name = "p2";
-
-    return [p1, p2];
-}
-
-function makeControlPoint(left: number, top: number) {
-    const c = new fabric.Circle({
-        left: left - 8,
-        top: top - 8,
-        radius: 8,
-        fill: "#fff",
-    });
-
-    return c;
-}
-
-function linkEndPointsToLine(
-    line: fabric.Path,
-    p0: fabric.Object,
-    p3: fabric.Object
-) {
-    const ptsArr = [p0, p3];
-    ptsArr.forEach((pt) => {
-        pt.hasBorders = pt.hasControls = false;
-        pt.line1 = null;
-        pt.line2 = null;
-        pt.line3 = null;
-        pt.line4 = null;
-    });
-    // Connect existing points with the path line
-    p0.line1 = line;
-    p3.line4 = line;
-}
-
-function linkControlPointsToLine(
-    line: fabric.Path,
-    p1: fabric.Object,
-    p2: fabric.Object
-) {
-    const ptsArr = [p1, p2];
-    ptsArr.forEach((pt) => {
-        pt.hasBorders = pt.hasControls = false;
-        pt.line1 = null;
-        pt.line2 = null;
-        pt.line3 = null;
-        pt.line4 = null;
-    });
-    // Connect existing points with the path line
-    p1.line2 = line;
-    p2.line3 = line;
-}
-
-function unLinkControlPointsFromLine(p1: fabric.Object, p2: fabric.Object) {
-    const ptsArr = [p1, p2];
-    ptsArr.forEach((pt) => {
-        pt.hasBorders = pt.hasControls = false;
-        pt.line1 = null;
-        pt.line2 = null;
-        pt.line3 = null;
-        pt.line4 = null;
-    });
+    // console.log("In newObjectForNewFrame", oldOptions);
+    canvas.remove(line, p0, p1, p2, p3);
+    //TODO: need to load old objects attribute in new frame
+    // if (p3.currentType == "point") {
+    // } else if (p3.currentType == "line" || p3.currentType == "curve") {
+    // }
+    frameObject(fabricRef, endPoint, endPoint, "frame_line", false, oldOptions);
 }
 
 export function runAfterJSONLoad(fabricRef: fabricRefType) {
     const canvas = fabricRef.current!;
     const [line, p0, p3] = getReqObjByNames(canvas, ["frame_line", "p0", "p3"]);
     linkEndPointsToLine(line, p0, p3);
-    bindFOEvents(canvas);
 }
 
-type objectCurrentType = "point" | "line" | "curve";
-
-export function bindFOEvents(fabricRef: fabricRefType) {
-    // TODO: remove this workaround
-    // fix for loading cbc, after line properly
-    // canvas.__eventListeners = {};
+export function runAfterJSONLoad2(
+    fabricRef: fabricRefType,
+    lineName: string,
+    replace?: boolean
+) {
+    // This is required all canvas JSON is loaded,
+    // these objects/functionality is not stored in the json
     const canvas = fabricRef.current!;
-    canvas.on({
-        "object:moving": (e: fabric.IEvent<MouseEvent>) =>
-            onObjectMoving(e, canvas),
-    });
 
-    canvas.on({
-        "object:selected": (e: fabric.IEvent<MouseEvent>) =>
-            onObjectSelected(e, canvas),
-        "object:moving": (e: fabric.IEvent<MouseEvent>) =>
-            onFOMovingLine(e, canvas),
-        "selection:cleared": (e: fabric.IEvent<MouseEvent>) =>
-            onSelectionCleared(e, canvas),
-        "mouse:up": (e: fabric.IEvent<MouseEvent>) =>
-            onObjectMouseUp(e, canvas),
-        "mouse:down": (e: fabric.IEvent<MouseEvent>) =>
-            onObjectMouseDown(e, canvas),
+    const [store] = getReqObjByNames(canvas, ["invisibleStore"]);
+    const fOIds = store.fOIds as string[];
+
+    fOIds.forEach((fOId) => {
+        findAndLinkOneGroup(fabricRef, fOId);
     });
 }
 
-// Convert Line to Cubic Beizer
-// !FIX: This event is triggered multiple times
-function onObjectMouseUp(e: fabric.IEvent<MouseEvent>, canvas: fabric.Canvas) {
-    // When endpoint released
-    replaceLineWithCurve(e, "", canvas);
-}
-
-function replaceLineWithCurve(
-    e: fabric.IEvent<MouseEvent>,
+const findAndLinkOneGroup = (
+    fabricRef: fabricRefType,
     commonID: string,
-    canvas: fabric.Canvas
-) {
-    const [line] = getReqObjByNames(canvas, ["frame_line", "p0", "p3"]);
-    const [p1, p2] = getReqObjByNames(canvas, ["p1", "p2"]);
-    // When endpoint released
-    if (e.target!.name == "p3" && (p1 == null || p2 == null)) {
-        // add p1, p2 controls points, make it a beizer curve
-        const path = line!.path;
-        const startPoint: [number, number] = [path[0][1], path[0][2]];
-        const endPoint: [number, number] = [path[1][5], path[1][6]];
-        const [controlPoint1, controlPoint2] = findEquidistantPoints(
-            startPoint,
-            endPoint
-        );
-        line.path[1] = [
-            "C",
-            controlPoint1[0],
-            controlPoint1[1],
-            controlPoint2[0],
-            controlPoint2[1],
-            endPoint[0],
-            endPoint[1],
-        ];
+    objects?: fabric.Object[]
+) => {
+    // const { line, points } = getReqObj(canvas);
+    const canvas = fabricRef.current!;
+    const [line, p0, p1, p2, p3] = getReqObjByNamesForID(
+        canvas,
+        commonID,
+        ["frame_line", "p0", "p1", "p2", "p3"],
+        objects
+    );
 
-        const [p1, p2] = makeControlsPoints(controlPoint1, controlPoint2);
-        linkControlPointsToLine(line, p1, p2);
-        canvas.on({
-            "object:moving": (e: fabric.IEvent<MouseEvent>) =>
-                onObjectMoving(e, canvas),
-        });
-        [p1, p2].map((o) => canvas.add(o));
-        canvas.renderAll.bind(canvas);
-    }
-}
-
-// Convert Cubic Beizer to Line
-function onObjectMouseDown(
-    e: fabric.IEvent<MouseEvent>,
-    canvas: fabric.Canvas
-) {
-    if (e.target!.name == "p3") {
-        replaceCurveWithLine("", canvas);
-    }
-}
-
-function replaceCurveWithLine(commonID: string, canvas: fabric.Canvas) {
-    // remove p1, p2 controls points, make it a line
-    const [line, p1, p2] = getReqObjByNames(canvas, ["frame_line", "p1", "p2"]);
-    const path = line.path;
-    const endPoint = [path[1][5], path[1][6]];
-    canvas.remove(p1, p2);
-    line.path[1] = ["L", endPoint[0], endPoint[1]];
-    canvas.on({
-        "object:moving": (e: fabric.IEvent<MouseEvent>) =>
-            onFOMovingLine(e, canvas),
-    });
-    canvas.renderAll.bind(canvas);
-}
-
-function onFOMovingLine(e: fabric.IEvent<MouseEvent>, canvas?: fabric.Canvas) {
-    if (e.target!.name === "p0" || e.target!.name === "p3") {
-        const p = e.target!;
-        if (p.line1) {
-            p.line1.path[0][1] = p.left + endPointOffset;
-            p.line1.path[0][2] = p.top + endPointOffset;
-        } else if (p.line4) {
-            p.line4.path[1][1] = p.left + endPointOffset;
-            p.line4.path[1][2] = p.top + endPointOffset;
-        }
-    }
-}
+    console.log("Linking existing points");
+    line!.height = 0;
+    line!.width = 0;
+    // Link existing points
+    // const [p0, p1, p2, p3] = points;
+    linkPointsToLine(line, p0, p1, p2, p3);
+    // bindCubicEvents(canvas);
+    canvas.renderAll();
+};
 
 // TODO: Next onMouseDragOver, convert the line into a cubic beizer curve
 // update line name, line path
@@ -310,28 +157,3 @@ function onFOMovingLine(e: fabric.IEvent<MouseEvent>, canvas?: fabric.Canvas) {
 
 //# Frame stuff
 // for next frame load, line into previous frames' endPoint
-
-function onObjectMoving(e: fabric.IEvent<MouseEvent>, canvas?: fabric.Canvas) {
-    if (e.target!.name === "p0" || e.target!.name === "p3") {
-        const p = e.target!;
-        if (p.line1) {
-            p.line1.path[0][1] = p.left + endPointOffset;
-            p.line1.path[0][2] = p.top + endPointOffset;
-        } else if (p.line4) {
-            p.line4.path[1][5] = p.left + endPointOffset;
-            p.line4.path[1][6] = p.top + endPointOffset;
-        }
-    } else if (e.target!.name === "p1") {
-        const p = e.target;
-        if (p.line2) {
-            p.line2.path[1][1] = p.left + controlPointOffset;
-            p.line2.path[1][2] = p.top + controlPointOffset;
-        }
-    } else if (e.target!.name === "p2") {
-        const p = e.target;
-        if (p.line3) {
-            p.line3.path[1][3] = p.left + controlPointOffset;
-            p.line3.path[1][4] = p.top + controlPointOffset;
-        }
-    }
-}

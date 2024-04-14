@@ -1,5 +1,5 @@
 import type { fabricRefType } from "../Canvas";
-import { fabric } from "fabric";
+import { fabric } from "./custom_attribute";
 import { calculateControlPoints, getReqObjByNames } from "./helpers";
 
 export const drawCubic = (fabricRef: fabricRefType) => {
@@ -154,36 +154,13 @@ export function addCBCHelpers(
         "p2",
         "p3",
     ]);
-    if (replace) {
-        console.log("Replacing points");
-        // Replace old points with new
-        // Extract details
-        const path = line.path;
-        const startPoint = [path[0][1], path[0][2]];
-        const controlPoint1 = [path[1][1], path[1][2]];
-        const controlPoint2 = [path[1][3], path[1][4]];
-        const endPoint = [path[1][5], path[1][6]];
 
-        canvas.remove(...points);
-        const [p0, p1, p2, p3] = addPathPoints(
-            canvas,
-            startPoint,
-            controlPoint1,
-            controlPoint2,
-            endPoint,
-            line
-        );
-        linkPointsToLine(line, p0, p1, p2, p3);
-        [p0, p1, p2, p3].map((o) => canvas.add(o));
-    } else {
-        console.log("Linking existing points");
-        line!.height = 0;
-        line!.width = 0;
-        // Link existing points
-        // const [p0, p1, p2, p3] = points;
-        linkPointsToLine(line, p0, p1, p2, p3);
-    }
-
+    console.log("Linking existing points");
+    line!.height = 0;
+    line!.width = 0;
+    // Link existing points
+    // const [p0, p1, p2, p3] = points;
+    linkPointsToLine(line, p0, p1, p2, p3);
     bindCubicEvents(canvas);
 }
 
