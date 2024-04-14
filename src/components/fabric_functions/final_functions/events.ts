@@ -154,6 +154,7 @@ function onObjectMoving(e: fabric.IEvent<MouseEvent>, canvas?: fabric.Canvas) {
     if (initialFrame == currentFrame) {
         currentType == "point";
         // console.log("Current type is point");
+        // TODO: If next frame exist, update the next frame's start point accordingly
     } else {
         // Line or Curve
         if (currentType == "line") {

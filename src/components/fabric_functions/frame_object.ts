@@ -113,14 +113,28 @@ export function runAfterJSONLoad2(
     // This is required all canvas JSON is loaded,
     // these objects/functionality is not stored in the json
     const canvas = fabricRef.current!;
+
+    const [store] = getReqObjByNames(canvas, ["invisibleStore"]);
+    const fOIds = store.fOIds as string[];
+
+    fOIds.forEach((fOId) => {
+        findAndLinkOneGroup(fabricRef, fOId);
+    });
+}
+
+const findAndLinkOneGroup = (
+    fabricRef: fabricRefType,
+    commonID: string,
+    objects?: fabric.Object[]
+) => {
     // const { line, points } = getReqObj(canvas);
-    const [line, p0, p1, p2, p3] = getReqObjByNames(canvas, [
-        lineName,
-        "p0",
-        "p1",
-        "p2",
-        "p3",
-    ]);
+    const canvas = fabricRef.current!;
+    const [line, p0, p1, p2, p3] = getReqObjByNamesForID(
+        canvas,
+        commonID,
+        ["frame_line", "p0", "p1", "p2", "p3"],
+        objects
+    );
 
     console.log("Linking existing points");
     line!.height = 0;
@@ -130,7 +144,7 @@ export function runAfterJSONLoad2(
     linkPointsToLine(line, p0, p1, p2, p3);
     // bindCubicEvents(canvas);
     canvas.renderAll();
-}
+};
 
 // TODO: Next onMouseDragOver, convert the line into a cubic beizer curve
 // update line name, line path
