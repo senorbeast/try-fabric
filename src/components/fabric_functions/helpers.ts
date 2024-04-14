@@ -1,8 +1,7 @@
 import { canvasJSONType } from "../ButtonPanel";
 import { fabricRefType } from "../Canvas";
-import { animateObjectAlongPath } from "./common";
-import { frameObject } from "./frame_object";
-import fabric from "./custom_attribute";
+import { animateObjectAlongPath, imageObject } from "./common";
+import { fabric } from "./custom_attribute";
 
 export {
     getReqObjBy,
@@ -118,6 +117,8 @@ function animateOverFrames(fabricRef: fabricRefType, frames: canvasJSONType[]) {
     const allPaths: (string | number)[][][] = [];
     console.log(frames);
 
+    // for each FO i will require allPaths i think
+
     // Fill in paths across frames
     frames.forEach((frame) => {
         if (frame !== undefined) {
@@ -131,14 +132,29 @@ function animateOverFrames(fabricRef: fabricRefType, frames: canvasJSONType[]) {
 
     console.log(allPaths);
 
+    const canvas: fabric.Canvas = fabricRef.current!;
+    // remove all objects from canvas
+    const removableObjs = canvas
+        .getObjects()
+        .filter((obj) => obj.name !== "invisibleStore");
+
+    canvas.remove(...removableObjs);
+    const animateObject = imageObject("my-image");
+    canvas.add(animateObject);
+
     // animate
     let currentFrame = 0;
     const sequenceAnimation = () => {
         if (currentFrame < frames.length) {
-            animateObjectAlongPath(fabricRef, allPaths[currentFrame], () => {
-                currentFrame++;
-                sequenceAnimation();
-            });
+            animateObjectAlongPath(
+                fabricRef,
+                allPaths[currentFrame],
+                animateObject,
+                () => {
+                    currentFrame++;
+                    sequenceAnimation();
+                }
+            );
         }
     };
     sequenceAnimation();
@@ -173,11 +189,11 @@ function findEquidistantPoints(
     const equidistantPoint1 = [
         startPoint[0] + equidistantDistance * directionVector[0],
         startPoint[1] + equidistantDistance * directionVector[1],
-    ];
+    ] as PointType;
     const equidistantPoint2 = [
         endPoint[0] - equidistantDistance * directionVector[0],
         endPoint[1] - equidistantDistance * directionVector[1],
-    ];
+    ] as PointType;
 
     return [equidistantPoint1, equidistantPoint2];
 }

@@ -208,13 +208,14 @@ function animateOnPathC(
 function animateObjectAlongPath(
     fabricRef: fabricRefType,
     path: (string | number)[][],
+    animateObject: fabric.Object,
     // duration: number,
     onComplete?: () => void | undefined
 ) {
     const canvas = fabricRef.current!;
 
     // Use first object
-    const [firstObj] = getReqObjByNames(canvas, ["rect"]);
+    const firstObj = animateObject;
 
     // points on path
     const points: PointType[] = [];

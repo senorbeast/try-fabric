@@ -26,7 +26,6 @@ export const frameObject = (
     oldOptions: fabric.IObjectOptions
 ) => {
     const canvas = fabricRef.current!;
-
     const [store] = getReqObjByNames(canvas, ["invisibleStore"]);
     const currentFrame = store!.currentFrame;
 
