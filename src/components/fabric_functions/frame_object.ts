@@ -2,7 +2,11 @@ import type { fabricRefType } from "../Canvas";
 import fabric from "./custom_attribute";
 import { v4 as uuidv4 } from "uuid";
 
-import { getReqObjByNames, setObjsOptions } from "./helpers";
+import {
+    getReqObjByNames,
+    getReqObjByNamesForID,
+    setObjsOptions,
+} from "./helpers";
 import {
     linkEndPointsToLine,
     linkPointsToLine,
@@ -30,14 +34,17 @@ export const frameObject = (
     p0.set({ opacity: 0.5, ...unMovableOptions });
     p3.set({ hasBorders: false, hasControls: false });
 
+    // Make only a point, when its a new object
     if (newObject) {
+        const newCommonID = uuidv4();
         setObjsOptions([p0, p3], {
             initialFrame: currentFrame,
             currentType: "point",
-            commonID: uuidv4(),
+            commonID: newCommonID,
         });
-        console.log("new object", currentFrame);
-        // TODO: use prototype to add custom attrs
+        store?.set({ fOIds: [...store["fOIds"], newCommonID] });
+        // console.log("new object", currentFrame);
+        // Create line-curve for subsequent newFrames
     } else if (p3.currentType != "line" || p3.currentType != "curve") {
         const initialFrame = p3["initialFrame"];
         console.log("should make line", currentFrame, initialFrame);
@@ -51,13 +58,30 @@ export const frameObject = (
 
 export function newObjectForNewFrame(fabricRef: fabricRefType) {
     const canvas = fabricRef.current!;
-    const [line, p0, p1, p2, p3] = getReqObjByNames(canvas, [
-        "frame_line",
-        "p0",
-        "p1",
-        "p2",
-        "p3",
-    ]);
+
+    const [store] = getReqObjByNames(canvas, ["invisibleStore"]);
+    const fOIds = store.fOIds as string[];
+
+    // TODO: Optimise by filtering objects with id, in one pass: objects[][]
+    fOIds.forEach((fOId) => {
+        rmOldObjAddNewObj(fabricRef, fOId);
+    });
+}
+
+function rmOldObjAddNewObj(
+    fabricRef: fabricRefType,
+    commonID: string,
+    objects?: fabric.Object[]
+) {
+    const canvas = fabricRef.current!;
+    const [line, p0, p1, p2, p3] = getReqObjByNamesForID(
+        canvas,
+        commonID,
+        ["frame_line", "p0", "p1", "p2", "p3"],
+        objects
+    );
+
+    console.log("p3", p3);
 
     const endPoint = [p3.left, p3.top];
 
@@ -66,8 +90,7 @@ export function newObjectForNewFrame(fabricRef: fabricRefType) {
         commonID: p3.commonID,
     };
 
-    console.log("In newObjectForNewFrame", oldOptions);
-
+    // console.log("In newObjectForNewFrame", oldOptions);
     canvas.remove(line, p0, p1, p2, p3);
     //TODO: need to load old objects attribute in new frame
     // if (p3.currentType == "point") {

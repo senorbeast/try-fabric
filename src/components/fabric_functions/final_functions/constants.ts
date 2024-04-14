@@ -15,6 +15,7 @@ export const customAttributes = [
     "initialFrame",
     "currentType",
     "currentFrame",
+    "fOIds",
 ];
 
 export const extraProps = [
@@ -27,7 +28,6 @@ export const extraProps = [
     "path",
     "height",
     "width",
-    "initialFrame",
     ...customAttributes,
     ...Object.keys(unMovableOptions),
 ];

@@ -24,7 +24,7 @@ function updatePointToLine(
     ];
     const line = makeLinePath(startPoint, endPoint, "frame_line");
     linkEndPointsToLine(line, p0, p3);
-    console.log("objs, updatePointToLine", line, p0, p3);
+    // console.log("objs, updatePointToLine", line, p0, p3);
     setObjsOptions([line, p0, p3], { currentType: "line", ...oldOptions });
     [line, p0].map((o) => canvas.add(o));
     // canvas.add(line);
@@ -79,8 +79,8 @@ function makeEndPoints(
 function makeCustomEndPoint(left: number, top: number) {
     const c = imageObject("my-image");
     c.set({
-        left: left - endPointOffset,
-        top: top - endPointOffset,
+        left: left,
+        top: top,
     });
     return c;
 }

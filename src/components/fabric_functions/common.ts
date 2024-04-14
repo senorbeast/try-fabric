@@ -46,6 +46,7 @@ const invisibleStore = (fabricRef: fabricRefType) => {
         fill: "white",
         name: "invisibleStore",
         currentFrame: "0",
+        fOIds: [],
     });
     fabricRef.current!.add(invisibleStore);
 };
