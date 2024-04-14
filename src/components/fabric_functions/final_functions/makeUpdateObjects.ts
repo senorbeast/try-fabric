@@ -1,4 +1,3 @@
-import fabric from "../custom_attribute";
 import { fabricRefType } from "../../Canvas";
 import { imageObject } from "../common";
 import { setObjsOptions } from "../helpers";

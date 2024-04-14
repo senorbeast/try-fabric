@@ -68,6 +68,21 @@ function getReqObjBy(
     return result;
 }
 
+type ObjectList = (fabric.Object | null)[];
+
+function getReqObjGroups(canvas: fabric.Canvas): Record<string, ObjectList> {
+    const objCollection: Record<string, ObjectList> = {};
+    canvas.getObjects().forEach((obj) => {
+        if (obj["commonID"]) {
+            if (!objCollection[obj["commonID"]]) {
+                objCollection[obj["commonID"]] = [];
+            }
+            objCollection[obj["commonID"]].push(obj);
+        }
+    });
+    return objCollection;
+}
+
 function setObjsOptions(
     objects: fabric.Object[],
     options: fabric.IObjectOptions

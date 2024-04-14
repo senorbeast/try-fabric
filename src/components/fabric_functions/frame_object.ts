@@ -1,5 +1,5 @@
 import type { fabricRefType } from "../Canvas";
-import fabric from "./custom_attribute";
+import { fabric } from "./custom_attribute";
 import { v4 as uuidv4 } from "uuid";
 
 import {
@@ -36,7 +36,7 @@ export const frameObject = (
 
     // Make only a point, when its a new object
     if (newObject) {
-        const newCommonID = uuidv4();
+        const newCommonID: string = uuidv4();
         setObjsOptions([p0, p3], {
             initialFrame: currentFrame,
             currentType: "point",
@@ -83,9 +83,9 @@ function rmOldObjAddNewObj(
 
     console.log("p3", p3);
 
-    const endPoint = [p3.left, p3.top];
+    const endPoint: [number, number] = [p3.left, p3.top];
 
-    const oldOptions: fabric.IUtilObject = {
+    const oldOptions: fabric.IObjectOptions = {
         initialFrame: p3.initialFrame,
         commonID: p3.commonID,
     };
@@ -112,7 +112,6 @@ export function runAfterJSONLoad2(
 ) {
     // This is required all canvas JSON is loaded,
     // these objects/functionality is not stored in the json
-
     const canvas = fabricRef.current!;
     // const { line, points } = getReqObj(canvas);
     const [line, p0, p1, p2, p3] = getReqObjByNames(canvas, [
@@ -132,8 +131,6 @@ export function runAfterJSONLoad2(
     // bindCubicEvents(canvas);
     canvas.renderAll();
 }
-
-type objectCurrentType = "point" | "line" | "curve";
 
 // TODO: Next onMouseDragOver, convert the line into a cubic beizer curve
 // update line name, line path

@@ -1,5 +1,5 @@
 import type { fabricRefType } from "../Canvas";
-import fabric from "./custom_attribute";
+import { fabric } from "./custom_attribute";
 import { calculateControlPoints, getReqObjByNames } from "./helpers";
 
 export const drawCubic = (fabricRef: fabricRefType) => {
