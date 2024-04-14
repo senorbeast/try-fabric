@@ -205,9 +205,11 @@ function animateOnPathC(
     animate(0);
 }
 
+export type PathType = (string | number)[][];
+
 function animateObjectAlongPath(
     fabricRef: fabricRefType,
-    path: (string | number)[][],
+    path: PathType,
     animateObject: fabric.Object,
     // duration: number,
     onComplete?: () => void | undefined

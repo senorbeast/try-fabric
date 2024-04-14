@@ -113,8 +113,19 @@ function getEndPoint(line: fabric.Object): [number, number] {
 // remove eventListeners, old line/curve
 // replace them with fO on endPoint, on single point + use old ids/names
 
+type PathType = (string | number)[][];
+
 function animateOverFrames(fabricRef: fabricRefType, frames: canvasJSONType[]) {
-    const allPaths: (string | number)[][][] = [];
+    const canvas: fabric.Canvas = fabricRef.current!;
+
+    // remove all objects from canvas
+    const removableObjs = canvas
+        .getObjects()
+        .filter((obj) => obj.name !== "invisibleStore");
+
+    canvas.remove(...removableObjs);
+
+    const allPathsAcrossFrames: PathType[] = [];
     console.log(frames);
 
     // for each FO i will require allPaths i think
@@ -124,31 +135,65 @@ function animateOverFrames(fabricRef: fabricRefType, frames: canvasJSONType[]) {
         if (frame !== undefined) {
             frame.objects.forEach((obj) => {
                 if (obj.name == "frame_line") {
-                    allPaths.push(obj.path);
+                    allPathsAcrossFrames.push(obj.path);
                 }
             });
         }
     });
 
-    console.log(allPaths);
+    // const idPathsForFrames: Record<string, PathType> = {};
 
-    const canvas: fabric.Canvas = fabricRef.current!;
-    // remove all objects from canvas
-    const removableObjs = canvas
-        .getObjects()
-        .filter((obj) => obj.name !== "invisibleStore");
+    // for each FO i will require allPaths i think
+    // Fill in paths across frames
+    // frames.forEach((frame) => {
+    //     if (frame !== undefined) {
+    //         frame.objects.forEach((obj) => {
+    //             if (obj.name == "frame_line") {
+    //                 idPathsForFrames[obj.commonID] = obj.path;
+    //             }
+    //         });
+    //     }
+    // });
 
-    canvas.remove(...removableObjs);
+    // add object to animate
     const animateObject = imageObject("my-image");
     canvas.add(animateObject);
 
     // animate
     let currentFrame = 0;
+    console.log("Animating for Obj");
     const sequenceAnimation = () => {
         if (currentFrame < frames.length) {
             animateObjectAlongPath(
                 fabricRef,
-                allPaths[currentFrame],
+                allPathsAcrossFrames[currentFrame],
+                animateObject,
+                () => {
+                    currentFrame++;
+                    sequenceAnimation();
+                }
+            );
+        }
+    };
+    sequenceAnimation();
+
+    // Somehow using the same thing in a function doesn't work, maybe its waiting for returning
+    // animateOverFramesForObj(fabricRef, allPathsAcrossFrames, animateObject);
+}
+
+function animateOverFramesForObj(
+    fabricRef: fabricRefType,
+    allPathsAcrossFrames: PathType[],
+    animateObject: fabric.Image
+) {
+    // animate
+    let currentFrame = 0;
+    console.log("Animating for Obj");
+    const sequenceAnimation = () => {
+        if (currentFrame < frames.length) {
+            animateObjectAlongPath(
+                fabricRef,
+                allPathsAcrossFrames[currentFrame],
                 animateObject,
                 () => {
                     currentFrame++;
