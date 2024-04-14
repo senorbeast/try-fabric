@@ -1,8 +1,7 @@
 import { canvasJSONType } from "../ButtonPanel";
 import { fabricRefType } from "../Canvas";
-import { animateObjectAlongPath } from "./common";
-import { frameObject } from "./frame_object";
-import fabric from "./custom_attribute";
+import { animateObjectAlongPath, imageObject } from "./common";
+import { fabric } from "./custom_attribute";
 
 export {
     getReqObjBy,
@@ -114,31 +113,93 @@ function getEndPoint(line: fabric.Object): [number, number] {
 // remove eventListeners, old line/curve
 // replace them with fO on endPoint, on single point + use old ids/names
 
+type PathType = (string | number)[][];
+
 function animateOverFrames(fabricRef: fabricRefType, frames: canvasJSONType[]) {
-    const allPaths: (string | number)[][][] = [];
+    const canvas: fabric.Canvas = fabricRef.current!;
+
+    // remove all objects from canvas
+    const removableObjs = canvas
+        .getObjects()
+        .filter((obj) => obj.name !== "invisibleStore");
+
+    canvas.remove(...removableObjs);
+
+    const allPathsAcrossFrames: PathType[] = [];
     console.log(frames);
+
+    // for each FO i will require allPaths i think
 
     // Fill in paths across frames
     frames.forEach((frame) => {
         if (frame !== undefined) {
             frame.objects.forEach((obj) => {
                 if (obj.name == "frame_line") {
-                    allPaths.push(obj.path);
+                    allPathsAcrossFrames.push(obj.path);
                 }
             });
         }
     });
 
-    console.log(allPaths);
+    // const idPathsForFrames: Record<string, PathType> = {};
+
+    // for each FO i will require allPaths i think
+    // Fill in paths across frames
+    // frames.forEach((frame) => {
+    //     if (frame !== undefined) {
+    //         frame.objects.forEach((obj) => {
+    //             if (obj.name == "frame_line") {
+    //                 idPathsForFrames[obj.commonID] = obj.path;
+    //             }
+    //         });
+    //     }
+    // });
+
+    // add object to animate
+    const animateObject = imageObject("my-image");
+    canvas.add(animateObject);
 
     // animate
     let currentFrame = 0;
+    console.log("Animating for Obj");
     const sequenceAnimation = () => {
         if (currentFrame < frames.length) {
-            animateObjectAlongPath(fabricRef, allPaths[currentFrame], () => {
-                currentFrame++;
-                sequenceAnimation();
-            });
+            animateObjectAlongPath(
+                fabricRef,
+                allPathsAcrossFrames[currentFrame],
+                animateObject,
+                () => {
+                    currentFrame++;
+                    sequenceAnimation();
+                }
+            );
+        }
+    };
+    sequenceAnimation();
+
+    // Somehow using the same thing in a function doesn't work, maybe its waiting for returning
+    // animateOverFramesForObj(fabricRef, allPathsAcrossFrames, animateObject);
+}
+
+function animateOverFramesForObj(
+    fabricRef: fabricRefType,
+    allPathsAcrossFrames: PathType[],
+    animateObject: fabric.Image
+) {
+    // animate
+    let currentFrame = 0;
+    console.log("Animating for Obj");
+    const sequenceAnimation = () => {
+        if (currentFrame < frames.length) {
+            animateObjectAlongPath(
+                fabricRef,
+                allPathsAcrossFrames[currentFrame],
+                animateObject,
+                () => {
+                    currentFrame++;
+                    sequenceAnimation();
+                }
+            );
         }
     };
     sequenceAnimation();
@@ -173,11 +234,11 @@ function findEquidistantPoints(
     const equidistantPoint1 = [
         startPoint[0] + equidistantDistance * directionVector[0],
         startPoint[1] + equidistantDistance * directionVector[1],
-    ];
+    ] as PointType;
     const equidistantPoint2 = [
         endPoint[0] - equidistantDistance * directionVector[0],
         endPoint[1] - equidistantDistance * directionVector[1],
-    ];
+    ] as PointType;
 
     return [equidistantPoint1, equidistantPoint2];
 }
