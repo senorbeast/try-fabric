@@ -129,7 +129,7 @@ function animateOverFrames(fabricRef: fabricRefType, frames: canvasJSONType[]) {
     canvas.remove(...removableObjs);
 
     const allPathsAcrossFrames: PathType[] = [];
-    console.log(frames);
+    // console.log(frames);
 
     // for each FO i will require allPaths i think
 
@@ -222,7 +222,7 @@ export function newAnimation(
     // remove all objects from canvas
     const removableObjs = canvas
         .getObjects()
-        .filter((obj) => obj.name! == "invisibleStore");
+        .filter((obj) => obj.name !== "invisibleStore");
 
     canvas.remove(...removableObjs);
 
@@ -249,10 +249,11 @@ export function newAnimation(
                         animateObject,
                     ];
 
+                    // console.log(addedAnimateObjects);
+                    // console.log("All obj", obj.commonID);
+                    // if (addedAnimateObjects.indexOf(obj.commonID) === -1) {
+                    console.log("Adding new animate Object", obj.commonID);
                     addedAnimateObjects.push(obj.commonID);
-
-                    // if (addedAnimateObjects.indexOf(obj.commonID)) {
-                    // console  .log("Adding animate Object", obj.commonID);
                     canvas.add(animateObject);
                     canvas.renderAll();
                     // }
@@ -261,7 +262,7 @@ export function newAnimation(
         }
     });
 
-    // console.log(addedAnimateObjects);
+    console.log("unique", addedAnimateObjects);
 
     const duration = animationRef.current?.duration ?? 1500; // animation duration for each frame in ms
 
@@ -282,8 +283,7 @@ export function newAnimation(
 
         Object.values(fOInFrames[currentFrame]).forEach((frameObject) => {
             const [x, y] = interpolatePath(frameObject[0], relativeProgress);
-            const animateObject = frameObject[1];
-            animateObject.set({
+            frameObject[1].set({
                 left: x - endPointOffset,
                 top: y - endPointOffset,
             });
@@ -295,9 +295,14 @@ export function newAnimation(
         } else if (currentFrame < frames.length - 1) {
             currentFrame++;
             startTime = timestamp;
+            const removableObjs = canvas
+                .getObjects()
+                .filter((obj) => obj.name !== "invisibleStore");
+            console.log("Remove objs", removableObjs);
             requestAnimationFrame(animate);
         } else {
             // onFullAnimationComplete
+            console.log("Full animation complete");
         }
     };
 
