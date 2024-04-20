@@ -231,7 +231,7 @@ export function newAnimation(
     //frameNo, foPath
     const fOInFrames: Record<number, foPath> = {};
 
-    let addedAnimateObjects: string[] = [];
+    const addedAnimateObjects: Record<string, fabric.Object> = {};
 
     // for each FO i will require allPaths
     // Fill in paths across frames
@@ -239,28 +239,28 @@ export function newAnimation(
         if (frame !== undefined) {
             frame.objects.forEach((obj) => {
                 if (obj.name == "frame_line") {
+                    // New Frame
                     if (!fOInFrames[frameIdx]) {
                         fOInFrames[frameIdx] = {};
                     }
-                    const animateObject = imageObject("my-image");
 
+                    // Create single animate object
+                    if (
+                        !Object.keys(addedAnimateObjects).includes(obj.commonID)
+                    ) {
+                        // New animateObject
+                        const animateObject = imageObject("my-image");
+                        addedAnimateObjects[obj.commonID] = animateObject;
+                    }
                     fOInFrames[frameIdx][obj.commonID] = [
                         obj.path,
-                        animateObject,
+                        addedAnimateObjects[obj.commonID],
                     ];
-
-                    // console.log(addedAnimateObjects);
-                    // console.log("All obj", obj.commonID);
-                    // if (addedAnimateObjects.indexOf(obj.commonID) === -1) {
-                    console.log("Adding new animate Object", obj.commonID);
-                    addedAnimateObjects.push(obj.commonID);
-                    canvas.add(animateObject);
-                    canvas.renderAll();
-                    // }
                 }
             });
         }
     });
+    canvas.renderAll();
 
     console.log("unique", addedAnimateObjects);
 
@@ -269,6 +269,8 @@ export function newAnimation(
     let startTime: number | null = null;
     const pause = animationRef.current.pause ?? false;
     let currentFrame = 2;
+
+    const renderedAnimateObjects: string[] = [];
 
     const animate = (timestamp: number) => {
         // if (pause) {
@@ -281,13 +283,22 @@ export function newAnimation(
         const relativeProgress = runtime / duration;
         animationRef.current.relativeProgress = relativeProgress;
 
-        Object.values(fOInFrames[currentFrame]).forEach((frameObject) => {
-            const [x, y] = interpolatePath(frameObject[0], relativeProgress);
-            frameObject[1].set({
-                left: x - endPointOffset,
-                top: y - endPointOffset,
-            });
-        });
+        Object.entries(fOInFrames[currentFrame]).forEach(
+            ([commonID, frameObject]) => {
+                if (!renderedAnimateObjects.includes(commonID)) {
+                    renderedAnimateObjects.push(commonID);
+                    canvas.add(addedAnimateObjects[commonID]);
+                }
+                const [x, y] = interpolatePath(
+                    frameObject[0],
+                    relativeProgress
+                );
+                frameObject[1].set({
+                    left: x - endPointOffset,
+                    top: y - endPointOffset,
+                });
+            }
+        );
         canvas.renderAll();
 
         if (runtime < duration && currentFrame < frames.length) {
