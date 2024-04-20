@@ -33,12 +33,13 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
         loadFirstCanvas(fabricRef),
     ]);
     const [currentFrame, setCurrentFrame] = useState<number>(0);
-    const [pause, setPause] = useState<boolean>(false);
+    const [pause, setPause] = useState<boolean>(true);
 
     const animationRef = useRef({
-        pause: false,
+        pause: true,
         duration: 1500,
-        currentFrame: -1,
+        currentFrame: 2,
+        relativeProgress: -1,
     });
 
     const onCanvasModified = useCallback(() => {
@@ -266,13 +267,14 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
                     <>
                         <p className="text-white">Animate:</p>
                         <Button
-                            name="▶"
+                            name={pause ? "▶" : "⏸"}
                             onClick={() => {
                                 // animateOverFrames(fabricRef, frames);
+                                setPause(!pause);
+                                animationRef.current.pause = !pause;
                                 newAnimation(fabricRef, frames, animationRef);
                             }}
                         />
-                        <Button name="⏸" onClick={() => {}} />{" "}
                     </>
                 ) : null}
             </div>

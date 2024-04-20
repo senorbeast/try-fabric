@@ -215,6 +215,7 @@ export function newAnimation(
         pause: boolean;
         duration: number;
         currentFrame: number;
+        relativeProgress: number | null;
     }>
     // pause: boolean
 ) {
@@ -222,12 +223,15 @@ export function newAnimation(
     // remove all objects from canvas
     const removableObjs = canvas
         .getObjects()
-        .filter((obj) => obj.name !== "invisibleStore");
+        .filter(
+            (obj) =>
+                obj.name !== "invisibleStore" || obj.name !== "animateObject"
+        );
 
     canvas.remove(...removableObjs);
 
     // commonID, [path, animateObject]
-    type foPath = Record<string, [PathType, fabric.Object]>;
+    type foPath = Record<string, PathType>;
     //frameNo, foPath
     const fOInFrames: Record<number, foPath> = {};
 
@@ -250,50 +254,47 @@ export function newAnimation(
                     ) {
                         // New animateObject
                         const animateObject = imageObject("my-image");
+                        animateObject.set({ name: "animateObject" });
                         addedAnimateObjects[obj.commonID] = animateObject;
                     }
-                    fOInFrames[frameIdx][obj.commonID] = [
-                        obj.path,
-                        addedAnimateObjects[obj.commonID],
-                    ];
+                    fOInFrames[frameIdx][obj.commonID] = obj.path;
                 }
             });
         }
     });
     canvas.renderAll();
 
-    console.log("unique", addedAnimateObjects);
-
     const duration = animationRef.current?.duration ?? 1500; // animation duration for each frame in ms
 
     let startTime: number | null = null;
-    const pause = animationRef.current.pause ?? false;
-    let currentFrame = 2;
+    let relativeProgress: number | null;
 
     const renderedAnimateObjects: string[] = [];
 
     const animate = (timestamp: number) => {
-        // if (pause) {
-        //     return;
-        // }
+        if (animationRef.current.pause) {
+            animationRef.current.relativeProgress = relativeProgress;
+            console.log(animationRef.current.relativeProgress);
+            return;
+        }
         if (!startTime) {
             startTime = timestamp;
         }
         const runtime = timestamp - startTime;
-        const relativeProgress = runtime / duration;
-        animationRef.current.relativeProgress = relativeProgress;
+        relativeProgress =
+            animationRef.current.relativeProgress ?? runtime / duration;
 
-        Object.entries(fOInFrames[currentFrame]).forEach(
-            ([commonID, frameObject]) => {
+        Object.entries(fOInFrames[animationRef.current.currentFrame]).forEach(
+            ([commonID, frameObjectPath]) => {
                 if (!renderedAnimateObjects.includes(commonID)) {
                     renderedAnimateObjects.push(commonID);
                     canvas.add(addedAnimateObjects[commonID]);
                 }
                 const [x, y] = interpolatePath(
-                    frameObject[0],
-                    relativeProgress
+                    frameObjectPath,
+                    relativeProgress!
                 );
-                frameObject[1].set({
+                addedAnimateObjects[commonID].set({
                     left: x - endPointOffset,
                     top: y - endPointOffset,
                 });
@@ -301,18 +302,22 @@ export function newAnimation(
         );
         canvas.renderAll();
 
-        if (runtime < duration && currentFrame < frames.length) {
+        if (
+            runtime < duration &&
+            animationRef.current.currentFrame < frames.length
+        ) {
             requestAnimationFrame(animate);
-        } else if (currentFrame < frames.length - 1) {
-            currentFrame++;
+        } else if (animationRef.current.currentFrame < frames.length - 1) {
+            animationRef.current.currentFrame++;
             startTime = timestamp;
             requestAnimationFrame(animate);
         } else {
             // onFullAnimationComplete
+            animationRef.current.currentFrame = 2;
+            animationRef.current.relativeProgress = null;
             console.log("Full animation complete");
         }
     };
-
     requestAnimationFrame(animate);
 }
 
