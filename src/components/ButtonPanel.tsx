@@ -22,6 +22,7 @@ import {
 import {
     animateOverFrames,
     getReqObjByNames,
+    newAnimation,
 } from "./fabric_functions/helpers";
 import { extraProps } from "./fabric_functions/final_functions/constants";
 
@@ -262,7 +263,8 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
                         <Button
                             name="▶"
                             onClick={() => {
-                                animateOverFrames(fabricRef, frames);
+                                // animateOverFrames(fabricRef, frames);
+                                newAnimation(fabricRef, frames);
                             }}
                         />
                         <Button name="⏸" onClick={() => {}} />{" "}

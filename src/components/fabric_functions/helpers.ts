@@ -1,6 +1,6 @@
 import { canvasJSONType } from "../ButtonPanel";
 import { fabricRefType } from "../Canvas";
-import { animateObjectAlongPath, imageObject } from "./common";
+import { animateObject, animateObjectAlongPath, imageObject } from "./common";
 import { fabric } from "./custom_attribute";
 
 export {
@@ -203,6 +203,50 @@ function animateOverFramesForObj(
         }
     };
     sequenceAnimation();
+}
+
+export function newAnimation(
+    fabricRef: fabricRefType,
+    frames: canvasJSONType[]
+) {
+    const canvas: fabric.Canvas = fabricRef.current!;
+    // remove all objects from canvas
+    const removableObjs = canvas
+        .getObjects()
+        .filter((obj) => obj.name! == "invisibleStore");
+
+    canvas.remove(...removableObjs);
+
+    type foPath = Record<string, PathType>;
+    const fOInFrames: Record<number, foPath> = {};
+
+    // for each FO i will require allPaths i think
+    // Fill in paths across frames
+    frames.forEach((frame, frameIdx) => {
+        if (frame !== undefined) {
+            frame.objects.forEach((obj) => {
+                if (obj.name == "frame_line") {
+                    console.log(obj, frameIdx);
+                    if (!fOInFrames[frameIdx]) {
+                        fOInFrames[frameIdx] = {};
+                    }
+                    fOInFrames[frameIdx][obj.commonID] = obj.path;
+                }
+            });
+        }
+    });
+
+    console.log(fOInFrames);
+
+    // add object to animate
+    const animateObject = imageObject("my-image");
+    canvas.add(animateObject);
+
+    const animate = (timestamp) => {
+        console.log(timestamp);
+    };
+
+    requestAnimationFrame(animate);
 }
 
 export type PointType = [number, number];
