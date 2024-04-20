@@ -38,9 +38,13 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
     const animationRef = useRef({
         pause: true,
         duration: 1500,
-        currentFrame: 2,
+        currentFrame: 1,
         relativeProgress: -1,
     });
+
+    useEffect(() => {
+        setPause(animationRef.current.pause);
+    }, [animationRef.current.pause]);
 
     const onCanvasModified = useCallback(() => {
         // console.log("Called through useCallback");
@@ -270,9 +274,9 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
                             name={pause ? "▶" : "⏸"}
                             onClick={() => {
                                 // animateOverFrames(fabricRef, frames);
-                                setPause(!pause);
-                                animationRef.current.pause = !pause;
                                 newAnimation(fabricRef, frames, animationRef);
+                                animationRef.current.pause = !pause;
+                                setPause(!pause);
                             }}
                         />
                     </>

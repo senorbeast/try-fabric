@@ -264,6 +264,8 @@ export function newAnimation(
     });
     canvas.renderAll();
 
+    console.log(fOInFrames);
+
     const duration = animationRef.current?.duration ?? 1500; // animation duration for each frame in ms
 
     let startTime: number | null = null;
@@ -313,7 +315,7 @@ export function newAnimation(
             requestAnimationFrame(animate);
         } else {
             // onFullAnimationComplete
-            animationRef.current.currentFrame = 2;
+            animationRef.current.currentFrame = 1;
             animationRef.current.relativeProgress = null;
             console.log("Full animation complete");
         }
