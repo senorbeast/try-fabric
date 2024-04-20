@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Button from "./Button";
 import { fabricRefType } from "./Canvas";
 import { cubic, linear, quad } from "./fabric_functions/interpolate";
@@ -19,11 +19,7 @@ import {
     newObjectForNewFrame,
     runAfterJSONLoad2,
 } from "./fabric_functions/frame_object";
-import {
-    animateOverFrames,
-    getReqObjByNames,
-    newAnimation,
-} from "./fabric_functions/helpers";
+import { getReqObjByNames, newAnimation } from "./fabric_functions/helpers";
 import { extraProps } from "./fabric_functions/final_functions/constants";
 
 export type canvasJSONType = {
@@ -37,6 +33,12 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
     ]);
     const [currentFrame, setCurrentFrame] = useState<number>(0);
     const [pause, setPause] = useState<boolean>(false);
+
+    const animationRef = useRef({
+        pause: false,
+        duration: 1500,
+        currentFrame: -1,
+    });
 
     const onCanvasModified = useCallback(() => {
         // console.log("Called through useCallback");
@@ -264,7 +266,7 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
                             name="▶"
                             onClick={() => {
                                 // animateOverFrames(fabricRef, frames);
-                                newAnimation(fabricRef, frames);
+                                newAnimation(fabricRef, frames, animationRef);
                             }}
                         />
                         <Button name="⏸" onClick={() => {}} />{" "}
