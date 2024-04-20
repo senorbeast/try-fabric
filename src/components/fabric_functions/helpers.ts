@@ -306,10 +306,6 @@ export function newAnimation(
         } else if (currentFrame < frames.length - 1) {
             currentFrame++;
             startTime = timestamp;
-            const removableObjs = canvas
-                .getObjects()
-                .filter((obj) => obj.name !== "invisibleStore");
-            console.log("Remove objs", removableObjs);
             requestAnimationFrame(animate);
         } else {
             // onFullAnimationComplete
