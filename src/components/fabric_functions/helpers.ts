@@ -2,6 +2,7 @@ import { canvasJSONType } from "../ButtonPanel";
 import { fabricRefType } from "../Canvas";
 import { animateObject, animateObjectAlongPath, imageObject } from "./common";
 import { fabric } from "./custom_attribute";
+import { interpolatePath } from "./interpolate";
 
 export {
     getReqObjBy,
@@ -208,6 +209,7 @@ function animateOverFramesForObj(
 export function newAnimation(
     fabricRef: fabricRefType,
     frames: canvasJSONType[]
+    // pause: boolean
 ) {
     const canvas: fabric.Canvas = fabricRef.current!;
     // remove all objects from canvas
@@ -217,20 +219,25 @@ export function newAnimation(
 
     canvas.remove(...removableObjs);
 
-    type foPath = Record<string, PathType>;
+    // commonID, [path, animateObject]
+    type foPath = Record<string, [PathType, fabric.Object]>;
+    //frameNo, foPath
     const fOInFrames: Record<number, foPath> = {};
 
-    // for each FO i will require allPaths i think
+    // for each FO i will require allPaths
     // Fill in paths across frames
     frames.forEach((frame, frameIdx) => {
         if (frame !== undefined) {
             frame.objects.forEach((obj) => {
                 if (obj.name == "frame_line") {
-                    console.log(obj, frameIdx);
                     if (!fOInFrames[frameIdx]) {
                         fOInFrames[frameIdx] = {};
                     }
-                    fOInFrames[frameIdx][obj.commonID] = obj.path;
+                    const animateObject = imageObject("my-image");
+                    fOInFrames[frameIdx][obj.commonID] = [
+                        obj.path,
+                        animateObject,
+                    ];
                 }
             });
         }
@@ -238,12 +245,44 @@ export function newAnimation(
 
     console.log(fOInFrames);
 
-    // add object to animate
-    const animateObject = imageObject("my-image");
-    canvas.add(animateObject);
+    const duration = 4000; // 4sec animation duration for each frame
 
-    const animate = (timestamp) => {
-        console.log(timestamp);
+    let startTime: number | null = null;
+    const pause = false;
+    let currentFrame = 2;
+
+    const animate = (timestamp: number) => {
+        if (pause) {
+            return;
+        }
+        if (!startTime) {
+            startTime = timestamp;
+        }
+        const runtime = timestamp - startTime;
+        const relativeProgress = runtime / duration;
+
+        Object.values(fOInFrames[2]).forEach((frameObject) => {
+            const [x, y] = interpolatePath(frameObject[0], relativeProgress);
+            const animateObject = frameObject[1];
+            canvas.add(animateObject);
+            canvas.renderAll();
+            console.log(relativeProgress, x, y);
+            animateObject.animate({
+                left: x,
+                top: y,
+            });
+            canvas.renderAll();
+        });
+
+        if (runtime < duration && currentFrame < frames.length) {
+            requestAnimationFrame(animate);
+        } else if (currentFrame < frames.length - 1) {
+            return;
+            // currentFrame++;
+            // requestAnimationFrame(animate);
+        } else {
+            // onFullAnimationComplete
+        }
     };
 
     requestAnimationFrame(animate);
