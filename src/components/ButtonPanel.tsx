@@ -3,6 +3,7 @@ import Button from "./Button";
 import { fabricRefType } from "./Canvas";
 import { cubic, linear, quad } from "./fabric_functions/interpolate";
 import { addCBCHelpers, drawCubic } from "./fabric_functions/cubic";
+import exampleFrames from "../assets/exampleFrames.json";
 import {
     addRectangle,
     logObject,
@@ -54,6 +55,8 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
 
         return () => {};
     }, [fabricRef]);
+
+    useEffect(() => console.log(frames), [frames]);
 
     // Store currentFrame to canvas object
     useEffect(() => {
@@ -121,7 +124,6 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
             if (idx === currentFrame) return canvas.toJSON(extraProps);
             else return frame;
         });
-        // console.log("Update current Frames", newFrames);
 
         setFrames(newFrames);
     }
@@ -133,6 +135,7 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
         const newFrame = [...frames, canvas.toJSON(extraProps)];
         setFrames(newFrame); // add frame
         newObjectForNewFrame(fabricRef);
+        console.log("Update current Frames", newFrames);
 
         // const oldFrame = fabricRef.current!.getObjects();
         // console.log(
@@ -287,6 +290,10 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
                             {}
                         )
                     }
+                />
+                <Button
+                    name="Load Eg frames"
+                    onClick={() => setFrames(exampleFrames)}
                 />
             </div>
         </div>
