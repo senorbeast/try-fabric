@@ -61,7 +61,7 @@ function updateLineToCurve(
                 startPoint,
                 endPoint
             );
-            console.log("UpdateLineToCurveInside", endPoint);
+            // console.log("UpdateLineToCurveInside", endPoint);
 
             // TODO: Edit path, from the endpoint/ control point itself
 
@@ -97,10 +97,10 @@ function onObjectMouseDown(
     canvas: fabric.Canvas
 ) {
     if (e.target == null) {
-        console.log("onObjectMouseDown null target");
+        // console.log("onObjectMouseDown null target");
         return;
     }
-    console.log("mousedown", e);
+    // console.log("mousedown", e);
     if (e.target!.name == "p3" && e.target!.currentType == "curve") {
         updateCurveToLine(e, e.target!.commonID, canvas);
     }

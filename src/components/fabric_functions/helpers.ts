@@ -252,7 +252,7 @@ export function newAnimation(
                     addedAnimateObjects.push(obj.commonID);
 
                     // if (addedAnimateObjects.indexOf(obj.commonID)) {
-                    console.log("Adding animate Object", obj.commonID);
+                    // console  .log("Adding animate Object", obj.commonID);
                     canvas.add(animateObject);
                     canvas.renderAll();
                     // }
@@ -261,7 +261,7 @@ export function newAnimation(
         }
     });
 
-    console.log(addedAnimateObjects);
+    // console.log(addedAnimateObjects);
 
     const duration = animationRef.current?.duration ?? 1500; // animation duration for each frame in ms
 

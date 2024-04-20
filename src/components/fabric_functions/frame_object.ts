@@ -135,7 +135,7 @@ const findAndLinkOneGroup = (
         objects
     );
 
-    console.log("Linking existing points");
+    // console.log("Linking existing points");
     line!.height = 0;
     line!.width = 0;
     // Link existing points
