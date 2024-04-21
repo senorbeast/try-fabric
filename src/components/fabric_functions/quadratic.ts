@@ -1,5 +1,5 @@
 import { fabricRefType } from "../Canvas";
-import { fabric } from "./custom_attribute";
+import { fabric } from "fabric";
 
 // Quad
 

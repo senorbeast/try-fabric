@@ -1,5 +1,5 @@
 import type { fabricRefType } from "../Canvas";
-import { fabric } from "./custom_attribute";
+import { fabric } from "fabric";
 import { v4 as uuidv4 } from "uuid";
 
 import {

@@ -36,7 +36,7 @@ function onObjectMouseUp(e: fabric.IEvent<MouseEvent>, canvas: fabric.Canvas) {
         console.log("onObjectMouseUp null target");
         return;
     }
-    updateLineToCurve(e, e.target!.commonID, canvas);
+    updateLineToCurve(e, e.target!.commonID!, canvas);
 }
 
 function updateLineToCurve(

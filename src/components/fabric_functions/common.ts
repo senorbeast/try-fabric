@@ -1,7 +1,6 @@
 import { fabric } from "fabric";
 import { fabricRefType } from "../Canvas";
 import { interpolatePath } from "./interpolate";
-import { getReqObjByNames } from "./helpers";
 import { bindFOEvents } from "./final_functions/events";
 
 export {
@@ -17,7 +16,6 @@ export {
     animateObjectAlongPath,
     resetPos,
     logObject,
-    animateDrag,
     addImageObject,
     imageObject,
     animateOnPathC,
@@ -45,7 +43,7 @@ const invisibleStore = (fabricRef: fabricRefType) => {
         height: 0,
         fill: "white",
         name: "invisibleStore",
-        currentFrame: "0",
+        currentFrame: 0,
         fOIds: [],
     });
     fabricRef.current!.add(invisibleStore);
@@ -59,7 +57,7 @@ const addRectangle = (fabricRef: fabricRefType) => {
         height: 50,
         fill: "white",
         name: "rect",
-        currentFrame: "-1",
+        currentFrame: -1,
     });
 
     fabricRef.current!.add(rect);
@@ -155,15 +153,15 @@ function animateObject(
 
 export type PointType = [number, number];
 
-const path: (string | number)[][] = [
-    ["M", 50, 50],
-    ["L", 400, 200],
-    ["Q", 200, 450, 300, 100],
-    // ["C", 150, 50, 300, 350, 550, 100],
-    // ["M", 100, 200],
-    // ["C", 150, 50, 300, 250, 350, 100],
-    // ["C", 200, 200, 600, 300, 100],
-];
+// const path: (string | number)[][] = [
+//     ["M", 50, 50],
+//     ["L", 400, 200],
+//     ["Q", 200, 450, 300, 100],
+//     // ["C", 150, 50, 300, 350, 550, 100],
+//     // ["M", 100, 200],
+//     // ["C", 150, 50, 300, 250, 350, 100],
+//     // ["C", 200, 200, 600, 300, 100],
+// ];
 
 function animateOnPathC(
     fabricRef: fabricRefType,
@@ -318,7 +316,7 @@ const logObject = (fabricRef: fabricRefType) => {
 
 const addImageObject = (fabricRef: fabricRefType, imgId: string) => {
     const canvas = fabricRef.current!;
-    const imgElement = document.getElementById(imgId);
+    const imgElement = document.getElementById(imgId) as HTMLImageElement;
     const imgInstance = new fabric.Image(imgElement, {
         left: 100,
         top: 100,
@@ -331,7 +329,7 @@ const addImageObject = (fabricRef: fabricRefType, imgId: string) => {
 };
 
 const imageObject = (imgId: string): fabric.Image => {
-    const imgElement = document.getElementById(imgId);
+    const imgElement = document.getElementById(imgId) as HTMLImageElement;
     const imgInstance = new fabric.Image(imgElement, {
         left: 100,
         top: 100,
@@ -342,76 +340,76 @@ const imageObject = (imgId: string): fabric.Image => {
     return imgInstance;
 };
 
-function animateDrag(fabricRef: fabricRefType) {
-    const canvas = fabricRef.current!;
+// function animateDrag(fabricRef: fabricRefType) {
+//     const canvas = fabricRef.current!;
 
-    // disable controls and set hover-cursor
-    canvas.forEachObject(function (o) {
-        o.hasBorders = o.hasControls = false;
-    });
-    canvas.hoverCursor = "pointer";
+//     // disable controls and set hover-cursor
+//     canvas.forEachObject(function (o) {
+//         o.hasBorders = o.hasControls = false;
+//     });
+//     canvas.hoverCursor = "pointer";
 
-    // mouse events
-    canvas.on("mouse:down", function (e) {
-        animate(e, 1);
-    });
-    canvas.on("mouse:up", function (e) {
-        animate(e, 0);
-    });
+//     // mouse events
+//     canvas.on("mouse:down", function (e) {
+//         animate(e, 1);
+//     });
+//     canvas.on("mouse:up", function (e) {
+//         animate(e, 0);
+//     });
 
-    function animate(e: fabric.IEvent<MouseEvent>, p: 0 | 1) {
-        if (e.target) {
-            fabric.util.animate({
-                startValue: e.target.get("height"),
-                endValue:
-                    e.target.get("height")! + (p ? -10 : 50 - e.target.height!),
-                duration: 200,
-                onChange: function (v) {
-                    e.target!.height = v;
-                    canvas.renderAll();
-                },
-                onComplete: function () {
-                    e.target.setCoords();
-                },
-            });
-            fabric.util.animate({
-                startValue: e.target.get("width"),
-                endValue:
-                    e.target.get("width") + (p ? -10 : 50 - e.target.width),
-                duration: 200,
-                onChange: function (v) {
-                    e.target.width = v;
-                    canvas.renderAll();
-                },
-                onComplete: function () {
-                    e.target.setCoords();
-                },
-            });
-            fabric.util.animate({
-                startValue: e.target.get("top"),
-                endValue: e.target.get("top") + (p && 5),
-                duration: 200,
-                onChange: function (v) {
-                    e.target.top = v;
-                    canvas.renderAll();
-                },
-                onComplete: function () {
-                    e.target.setCoords();
-                },
-            });
-            fabric.util.animate({
-                startValue: e.target.get("left"),
-                endValue: e.target.get("left") + (p && 5),
-                duration: 200,
-                onChange: function (v) {
-                    e.target.left = v;
-                    canvas.renderAll();
-                },
-                onComplete: function () {
-                    e.target.setCoords();
-                },
-            });
-        }
-    }
-    canvas.renderAll();
-}
+//     function animate(e: fabric.IEvent<MouseEvent>, p: 0 | 1) {
+//         if (e.target) {
+//             fabric.util.animate({
+//                 startValue: e.target.get("height"),
+//                 endValue:
+//                     e.target.get("height")! + (p ? -10 : 50 - e.target.height!),
+//                 duration: 200,
+//                 onChange: function (v) {
+//                     e.target!.height = v;
+//                     canvas.renderAll();
+//                 },
+//                 onComplete: function () {
+//                     e.target.setCoords();
+//                 },
+//             });
+//             fabric.util.animate({
+//                 startValue: e.target.get("width"),
+//                 endValue:
+//                     e.target.get("width") + (p ? -10 : 50 - e.target.width),
+//                 duration: 200,
+//                 onChange: function (v) {
+//                     e.target.width = v;
+//                     canvas.renderAll();
+//                 },
+//                 onComplete: function () {
+//                     e.target.setCoords();
+//                 },
+//             });
+//             fabric.util.animate({
+//                 startValue: e.target.get("top"),
+//                 endValue: e.target.get("top") + (p && 5),
+//                 duration: 200,
+//                 onChange: function (v) {
+//                     e.target.top = v;
+//                     canvas.renderAll();
+//                 },
+//                 onComplete: function () {
+//                     e.target.setCoords();
+//                 },
+//             });
+//             fabric.util.animate({
+//                 startValue: e.target.get("left"),
+//                 endValue: e.target.get("left") + (p && 5),
+//                 duration: 200,
+//                 onChange: function (v) {
+//                     e.target.left = v;
+//                     canvas.renderAll();
+//                 },
+//                 onComplete: function () {
+//                     e.target.setCoords();
+//                 },
+//             });
+//         }
+//     }
+//     canvas.renderAll();
+// }

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Button from "./Button";
 import { fabricRefType } from "./Canvas";
 import { cubic, linear, quad } from "./fabric_functions/interpolate";
-import { addCBCHelpers, drawCubic } from "./fabric_functions/cubic";
+import { drawCubic } from "./fabric_functions/cubic";
 import exampleFrames from "../assets/exampleFrames.json";
 import {
     addRectangle,
@@ -11,6 +11,7 @@ import {
     animateFirstObject,
     animateOnPathC,
     addImageObject,
+    imageObject,
 } from "./fabric_functions/common";
 import { drawQuadratic } from "./fabric_functions/quadratic";
 import _ from "lodash";
@@ -46,6 +47,7 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
         setPause(animationRef.current.pause);
     }, [animationRef.current.pause]);
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const onCanvasModified = useCallback(() => {
         // console.log("Called through useCallback");
         updateCurrentFrame(frames, currentFrame, fabricRef);
@@ -101,7 +103,7 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
     ) {
         const canvas = fabricRef.current!;
         setCurrentFrame(idx);
-        canvas.loadFromJSON(frames[idx], () => {
+        canvas.loadFromJSON(JSON.stringify(frames[idx]), () => {
             // run required functions for bezier function to work
             // addCBCHelpers(fabricRef, "frame_line");
             runAfterJSONLoad2(fabricRef, "frame_line");
@@ -140,7 +142,6 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
         const newFrame = [...frames, canvas.toJSON(extraProps)];
         setFrames(newFrame); // add frame
         newObjectForNewFrame(fabricRef);
-        console.log("Update current Frames", newFrames);
 
         // const oldFrame = fabricRef.current!.getObjects();
         // console.log(
@@ -168,6 +169,7 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
                         name="logEvents"
                         onClick={() => {
                             const canvas = fabricRef.current!;
+                            // @ts-expect-error hhh
                             console.log(canvas.__eventListeners);
                         }}
                     />
@@ -213,15 +215,31 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
 
                 <Button
                     name="cubicAnimate"
-                    onClick={() => animateObjectAlongPath(fabricRef, cubic)}
+                    onClick={() => {
+                        const animateObject = imageObject("my-image");
+                        fabricRef.current!.add(animateObject);
+                        animateObjectAlongPath(fabricRef, cubic, animateObject);
+                    }}
                 />
                 <Button
                     name="quadAnimate"
-                    onClick={() => animateObjectAlongPath(fabricRef, quad)}
+                    onClick={() => {
+                        const animateObject = imageObject("my-image");
+                        fabricRef.current!.add(animateObject);
+                        animateObjectAlongPath(fabricRef, quad, animateObject);
+                    }}
                 />
                 <Button
                     name="linearAnimate"
-                    onClick={() => animateObjectAlongPath(fabricRef, linear)}
+                    onClick={() => {
+                        const animateObject = imageObject("my-image");
+                        fabricRef.current!.add(animateObject);
+                        animateObjectAlongPath(
+                            fabricRef,
+                            linear,
+                            animateObject
+                        );
+                    }}
                 />
                 <Button
                     name="from-to-line"
@@ -299,6 +317,7 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
                 />
                 <Button
                     name="Load Eg frames"
+                    // @ts-expect-error hhh
                     onClick={() => setFrames(exampleFrames)}
                 />
             </div>

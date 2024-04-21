@@ -13,14 +13,17 @@ function updatePointToLine(
     oldOptions: fabric.IObjectOptions
 ) {
     const canvas = fabricRef.current!;
-    const startPoint = [p0.left + endPointOffset, p0.top + endPointOffset] as [
+    const startPoint = [
+        p0.left! + endPointOffset,
+        p0.top! + endPointOffset,
+    ] as [number, number];
+    const endPoint = [p3.left! + endPointOffset, p3.top! + endPointOffset] as [
         number,
         number
     ];
-    const endPoint = [p3.left + endPointOffset, p3.top + endPointOffset] as [
-        number,
-        number
-    ];
+
+    // TODO: set the path of the line
+
     const line = makeLinePath(startPoint, endPoint, "frame_line");
     linkEndPointsToLine(line, p0, p3);
     // console.log("objs, updatePointToLine", line, p0, p3);

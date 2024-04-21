@@ -1,8 +1,7 @@
-import { Ref } from "react";
 import { canvasJSONType } from "../ButtonPanel";
 import { fabricRefType } from "../Canvas";
-import { animateObject, animateObjectAlongPath, imageObject } from "./common";
-import { fabric } from "./custom_attribute";
+import { animateObjectAlongPath, imageObject } from "./common";
+import { fabric } from "fabric";
 import { endPointOffset } from "./final_functions/constants";
 import { interpolatePath } from "./interpolate";
 
@@ -118,6 +117,8 @@ function getEndPoint(line: fabric.Object): [number, number] {
 
 type PathType = (string | number)[][];
 
+// type PathType22 = Point[];
+
 function animateOverFrames(fabricRef: fabricRefType, frames: canvasJSONType[]) {
     const canvas: fabric.Canvas = fabricRef.current!;
 
@@ -138,6 +139,7 @@ function animateOverFrames(fabricRef: fabricRefType, frames: canvasJSONType[]) {
         if (frame !== undefined) {
             frame.objects.forEach((obj) => {
                 if (obj.name == "frame_line") {
+                    const obj = obj as fabric.Path;
                     allPathsAcrossFrames.push(obj.path);
                 }
             });
@@ -317,6 +319,7 @@ export function newAnimation(
             // onFullAnimationComplete
             animationRef.current.currentFrame = 1;
             animationRef.current.relativeProgress = null;
+            animationRef.current.pause = true;
             console.log("Full animation complete");
         }
     };
