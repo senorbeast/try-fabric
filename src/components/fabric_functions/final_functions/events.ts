@@ -53,7 +53,7 @@ function updateLineToCurve(
     if (line) {
         if (e.target!.name == "p3" && (p1 == null || p2 == null)) {
             // add p1, p2 controls points, make it a beizer curve
-            const path = line!.path;
+            const path = line!.path! as fabric.Path["path"];
             const startPoint: [number, number] = [path[0][1], path[0][2]];
             //TODO: How did p15, p16 work earlier ?
             const endPoint: [number, number] = [path[1][1], path[1][2]];
@@ -77,7 +77,7 @@ function updateLineToCurve(
             const initialFrame = line.initialFrame;
 
             const [p1, p2] = makeControlsPoints(controlPoint1, controlPoint2);
-            linkControlPointsToLine(line, p1, p2);
+            linkControlPointsToLine(line as fabric.Path, p1, p2);
             setObjsOptions([e.target!, p1, p2], {
                 currentType: "curve",
                 initialFrame: initialFrame,
@@ -121,7 +121,7 @@ function updateCurveToLine(
     ]);
 
     if (line) {
-        const path = line.path;
+        const path = line!.path! as fabric.Path["path"];
         const endPoint = [path[1][5], path[1][6]];
         canvas.remove(p1, p2);
         line.path[1] = ["L", endPoint[0], endPoint[1]];
@@ -174,11 +174,11 @@ function onObjectMovingForLine(
     if (e.target!.name === "p0" || e.target!.name === "p3") {
         const p = e.target!;
         if (p.line1) {
-            p.line1.path[0][1] = p.left + endPointOffset;
-            p.line1.path[0][2] = p.top + endPointOffset;
+            p.line1.path[0][1] = p.left! + endPointOffset;
+            p.line1.path[0][2] = p.top! + endPointOffset;
         } else if (p.line4) {
-            p.line4.path[1][1] = p.left + endPointOffset;
-            p.line4.path[1][2] = p.top + endPointOffset;
+            p.line4.path[1][1] = p.left! + endPointOffset;
+            p.line4.path[1][2] = p.top! + endPointOffset;
         }
     }
 }
@@ -191,23 +191,23 @@ function onObjectMovingForCurve(
     if (e.target!.name === "p0" || e.target!.name === "p3") {
         const p = e.target!;
         if (p.line1) {
-            p.line1.path[0][1] = p.left + endPointOffset;
-            p.line1.path[0][2] = p.top + endPointOffset;
+            p.line1.path[0][1] = p.left! + endPointOffset;
+            p.line1.path[0][2] = p.top! + endPointOffset;
         } else if (p.line4) {
-            p.line4.path[1][5] = p.left + endPointOffset;
-            p.line4.path[1][6] = p.top + endPointOffset;
+            p.line4.path[1][5] = p.left! + endPointOffset;
+            p.line4.path[1][6] = p.top! + endPointOffset;
         }
     } else if (e.target!.name === "p1") {
         const p = e.target;
         if (p.line2) {
-            p.line2.path[1][1] = p.left + controlPointOffset;
-            p.line2.path[1][2] = p.top + controlPointOffset;
+            p.line2.path[1][1] = p.left! + controlPointOffset;
+            p.line2.path[1][2] = p.top! + controlPointOffset;
         }
     } else if (e.target!.name === "p2") {
         const p = e.target;
         if (p.line3) {
-            p.line3.path[1][3] = p.left + controlPointOffset;
-            p.line3.path[1][4] = p.top + controlPointOffset;
+            p.line3.path[1][3] = p.left! + controlPointOffset;
+            p.line3.path[1][4] = p.top! + controlPointOffset;
         }
     }
 }
@@ -218,11 +218,11 @@ export function onObjectSelected(
 ) {
     const activeObject = e.target!;
     if (activeObject.name === "p0" || activeObject.name === "p3") {
-        activeObject.line2.animate("opacity", "1", {
+        activeObject.line2!.animate("opacity", "1", {
             duration: 200,
             onChange: canvas.renderAll.bind(canvas),
         });
-        activeObject.line2.selectable = true;
+        activeObject.line2!.selectable = true;
     } else {
         console.log(activeObject);
     }

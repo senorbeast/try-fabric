@@ -1,9 +1,16 @@
 import { canvasJSONType } from "../ButtonPanel";
 import { fabricRefType } from "../Canvas";
-import { animateObjectAlongPath, imageObject } from "./common";
+import { animateCurve, animateObjectAlongPath, imageObject } from "./common";
 import { fabric } from "fabric";
 import { endPointOffset } from "./final_functions/constants";
 import { interpolatePath } from "./interpolate";
+import {
+    animationDurationS,
+    animationFrameS,
+    animationPauseS,
+    animationRelativeProgressS,
+    currentFrameS,
+} from "../react-ridge";
 
 export {
     getReqObjBy,
@@ -212,13 +219,13 @@ function animateOverFramesForObj(
 
 export function newAnimation(
     fabricRef: fabricRefType,
-    frames: canvasJSONType[],
-    animationRef: React.MutableRefObject<{
-        pause: boolean;
-        duration: number;
-        currentFrame: number;
-        relativeProgress: number | null;
-    }>
+    frames: canvasJSONType[]
+    // animationRef: React.MutableRefObject<{
+    //     pause: boolean;
+    //     duration: number;
+    //     currentFrame: number;
+    //     relativeProgress: number | null;
+    // }>
     // pause: boolean
 ) {
     const canvas: fabric.Canvas = fabricRef.current!;
@@ -268,27 +275,29 @@ export function newAnimation(
 
     console.log(fOInFrames);
 
-    const duration = animationRef.current?.duration ?? 1500; // animation duration for each frame in ms
+    const duration = animationDurationS.get() ?? 1500; // animation duration for each frame in ms
 
     let startTime: number | null = null;
-    let relativeProgress: number | null;
 
     const renderedAnimateObjects: string[] = [];
 
     const animate = (timestamp: number) => {
-        if (animationRef.current.pause) {
-            animationRef.current.relativeProgress = relativeProgress;
-            console.log(animationRef.current.relativeProgress);
+        if (animationPauseS.get() == true) {
+            // console.log("Pause true");
             return;
         }
         if (!startTime) {
             startTime = timestamp;
         }
         const runtime = timestamp - startTime;
-        relativeProgress =
-            animationRef.current.relativeProgress ?? runtime / duration;
+        // console.log(
+        //     "Animation Progress",
+        //     animationFrameS.get() + animationRelativeProgressS.get()
+        // );
+        animationRelativeProgressS.set(runtime / duration);
 
-        Object.entries(fOInFrames[animationRef.current.currentFrame]).forEach(
+        // Get objects in currentFrame and update the position
+        Object.entries(fOInFrames[animationFrameS.get()]).forEach(
             ([commonID, frameObjectPath]) => {
                 if (!renderedAnimateObjects.includes(commonID)) {
                     renderedAnimateObjects.push(commonID);
@@ -296,7 +305,7 @@ export function newAnimation(
                 }
                 const [x, y] = interpolatePath(
                     frameObjectPath,
-                    relativeProgress!
+                    animationRelativeProgressS.get()
                 );
                 addedAnimateObjects[commonID].set({
                     left: x - endPointOffset,
@@ -306,20 +315,21 @@ export function newAnimation(
         );
         canvas.renderAll();
 
-        if (
-            runtime < duration &&
-            animationRef.current.currentFrame < frames.length
-        ) {
+        if (runtime < duration && animationFrameS.get() < frames.length) {
+            // More animation to be done
             requestAnimationFrame(animate);
-        } else if (animationRef.current.currentFrame < frames.length - 1) {
-            animationRef.current.currentFrame++;
+        } else if (animationFrameS.get() < frames.length - 1) {
+            //
+            animationFrameS.set((prev) => prev + 1);
             startTime = timestamp;
+            animationRelativeProgressS.set(0);
             requestAnimationFrame(animate);
         } else {
             // onFullAnimationComplete
-            animationRef.current.currentFrame = 1;
-            animationRef.current.relativeProgress = null;
-            animationRef.current.pause = true;
+            animationFrameS.set(2);
+            currentFrameS.set(2);
+            animationPauseS.set(true);
+            animationRelativeProgressS.set(0);
             console.log("Full animation complete");
         }
     };

@@ -32,6 +32,7 @@ export const frameObject = (
     const [p0, p3] = makeEndPoints(startPoint, endPoint);
     p0.set({ opacity: 0.5, ...unMovableOptions });
     p3.set({ hasBorders: false, hasControls: false });
+    console.log(name);
 
     // Make only a point, when its a new object
     if (newObject) {
@@ -41,9 +42,10 @@ export const frameObject = (
             currentType: "point",
             commonID: newCommonID,
         });
-        store?.set({ fOIds: [...store["fOIds"], newCommonID] });
+        store?.set({ fOIds: [...store["fOIds"]!, newCommonID] });
         // console.log("new object", currentFrame);
         // Create line-curve for subsequent newFrames
+        // @ts-expect-error only point not does work somehow
     } else if (p3.currentType != "line" || p3.currentType != "curve") {
         const initialFrame = p3["initialFrame"];
         console.log("should make line", currentFrame, initialFrame);
@@ -59,7 +61,7 @@ export function newObjectForNewFrame(fabricRef: fabricRefType) {
     const canvas = fabricRef.current!;
 
     const [store] = getReqObjByNames(canvas, ["invisibleStore"]);
-    const fOIds = store.fOIds as string[];
+    const fOIds = store!.fOIds as string[];
 
     // TODO: Optimise by filtering objects with id, in one pass: objects[][]
     fOIds.forEach((fOId) => {
@@ -82,15 +84,15 @@ function rmOldObjAddNewObj(
 
     console.log("p3", p3);
 
-    const endPoint: [number, number] = [p3.left, p3.top];
+    const endPoint: [number, number] = [p3!.left!, p3!.top!];
 
     const oldOptions: fabric.IObjectOptions = {
-        initialFrame: p3.initialFrame,
-        commonID: p3.commonID,
+        initialFrame: p3!.initialFrame,
+        commonID: p3!.commonID,
     };
 
     // console.log("In newObjectForNewFrame", oldOptions);
-    canvas.remove(line, p0, p1, p2, p3);
+    canvas.remove(line!, p0!, p1!, p2!, p3!);
     //TODO: need to load old objects attribute in new frame
     // if (p3.currentType == "point") {
     // } else if (p3.currentType == "line" || p3.currentType == "curve") {
@@ -101,20 +103,21 @@ function rmOldObjAddNewObj(
 export function runAfterJSONLoad(fabricRef: fabricRefType) {
     const canvas = fabricRef.current!;
     const [line, p0, p3] = getReqObjByNames(canvas, ["frame_line", "p0", "p3"]);
-    linkEndPointsToLine(line, p0, p3);
+    linkEndPointsToLine(line as fabric.Path, p0!, p3!);
 }
 
 export function runAfterJSONLoad2(
-    fabricRef: fabricRefType,
-    lineName: string,
-    replace?: boolean
+    fabricRef: fabricRefType
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    // lineName: string,
+    // replace?: boolean
 ) {
     // This is required all canvas JSON is loaded,
     // these objects/functionality is not stored in the json
     const canvas = fabricRef.current!;
 
     const [store] = getReqObjByNames(canvas, ["invisibleStore"]);
-    const fOIds = store.fOIds as string[];
+    const fOIds = store!.fOIds as string[];
 
     fOIds.forEach((fOId) => {
         findAndLinkOneGroup(fabricRef, fOId);
@@ -140,7 +143,7 @@ const findAndLinkOneGroup = (
     line!.width = 0;
     // Link existing points
     // const [p0, p1, p2, p3] = points;
-    linkPointsToLine(line, p0, p1, p2, p3);
+    linkPointsToLine(line as fabric.Path, p0!, p1!, p2!, p3!);
     // bindCubicEvents(canvas);
     canvas.renderAll();
 };
