@@ -4,6 +4,7 @@ import { fabricRefType } from "./Canvas";
 import { cubic, linear, quad } from "./fabric_functions/interpolate";
 import { drawCubic } from "./fabric_functions/cubic";
 import exampleFrames from "../assets/exampleFrames.json";
+import example2Frames from "../assets/egFrames2.json";
 import {
     addRectangle,
     logObject,
@@ -23,6 +24,8 @@ import {
 } from "./fabric_functions/frame_object";
 import { getReqObjByNames, newAnimation } from "./fabric_functions/helpers";
 import { extraProps } from "./fabric_functions/final_functions/constants";
+import { animationPauseS } from "./react-ridge";
+import DisplayAnimationPanel from "./AnimationPanel";
 
 export type canvasJSONType = {
     version: string;
@@ -34,7 +37,7 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
         loadFirstCanvas(fabricRef),
     ]);
     const [currentFrame, setCurrentFrame] = useState<number>(0);
-    const [pause, setPause] = useState<boolean>(true);
+    // const [pause, setPause] = useState<boolean>(true);
 
     const animationRef = useRef({
         pause: true,
@@ -42,10 +45,11 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
         currentFrame: 1,
         relativeProgress: -1,
     });
+    const [pause, setPause] = animationPauseS.use();
 
-    useEffect(() => {
-        setPause(animationRef.current.pause);
-    }, [animationRef.current.pause]);
+    // useEffect(() => {
+    //     setPause(animationRef.current.pause);
+    // }, [animationRef.current.pause]);
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const onCanvasModified = useCallback(() => {
@@ -292,9 +296,8 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
                             name={pause ? "▶" : "⏸"}
                             onClick={() => {
                                 // animateOverFrames(fabricRef, frames);
-                                newAnimation(fabricRef, frames, animationRef);
-                                animationRef.current.pause = !pause;
-                                setPause(!pause);
+                                newAnimation(fabricRef, frames);
+                                setPause((prev) => !prev);
                             }}
                         />
                     </>
@@ -320,6 +323,13 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
                     // @ts-expect-error hhh
                     onClick={() => setFrames(exampleFrames)}
                 />
+                <Button
+                    name="Load Eg2 frames"
+                    // @ts-expect-error hhh
+                    onClick={() => setFrames(example2Frames)}
+                />
+                <Button name="Log frames" onClick={() => console.log(frames)} />
+                <DisplayAnimationPanel />
             </div>
         </div>
     );
