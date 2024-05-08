@@ -1,3 +1,4 @@
+import { fabric } from "fabric";
 import { fabricRefType } from "../../Canvas";
 import { imageObject } from "../common";
 import { setObjsOptions } from "../helpers";
