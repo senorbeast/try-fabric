@@ -38,6 +38,7 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
     ]);
     const [currentFrame, setCurrentFrame] = useState<number>(0);
     // const [pause, setPause] = useState<boolean>(true);
+    const [showAniPanel, setShowAniPanel] = useState<boolean>(false);
 
     const animationRef = useRef({
         pause: true,
@@ -329,7 +330,11 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
                     onClick={() => setFrames(example2Frames)}
                 />
                 <Button name="Log frames" onClick={() => console.log(frames)} />
-                <DisplayAnimationPanel />
+                <Button
+                    name="Toggle Ani Panel"
+                    onClick={() => setShowAniPanel((prev) => !prev)}
+                />
+                {showAniPanel ? <DisplayAnimationPanel /> : null}
             </div>
         </div>
     );

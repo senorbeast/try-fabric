@@ -283,17 +283,17 @@ export function newAnimation(
 
     const animate = (timestamp: number) => {
         if (animationPauseS.get() == true) {
-            console.log("Pause true");
+            // console.log("Pause true");
             return;
         }
         if (!startTime) {
             startTime = timestamp;
         }
         const runtime = timestamp - startTime;
-        console.log(
-            "Animation Progress",
-            animationFrameS.get() + animationRelativeProgressS.get()
-        );
+        // console.log(
+        //     "Animation Progress",
+        //     animationFrameS.get() + animationRelativeProgressS.get()
+        // );
         animationRelativeProgressS.set(runtime / duration);
 
         // Get objects in currentFrame and update the position

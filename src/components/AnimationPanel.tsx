@@ -10,8 +10,7 @@ const DisplayAnimationPanel = () => {
     const currentFrame = currentFrameS.useValue();
     return (
         <div className="flex gap-2 text-white">
-            <li>AF: {animationFrame}</li>
-            <li>RP: {relProg}</li>
+            <li>Animation Progress: {animationFrame + relProg}</li>
             <li>CF: {currentFrame}</li>
         </div>
     );
