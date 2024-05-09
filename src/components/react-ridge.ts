@@ -4,7 +4,7 @@ import { canvasJSONType } from "./ButtonPanel";
 // Init state
 export const animationPauseS = newRidgeState<boolean>(true);
 export const animationDurationS = newRidgeState<number>(1500);
-export const animationFrameS = newRidgeState<number>(0);
+export const animationFrameS = newRidgeState<number>(1);
 export const animationRelativeProgressS = newRidgeState<number>(0);
 
 export const currentFrameS = newRidgeState<number>(0);
