@@ -22,10 +22,16 @@ import {
     newObjectForNewFrame,
     runAfterJSONLoad2,
 } from "./fabric_functions/frame_object";
-import { getReqObjByNames, newAnimation } from "./fabric_functions/helpers";
+import { newAnimation } from "./fabric_functions/helpers";
 import { extraProps } from "./fabric_functions/final_functions/constants";
-import { animationPauseS } from "./react-ridge";
+import { animationPauseS, currentFrameS } from "./react-ridge";
 import DisplayAnimationPanel from "./AnimationPanel";
+
+//TODO: Add fOIds to data, to the collective data
+// type framesDataType = {
+//     fOIds: string[];
+//     frames: canvasJSONType[];
+// };
 
 export type canvasJSONType = {
     version: string;
@@ -36,16 +42,11 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
     const [frames, setFrames] = useState<canvasJSONType[]>([
         loadFirstCanvas(fabricRef),
     ]);
-    const [currentFrame, setCurrentFrame] = useState<number>(0);
+    // const [currentFrame, setCurrentFrame] = useState<number>(0);
+    const [currentFrame, setCurrentFrame] = currentFrameS.use();
     // const [pause, setPause] = useState<boolean>(true);
     const [showAniPanel, setShowAniPanel] = useState<boolean>(false);
 
-    const animationRef = useRef({
-        pause: true,
-        duration: 1500,
-        currentFrame: 1,
-        relativeProgress: -1,
-    });
     const [pause, setPause] = animationPauseS.use();
 
     // useEffect(() => {
@@ -71,16 +72,16 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
     // useEffect(() => console.log(frames), [frames]);
 
     // Store currentFrame to canvas object
-    useEffect(() => {
-        if (fabricRef.current) {
-            const canvas = fabricRef.current!;
-            const [store] = getReqObjByNames(canvas, ["invisibleStore"]);
-            if (store) {
-                store.currentFrame = currentFrame;
-            }
-        }
-        return () => {};
-    }, [currentFrame, fabricRef]);
+    // useEffect(() => {
+    //     if (fabricRef.current) {
+    //         const canvas = fabricRef.current!;
+    //         const [store] = getReqObjByNames(canvas, ["invisibleStore"]);
+    //         if (store) {
+    //             store.currentFrame = currentFrame;
+    //         }
+    //     }
+    //     return () => {};
+    // }, [currentFrame, fabricRef]);
 
     function loadFirstCanvas(fabricRef: fabricRefType): canvasJSONType {
         const canvas = fabricRef.current!;

@@ -1,9 +1,9 @@
 import { fabricRefType } from "../../Canvas";
+import { currentFrameS } from "../../react-ridge";
 import {
     getReqObjByNamesForID,
     findEquidistantPoints,
     setObjsOptions,
-    getReqObjByNames,
 } from "../helpers";
 import { endPointOffset, controlPointOffset } from "./constants";
 import { linkControlPointsToLine } from "./linkage";
@@ -137,8 +137,9 @@ function onObjectMoving(e: fabric.IEvent<MouseEvent>, canvas?: fabric.Canvas) {
         console.log("onObjectMoving null target");
         return;
     }
-    const [store] = getReqObjByNames(canvas, ["invisibleStore"]);
-    const currentFrame = store!.currentFrame;
+    // const [store] = getReqObjByNames(canvas, ["invisibleStore"]);
+    // const currentFrame = store!.currentFrame;
+    const currentFrame = currentFrameS.get();
 
     const initialFrame = e.target!.initialFrame;
     const currentType = e.target!.currentType;

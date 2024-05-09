@@ -16,6 +16,7 @@ import {
     updatePointToLine,
 } from "./final_functions/makeUpdateObjects";
 import { unMovableOptions } from "./final_functions/constants";
+import { currentFrameS, fOIdsState } from "../react-ridge";
 
 export const frameObject = (
     fabricRef: fabricRefType,
@@ -27,7 +28,8 @@ export const frameObject = (
 ) => {
     const canvas = fabricRef.current!;
     const [store] = getReqObjByNames(canvas, ["invisibleStore"]);
-    const currentFrame = store!.currentFrame;
+    // const currentFrame = store!.currentFrame;
+    const currentFrame = currentFrameS.get();
 
     const [p0, p3] = makeEndPoints(startPoint, endPoint);
     p0.set({ opacity: 0.5, ...unMovableOptions });
@@ -43,6 +45,7 @@ export const frameObject = (
             commonID: newCommonID,
         });
         store?.set({ fOIds: [...store["fOIds"]!, newCommonID] });
+        // fOIdsState.set((prev) => [...prev, newCommonID]);
         // console.log("new object", currentFrame);
         // Create line-curve for subsequent newFrames
         // @ts-expect-error only point not does work somehow
@@ -62,7 +65,7 @@ export function newObjectForNewFrame(fabricRef: fabricRefType) {
 
     const [store] = getReqObjByNames(canvas, ["invisibleStore"]);
     const fOIds = store!.fOIds as string[];
-
+    // const fOIds = fOIdsState.get();
     // TODO: Optimise by filtering objects with id, in one pass: objects[][]
     fOIds.forEach((fOId) => {
         rmOldObjAddNewObj(fabricRef, fOId);
@@ -118,6 +121,7 @@ export function runAfterJSONLoad2(
 
     const [store] = getReqObjByNames(canvas, ["invisibleStore"]);
     const fOIds = store!.fOIds as string[];
+    // const fOIds = fOIdsState.get();
 
     fOIds.forEach((fOId) => {
         findAndLinkOneGroup(fabricRef, fOId);
