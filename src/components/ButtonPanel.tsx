@@ -4,7 +4,6 @@ import { fabricRefType } from "./Canvas";
 import { cubic, linear, quad } from "./fabric_functions/interpolate";
 import { drawCubic } from "./fabric_functions/cubic";
 import exampleFrames from "../assets/exampleFrames.json";
-import example2Frames from "../assets/egFrames2.json";
 import {
     addRectangle,
     logObject,
@@ -24,14 +23,20 @@ import {
 } from "./fabric_functions/frame_object";
 import { newAnimation } from "./fabric_functions/helpers";
 import { extraProps } from "./fabric_functions/final_functions/constants";
-import { animationPauseS, currentFrameS, framesS } from "./react-ridge";
+import {
+    animationFrameS,
+    animationPauseS,
+    currentFrameS,
+    fOIdsState,
+    framesS,
+} from "./react-ridge";
 import DisplayAnimationPanel from "./AnimationPanel";
 
 //TODO: Add fOIds to data, to the collective data
-// type framesDataType = {
-//     fOIds: string[];
-//     frames: canvasJSONType[];
-// };
+export type framesDataType = {
+    fOIds: string[];
+    frames: canvasJSONType[];
+};
 
 export type canvasJSONType = {
     version: string;
@@ -208,9 +213,11 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
                             }
                             ${currentFrame == idx ? "font-bold" : ""}
                             `}
-                            onClick={() =>
-                                applyOldFrame(frames, idx, fabricRef)
-                            }
+                            onClick={() => {
+                                applyOldFrame(frames, idx, fabricRef);
+                                animationPauseS.set(true);
+                                animationFrameS.set(idx);
+                            }}
                         >
                             {idx}
                         </button>
@@ -254,15 +261,28 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
                 />
                 <Button
                     name="Load Eg frames"
-                    // @ts-expect-error hhh
-                    onClick={() => setFrames(exampleFrames)}
+                    onClick={() => {
+                        fOIdsState.set(exampleFrames.fOIds);
+                        // @ts-expect-error hhh
+                        setFrames(exampleFrames.frames);
+                    }}
+                />
+
+                <Button name="Log frames" onClick={() => console.log(frames)} />
+                <Button
+                    name="Log fOIds"
+                    onClick={() => console.log(fOIdsState.get())}
                 />
                 <Button
-                    name="Load Eg2 frames"
-                    // @ts-expect-error hhh
-                    onClick={() => setFrames(example2Frames)}
+                    name="Log FrameData"
+                    onClick={() => {
+                        const frameData: framesDataType = {
+                            fOIds: fOIdsState.get(),
+                            frames: frames,
+                        };
+                        console.log(frameData);
+                    }}
                 />
-                <Button name="Log frames" onClick={() => console.log(frames)} />
                 <Button
                     name="Toggle Ani Panel"
                     onClick={() => setShowAniPanel((prev) => !prev)}

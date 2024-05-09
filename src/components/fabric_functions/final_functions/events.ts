@@ -36,10 +36,10 @@ const updateFramesData = (canvas: fabric.Canvas) => {
 
     const currentFrame = currentFrameS.get();
     const frames = framesS.get();
-    console.log(currentFrame, frames);
+    // console.log(currentFrame, frames);
 
     if (currentFrame < frames.length) {
-        console.log("Updating frames....");
+        // console.log("Updating frames....");
         // Update
         framesS.set((prev) =>
             prev.map((item) =>
@@ -177,13 +177,13 @@ function onObjectMoving(e: fabric.IEvent<MouseEvent>, canvas?: fabric.Canvas) {
     const initialFrame = e.target!.initialFrame;
     const currentType = e.target!.currentType;
     const commonID = e.target!.commonID;
-    console.log(
-        "Current frame is",
-        currentFrame,
-        initialFrame,
-        currentType,
-        commonID
-    );
+    // console.log(
+    //     "Current frame is",
+    //     currentFrame,
+    //     initialFrame,
+    //     currentType,
+    //     commonID
+    // );
 
     if (initialFrame == currentFrame) {
         currentType == "point";

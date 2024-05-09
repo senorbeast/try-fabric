@@ -273,7 +273,7 @@ export function newAnimation(
     });
     canvas.renderAll();
 
-    console.log(fOInFrames);
+    // console.log(fOInFrames);
 
     const duration = animationDurationS.get() ?? 1500; // animation duration for each frame in ms
 
