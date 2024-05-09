@@ -27,7 +27,7 @@ export const frameObject = (
     oldOptions: fabric.IObjectOptions
 ) => {
     const canvas = fabricRef.current!;
-    // const [store] = getReqObjByNames(canvas, ["invisibleStore"]);
+    const [store] = getReqObjByNames(canvas, ["invisibleStore"]);
     // const currentFrame = store!.currentFrame;
     const currentFrame = currentFrameS.get();
 
@@ -61,7 +61,7 @@ export const frameObject = (
 };
 
 export function newObjectForNewFrame(fabricRef: fabricRefType) {
-    // const canvas = fabricRef.current!;
+    const canvas = fabricRef.current!;
 
     const [store] = getReqObjByNames(canvas, ["invisibleStore"]);
     const fOIds = store!.fOIds as string[];
