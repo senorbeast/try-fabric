@@ -13,12 +13,15 @@ function linkPointsToLine(
     p3: fabric.Object
 ) {
     const ptsArr = [p0, p1, p2, p3];
+    // TODO: correct types, use optional types maybe
     ptsArr.forEach((pt) => {
-        pt.hasBorders = pt.hasControls = false;
-        pt.line1 = null;
-        pt.line2 = null;
-        pt.line3 = null;
-        pt.line4 = null;
+        if (pt) {
+            pt.hasBorders = pt.hasControls = false;
+            pt.line1 = null;
+            pt.line2 = null;
+            pt.line3 = null;
+            pt.line4 = null;
+        }
     });
     // Connect existing points with the path line
     p0.line1 = line;

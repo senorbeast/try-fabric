@@ -131,7 +131,7 @@ const findAndLinkOneGroup = (
 ) => {
     // const { line, points } = getReqObj(canvas);
     const canvas = fabricRef.current!;
-    const [line, p0, p1, p2, p3] = getReqObjByNamesForID(
+    const [line1, p0, p1, p2, p3] = getReqObjByNamesForID(
         canvas,
         commonID,
         ["frame_line", "p0", "p1", "p2", "p3"],
@@ -139,11 +139,20 @@ const findAndLinkOneGroup = (
     );
 
     // console.log("Linking existing points");
-    line!.height = 0;
-    line!.width = 0;
-    // Link existing points
-    // const [p0, p1, p2, p3] = points;
-    linkPointsToLine(line as fabric.Path, p0!, p1!, p2!, p3!);
+    if (line1) {
+        console.log("Line found!", line1.commonID);
+        const line = line1 as fabric.Path;
+        // To fix position of line after loading
+        line!.height = 0;
+        line!.width = 0;
+        line.pathOffset.x = line.left!;
+        line.pathOffset.y = line.top!;
+
+        // Link existing points
+        // const [p0, p1, p2, p3] = points;
+        linkPointsToLine(line, p0!, p1!, p2!, p3!);
+    }
+
     // bindCubicEvents(canvas);
     canvas.renderAll();
 };
