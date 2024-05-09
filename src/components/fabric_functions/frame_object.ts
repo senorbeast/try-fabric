@@ -122,10 +122,11 @@ export function runAfterJSONLoad2(
     const [store] = getReqObjByNames(canvas, ["invisibleStore"]);
     const fOIds = store!.fOIds as string[];
     // const fOIds = fOIdsState.get();
-
-    fOIds.forEach((fOId) => {
-        findAndLinkOneGroup(fabricRef, fOId);
-    });
+    if (fOIds.length > 0) {
+        fOIds.forEach((fOId) => {
+            findAndLinkOneGroup(fabricRef, fOId);
+        });
+    }
 }
 
 const findAndLinkOneGroup = (
@@ -144,7 +145,7 @@ const findAndLinkOneGroup = (
 
     // console.log("Linking existing points");
     if (line1) {
-        console.log("Line found!", line1.commonID);
+        // console.log("Line found!", line1.commonID);
         const line = line1 as fabric.Path;
         // To fix position of line after loading
         line!.height = 0;

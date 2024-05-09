@@ -1,11 +1,11 @@
 import { fabricRefType } from "../../Canvas";
-import { currentFrameS } from "../../react-ridge";
+import { currentFrameS, framesS } from "../../react-ridge";
 import {
     getReqObjByNamesForID,
     findEquidistantPoints,
     setObjsOptions,
 } from "../helpers";
-import { endPointOffset, controlPointOffset } from "./constants";
+import { endPointOffset, controlPointOffset, extraProps } from "./constants";
 import { linkControlPointsToLine } from "./linkage";
 import { makeControlsPoints } from "./makeUpdateObjects";
 
@@ -26,7 +26,36 @@ export function bindFOEvents(fabricRef: fabricRefType) {
             onObjectMouseUp(e, canvas),
         "mouse:down": (e: fabric.IEvent<MouseEvent>) =>
             onObjectMouseDown(e, canvas),
+        "object:modified": (e: fabric.IEvent<MouseEvent>) =>
+            onObjectModified(e, canvas),
     });
+}
+
+function onObjectModified(e: fabric.IEvent<MouseEvent>, canvas: fabric.Canvas) {
+    // current frame data
+    const currentFrameData = canvas.toJSON(extraProps);
+
+    const currentFrame = currentFrameS.get();
+    const frames = framesS.get();
+    console.log(currentFrame, frames);
+
+    if (currentFrame < frames.length) {
+        console.log("Updating frames....");
+        // Update
+        framesS.set((prev) =>
+            prev.map((item) =>
+                prev.indexOf(item) == currentFrame ? currentFrameData : item
+            )
+        );
+    } else if (currentFrame == frames.length) {
+        // append
+        console.log("Adding new frame....");
+        framesS.set((prev) => [...prev, currentFrameData]);
+    } else {
+        console.log("Adding frame error....");
+
+        console.warn("Error: currentFrame out of range of frames");
+    }
 }
 
 // Convert Line to Cubic Beizer
