@@ -16,7 +16,7 @@ import {
     updatePointToLine,
 } from "./final_functions/makeUpdateObjects";
 import { unMovableOptions } from "./final_functions/constants";
-import { fOIdsState } from "../react-ridge";
+import { currentFrameS, fOIdsState } from "../react-ridge";
 
 export const frameObject = (
     fabricRef: fabricRefType,
@@ -27,8 +27,9 @@ export const frameObject = (
     oldOptions: fabric.IObjectOptions
 ) => {
     const canvas = fabricRef.current!;
-    const [store] = getReqObjByNames(canvas, ["invisibleStore"]);
-    const currentFrame = store!.currentFrame;
+    // const [store] = getReqObjByNames(canvas, ["invisibleStore"]);
+    // const currentFrame = store!.currentFrame;
+    const currentFrame = currentFrameS.get();
 
     const [p0, p3] = makeEndPoints(startPoint, endPoint);
     p0.set({ opacity: 0.5, ...unMovableOptions });
@@ -44,7 +45,7 @@ export const frameObject = (
             commonID: newCommonID,
         });
         store?.set({ fOIds: [...store["fOIds"]!, newCommonID] });
-        fOIdsState.set((prev) => [...prev, newCommonID]);
+        // fOIdsState.set((prev) => [...prev, newCommonID]);
         // console.log("new object", currentFrame);
         // Create line-curve for subsequent newFrames
         // @ts-expect-error only point not does work somehow
@@ -62,9 +63,9 @@ export const frameObject = (
 export function newObjectForNewFrame(fabricRef: fabricRefType) {
     // const canvas = fabricRef.current!;
 
-    // const [store] = getReqObjByNames(canvas, ["invisibleStore"]);
-    // const fOIds = store!.fOIds as string[];
-    const fOIds = fOIdsState.get();
+    const [store] = getReqObjByNames(canvas, ["invisibleStore"]);
+    const fOIds = store!.fOIds as string[];
+    // const fOIds = fOIdsState.get();
     // TODO: Optimise by filtering objects with id, in one pass: objects[][]
     fOIds.forEach((fOId) => {
         rmOldObjAddNewObj(fabricRef, fOId);
@@ -119,8 +120,8 @@ export function runAfterJSONLoad2(
     const canvas = fabricRef.current!;
 
     const [store] = getReqObjByNames(canvas, ["invisibleStore"]);
-    // const fOIds = store!.fOIds as string[];
-    const fOIds = fOIdsState.get();
+    const fOIds = store!.fOIds as string[];
+    // const fOIds = fOIdsState.get();
 
     fOIds.forEach((fOId) => {
         findAndLinkOneGroup(fabricRef, fOId);
@@ -142,19 +143,19 @@ const findAndLinkOneGroup = (
     );
 
     // console.log("Linking existing points");
-    // if (line1) {
-    console.log("Line found!", line1.commonID);
-    const line = line1 as fabric.Path;
-    // To fix position of line after loading
-    line!.height = 0;
-    line!.width = 0;
-    line.pathOffset.x = line.left!;
-    line.pathOffset.y = line.top!;
+    if (line1) {
+        console.log("Line found!", line1.commonID);
+        const line = line1 as fabric.Path;
+        // To fix position of line after loading
+        line!.height = 0;
+        line!.width = 0;
+        line.pathOffset.x = line.left!;
+        line.pathOffset.y = line.top!;
 
-    // Link existing points
-    // const [p0, p1, p2, p3] = points;
-    // }
-    linkPointsToLine(line, p0!, p1!, p2!, p3!);
+        // Link existing points
+        // const [p0, p1, p2, p3] = points;
+        linkPointsToLine(line, p0!, p1!, p2!, p3!);
+    }
 
     // bindCubicEvents(canvas);
     canvas.renderAll();
