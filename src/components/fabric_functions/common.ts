@@ -27,7 +27,7 @@ const initFabric = (fabricRef: fabricRefType) => {
         width: 800,
         selection: false,
     });
-    invisibleStore(fabricRef);
+    // invisibleStore(fabricRef);
     bindFOEvents(fabricRef);
 };
 
@@ -35,19 +35,19 @@ const disposeFabric = (fabricRef: fabricRefType) => {
     fabricRef.current!.dispose();
 };
 
-const invisibleStore = (fabricRef: fabricRefType) => {
-    const invisibleStore = new fabric.Rect({
-        top: 0,
-        left: 0,
-        width: 0,
-        height: 0,
-        fill: "white",
-        name: "invisibleStore",
-        currentFrame: 0,
-        fOIds: [],
-    });
-    fabricRef.current!.add(invisibleStore);
-};
+// const invisibleStore = (fabricRef: fabricRefType) => {
+//     const invisibleStore = new fabric.Rect({
+//         top: 0,
+//         left: 0,
+//         width: 0,
+//         height: 0,
+//         fill: "white",
+//         name: "invisibleStore",
+//         currentFrame: 0,
+//         fOIds: [],
+//     });
+//     fabricRef.current!.add(invisibleStore);
+// };
 
 const addRectangle = (fabricRef: fabricRefType) => {
     const rect = new fabric.Rect({

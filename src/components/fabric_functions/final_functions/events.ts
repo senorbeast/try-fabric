@@ -30,8 +30,7 @@ export function bindFOEvents(fabricRef: fabricRefType) {
             onObjectModified(e, canvas),
     });
 }
-
-function onObjectModified(e: fabric.IEvent<MouseEvent>, canvas: fabric.Canvas) {
+const updateFramesData = (canvas: fabric.Canvas) => {
     // current frame data
     const currentFrameData = canvas.toJSON(extraProps);
 
@@ -56,6 +55,10 @@ function onObjectModified(e: fabric.IEvent<MouseEvent>, canvas: fabric.Canvas) {
 
         console.warn("Error: currentFrame out of range of frames");
     }
+};
+
+function onObjectModified(e: fabric.IEvent<MouseEvent>, canvas: fabric.Canvas) {
+    updateFramesData(canvas);
 }
 
 // Convert Line to Cubic Beizer
@@ -66,6 +69,7 @@ function onObjectMouseUp(e: fabric.IEvent<MouseEvent>, canvas: fabric.Canvas) {
         return;
     }
     updateLineToCurve(e, e.target!.commonID!, canvas);
+    updateFramesData(canvas);
 }
 
 function updateLineToCurve(
