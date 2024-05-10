@@ -18,7 +18,7 @@ import _ from "lodash";
 import { drawLine } from "./fabric_functions/line";
 import {
     frameObject,
-    newObjectForNewFrame,
+    updateObjsForNewFrame,
     runAfterJSONLoad2,
 } from "./fabric_functions/frame_object";
 import { newAnimation } from "./fabric_functions/helpers";
@@ -31,6 +31,8 @@ import {
     framesS,
 } from "./react-ridge";
 import DisplayAnimationPanel from "./AnimationPanel";
+import { Canvas } from "fabric/fabric-impl";
+import { updateFramesData } from "./fabric_functions/final_functions/events";
 
 //TODO: Add fOIds to data, to the collective data
 export type framesDataType = {
@@ -82,15 +84,10 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
     function addNewFrame(frames: canvasJSONType[], fabricRef: fabricRefType) {
         const canvas = fabricRef.current!;
         setCurrentFrame(frames.length);
-        const newFrame = [...frames, canvas.toJSON(extraProps)];
-        setFrames(newFrame); // add frame
-        newObjectForNewFrame(fabricRef);
-
-        // const oldFrame = fabricRef.current!.getObjects();
-        // console.log(
-        //     "Compare oldFrame, savedFrame",
-        //     deepDiff(oldFrame, newFrame[currentFrame])
-        // );
+        const newFrames = [...frames, canvas.toJSON(extraProps)]; // copy old frame data to newFrame
+        setFrames(newFrames); // add frame
+        updateObjsForNewFrame(fabricRef); // update for new frame
+        updateFramesData(fabricRef.current!); // save updates to frame
     }
 
     return (
@@ -248,16 +245,7 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
                 <p className="text-white">Tactic Obj:</p>
                 <Button
                     name="frameObject"
-                    onClick={() =>
-                        frameObject(
-                            fabricRef,
-                            [100, 100],
-                            [100, 100],
-                            "frame_line",
-                            true,
-                            {}
-                        )
-                    }
+                    onClick={() => frameObject(fabricRef, [100, 100])}
                 />
                 <Button
                     name="Load Eg frames"

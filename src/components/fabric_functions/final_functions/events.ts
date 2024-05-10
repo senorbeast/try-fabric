@@ -30,7 +30,7 @@ export function bindFOEvents(fabricRef: fabricRefType) {
             onObjectModified(e, canvas),
     });
 }
-const updateFramesData = (canvas: fabric.Canvas) => {
+export const updateFramesData = (canvas: fabric.Canvas) => {
     // current frame data
     const currentFrameData = canvas.toJSON(extraProps);
 

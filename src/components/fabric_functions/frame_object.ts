@@ -12,93 +12,87 @@ import {
     linkPointsToLine,
 } from "./final_functions/linkage";
 import {
-    makeEndPoints,
+    makeCustomEndPoint,
+    updateLinePath,
     updatePointToLine,
 } from "./final_functions/makeUpdateObjects";
-import { unMovableOptions } from "./final_functions/constants";
+import { endPointOffset } from "./final_functions/constants";
 import { currentFrameS, fOIdsState } from "../react-ridge";
 
 export const frameObject = (
     fabricRef: fabricRefType,
-    startPoint: [number, number],
-    endPoint: [number, number],
-    name: string,
-    newObject: boolean,
-    oldOptions: fabric.IObjectOptions
+    startPoint: [number, number]
 ) => {
     const canvas = fabricRef.current!;
-    const currentFrame = currentFrameS.get();
 
-    const [p0, p3] = makeEndPoints(startPoint, endPoint);
-    p0.set({ opacity: 0.5, ...unMovableOptions });
+    const p3 = makeCustomEndPoint(
+        startPoint[0] + endPointOffset,
+        startPoint[1] + endPointOffset
+    );
+    p3.name = "p3";
     p3.set({ hasBorders: false, hasControls: false });
-    console.log(name);
 
-    // Make only a point, when its a new object
-    if (newObject) {
-        const newCommonID: string = uuidv4();
-        setObjsOptions([p0, p3], {
-            initialFrame: currentFrame,
-            currentType: "point",
-            commonID: newCommonID,
-        });
-        // store?.set({ fOIds: [...store["fOIds"]!, newCommonID] });
-        fOIdsState.set((prev) => [...prev, newCommonID]);
-        // console.log("new object", currentFrame);
-        // Create line-curve for subsequent newFrames
-        // @ts-expect-error only point not does work somehow
-    } else if (p3.currentType != "line" || p3.currentType != "curve") {
-        const initialFrame = p3["initialFrame"];
-        console.log("should make line", currentFrame, initialFrame);
-        // if (currentFrame > 0) {
-        updatePointToLine(fabricRef, p0, p3, oldOptions);
-        // }
-    }
+    const newCommonID: string = uuidv4();
+    const currentFrame = currentFrameS.get();
+    setObjsOptions([p3], {
+        initialFrame: currentFrame,
+        currentType: "point",
+        commonID: newCommonID,
+    });
+    fOIdsState.set((prev) => [...prev, newCommonID]);
+
     canvas.add(p3);
     canvas.renderAll();
 };
 
-export function newObjectForNewFrame(fabricRef: fabricRefType) {
-    const canvas = fabricRef.current!;
-
-    // const [store] = getReqObjByNames(canvas, ["invisibleStore"]);
-    // const fOIds = store!.fOIds as string[];
+// Called on for new Frame
+export function updateObjsForNewFrame(fabricRef: fabricRefType) {
     const fOIds = fOIdsState.get();
     // TODO: Optimise by filtering objects with id, in one pass: objects[][]
     fOIds.forEach((fOId) => {
-        rmOldObjAddNewObj(fabricRef, fOId);
+        updateObjForNewFrame(fabricRef, fOId);
     });
 }
 
-function rmOldObjAddNewObj(
+function updateObjForNewFrame(
     fabricRef: fabricRefType,
     commonID: string,
     objects?: fabric.Object[]
 ) {
     const canvas = fabricRef.current!;
-    const [line, p0, p1, p2, p3] = getReqObjByNamesForID(
-        canvas,
-        commonID,
-        ["frame_line", "p0", "p1", "p2", "p3"],
-        objects
-    );
-
-    console.log("p3", p3);
-
-    const endPoint: [number, number] = [p3!.left!, p3!.top!];
+    const [p3] = getReqObjByNamesForID(canvas, commonID, ["p3"], objects);
 
     const oldOptions: fabric.IObjectOptions = {
         initialFrame: p3!.initialFrame,
         commonID: p3!.commonID,
     };
 
-    // console.log("In newObjectForNewFrame", oldOptions);
-    canvas.remove(line!, p0!, p1!, p2!, p3!);
-    //TODO: need to load old objects attribute in new frame
-    // if (p3.currentType == "point") {
-    // } else if (p3.currentType == "line" || p3.currentType == "curve") {
-    // }
-    frameObject(fabricRef, endPoint, endPoint, "frame_line", false, oldOptions);
+    // Create line-curve for subsequent newFrame
+    if (p3!.initialFrame! < currentFrameS.get() && p3!.currentType == "point") {
+        // Upgrade obj to line
+        updatePointToLine(fabricRef, p3!, oldOptions);
+    } else {
+        // Move coinciding line to that pointPosition
+        const [line, p0, p1, p2] = getReqObjByNamesForID(
+            canvas,
+            commonID,
+            ["frame_line", "p0", "p1", "p2"],
+            objects
+        );
+        canvas.remove(p1!, p2!); //remove controlPoints, from canvas (but its reference is used next)
+        // move initial point to endpoint + update path
+
+        p0!.left = p3!.left!;
+        p0!.top = p3!.top!;
+        // Offset to center
+        const pointPos = [
+            p3!.left! + endPointOffset,
+            p3!.top! + endPointOffset,
+        ] as [number, number];
+        updateLinePath(pointPos, pointPos, line as fabric.Path);
+        linkPointsToLine(line as fabric.Path, p0!, p1!, p2!, p3!);
+        canvas.renderAll();
+    }
 }
 
 export function runAfterJSONLoad(fabricRef: fabricRefType) {

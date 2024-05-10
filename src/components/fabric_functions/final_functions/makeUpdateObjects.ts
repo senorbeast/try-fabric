@@ -9,23 +9,24 @@ export { updatePointToLine, makeEndPoints, makeControlsPoints };
 
 function updatePointToLine(
     fabricRef: fabricRefType,
-    p0: fabric.Object,
     p3: fabric.Object,
     oldOptions: fabric.IObjectOptions
 ) {
     const canvas = fabricRef.current!;
-    const startPoint = [
-        p0.left! + endPointOffset,
-        p0.top! + endPointOffset,
+
+    const pointPosition = [
+        p3.left! + endPointOffset,
+        p3.top! + endPointOffset,
     ] as [number, number];
-    const endPoint = [p3.left! + endPointOffset, p3.top! + endPointOffset] as [
-        number,
-        number
-    ];
 
-    // TODO: set the path of the line
+    //set the path of the line
+    const line = makeLinePath(pointPosition, pointPosition, "frame_line");
+    const p0 = makeCustomEndPoint(
+        pointPosition[0] - endPointOffset,
+        pointPosition[1] - endPointOffset
+    );
+    p0.set({ opacity: 0.5, ...unMovableOptions, name: "p0" });
 
-    const line = makeLinePath(startPoint, endPoint, "frame_line");
     linkEndPointsToLine(line, p0, p3);
     // console.log("objs, updatePointToLine", line, p0, p3);
     setObjsOptions([line, p0, p3], { currentType: "line", ...oldOptions });
@@ -64,6 +65,20 @@ function makeLinePath(
     return line;
 }
 
+export function updateLinePath(
+    startPoint: [number, number],
+    endPoint: [number, number],
+    line: fabric.Path
+) {
+    line.path[0][0] = "M";
+    line.path[0][1] = startPoint[0];
+    line.path[0][2] = startPoint[1];
+    line.path[1][0] = "L";
+    line.path[1][1] = endPoint[0];
+    line.path[1][2] = endPoint[1];
+    return line;
+}
+
 function makeEndPoints(
     startPoint: number[],
     endPoint: number[]
@@ -79,7 +94,7 @@ function makeEndPoints(
     return [p0, p3];
 }
 
-function makeCustomEndPoint(left: number, top: number) {
+export function makeCustomEndPoint(left: number, top: number) {
     const c = imageObject("my-image");
     c.set({
         left: left,

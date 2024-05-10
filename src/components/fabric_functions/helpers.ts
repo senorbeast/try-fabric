@@ -307,6 +307,7 @@ export function newAnimation(
                     frameObjectPath,
                     animationRelativeProgressS.get()
                 );
+                // Set position
                 addedAnimateObjects[commonID].set({
                     left: x - endPointOffset,
                     top: y - endPointOffset,
