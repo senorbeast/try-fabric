@@ -27,8 +27,6 @@ export const frameObject = (
     oldOptions: fabric.IObjectOptions
 ) => {
     const canvas = fabricRef.current!;
-    const [store] = getReqObjByNames(canvas, ["invisibleStore"]);
-    // const currentFrame = store!.currentFrame;
     const currentFrame = currentFrameS.get();
 
     const [p0, p3] = makeEndPoints(startPoint, endPoint);
@@ -44,8 +42,8 @@ export const frameObject = (
             currentType: "point",
             commonID: newCommonID,
         });
-        store?.set({ fOIds: [...store["fOIds"]!, newCommonID] });
-        // fOIdsState.set((prev) => [...prev, newCommonID]);
+        // store?.set({ fOIds: [...store["fOIds"]!, newCommonID] });
+        fOIdsState.set((prev) => [...prev, newCommonID]);
         // console.log("new object", currentFrame);
         // Create line-curve for subsequent newFrames
         // @ts-expect-error only point not does work somehow
@@ -63,9 +61,9 @@ export const frameObject = (
 export function newObjectForNewFrame(fabricRef: fabricRefType) {
     const canvas = fabricRef.current!;
 
-    const [store] = getReqObjByNames(canvas, ["invisibleStore"]);
-    const fOIds = store!.fOIds as string[];
-    // const fOIds = fOIdsState.get();
+    // const [store] = getReqObjByNames(canvas, ["invisibleStore"]);
+    // const fOIds = store!.fOIds as string[];
+    const fOIds = fOIdsState.get();
     // TODO: Optimise by filtering objects with id, in one pass: objects[][]
     fOIds.forEach((fOId) => {
         rmOldObjAddNewObj(fabricRef, fOId);
@@ -117,12 +115,11 @@ export function runAfterJSONLoad2(
 ) {
     // This is required all canvas JSON is loaded,
     // these objects/functionality is not stored in the json
-    const canvas = fabricRef.current!;
+    // const canvas = fabricRef.current!;
 
-    const [store] = getReqObjByNames(canvas, ["invisibleStore"]);
-    const fOIds = store!.fOIds as string[];
-    // const fOIds = fOIdsState.get();
-
+    // const [store] = getReqObjByNames(canvas, ["invisibleStore"]);
+    // const fOIds = store!.fOIds as string[];
+    const fOIds = fOIdsState.get();
     fOIds.forEach((fOId) => {
         findAndLinkOneGroup(fabricRef, fOId);
     });
@@ -144,7 +141,7 @@ const findAndLinkOneGroup = (
 
     // console.log("Linking existing points");
     if (line1) {
-        console.log("Line found!", line1.commonID);
+        // console.log("Line found!", line1.commonID);
         const line = line1 as fabric.Path;
         // To fix position of line after loading
         line!.height = 0;

@@ -273,7 +273,7 @@ export function newAnimation(
     });
     canvas.renderAll();
 
-    console.log(fOInFrames);
+    // console.log(fOInFrames);
 
     const duration = animationDurationS.get() ?? 1500; // animation duration for each frame in ms
 
@@ -326,8 +326,8 @@ export function newAnimation(
             requestAnimationFrame(animate);
         } else {
             // onFullAnimationComplete
-            animationFrameS.set(2);
-            currentFrameS.set(2);
+            animationFrameS.set(1);
+            currentFrameS.set(0);
             animationPauseS.set(true);
             animationRelativeProgressS.set(0);
             console.log("Full animation complete");

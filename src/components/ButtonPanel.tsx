@@ -1,10 +1,9 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import Button from "./Button";
 import { fabricRefType } from "./Canvas";
 import { cubic, linear, quad } from "./fabric_functions/interpolate";
 import { drawCubic } from "./fabric_functions/cubic";
 import exampleFrames from "../assets/exampleFrames.json";
-import example2Frames from "../assets/egFrames2.json";
 import {
     addRectangle,
     logObject,
@@ -24,14 +23,20 @@ import {
 } from "./fabric_functions/frame_object";
 import { newAnimation } from "./fabric_functions/helpers";
 import { extraProps } from "./fabric_functions/final_functions/constants";
-import { animationPauseS, currentFrameS } from "./react-ridge";
+import {
+    animationFrameS,
+    animationPauseS,
+    currentFrameS,
+    fOIdsState,
+    framesS,
+} from "./react-ridge";
 import DisplayAnimationPanel from "./AnimationPanel";
 
 //TODO: Add fOIds to data, to the collective data
-// type framesDataType = {
-//     fOIds: string[];
-//     frames: canvasJSONType[];
-// };
+export type framesDataType = {
+    fOIds: string[];
+    frames: canvasJSONType[];
+};
 
 export type canvasJSONType = {
     version: string;
@@ -39,67 +44,17 @@ export type canvasJSONType = {
 };
 
 const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
-    const [frames, setFrames] = useState<canvasJSONType[]>([
-        loadFirstCanvas(fabricRef),
-    ]);
+    // const [frames, setFrames] = useState<canvasJSONType[]>([
+    //     loadFirstCanvas(fabricRef),
+    // ]);
+    const [frames, setFrames] = framesS.use();
+
     // const [currentFrame, setCurrentFrame] = useState<number>(0);
     const [currentFrame, setCurrentFrame] = currentFrameS.use();
     // const [pause, setPause] = useState<boolean>(true);
     const [showAniPanel, setShowAniPanel] = useState<boolean>(false);
 
     const [pause, setPause] = animationPauseS.use();
-
-    // useEffect(() => {
-    //     setPause(animationRef.current.pause);
-    // }, [animationRef.current.pause]);
-
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const onCanvasModified = useCallback(() => {
-        // console.log("Called through useCallback");
-        updateCurrentFrame(frames, currentFrame, fabricRef);
-    }, [frames, currentFrame, fabricRef]);
-
-    // # on mount only once
-    useEffect(() => {
-        // onCanvasModified();
-        if (fabricRef.current) {
-            loadFirstCanvas(fabricRef);
-        }
-
-        return () => {};
-    }, [fabricRef]);
-
-    // useEffect(() => console.log(frames), [frames]);
-
-    // Store currentFrame to canvas object
-    // useEffect(() => {
-    //     if (fabricRef.current) {
-    //         const canvas = fabricRef.current!;
-    //         const [store] = getReqObjByNames(canvas, ["invisibleStore"]);
-    //         if (store) {
-    //             store.currentFrame = currentFrame;
-    //         }
-    //     }
-    //     return () => {};
-    // }, [currentFrame, fabricRef]);
-
-    function loadFirstCanvas(fabricRef: fabricRefType): canvasJSONType {
-        const canvas = fabricRef.current!;
-        if (canvas) {
-            return canvas.toJSON(extraProps);
-        }
-    }
-
-    // # whenever fabricRef changes, update frame
-    // useEffect(() => {
-    //     const canvas = fabricRef.current!;
-    //     // TODO: why canvas not available ?
-    //     if (canvas) {
-    //         canvas.on("object:modified", onCanvasModified);
-    //     }
-
-    //     return () => {};
-    // }, [fabricRef, onCanvasModified]);
 
     // when we tap old frames
     function applyOldFrame(
@@ -112,11 +67,8 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
         canvas.loadFromJSON(JSON.stringify(frames[idx]), () => {
             // run required functions for bezier function to work
             // addCBCHelpers(fabricRef, "frame_line");
-            runAfterJSONLoad2(fabricRef, "frame_line");
-            // runAfterJSONLoad(fabricRef);
             // addCBCHelpers(fabricRef, "cubeLine");
-            // runAfterJSONLoad(fabricRef);
-            // runAfterJSONLoadLine(fabricRef);
+            runAfterJSONLoad2(fabricRef);
             canvas.renderAll.bind(canvas);
         });
         // const loadedFrame = fabricRef.current!.getObjects();
@@ -124,21 +76,6 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
         //     "Compare oldFrame, loadedFrame",
         //     deepDiff(oldFrame, loadedFrame)
         // );
-    }
-
-    // Run this whenever canvas is updated
-    function updateCurrentFrame(
-        frames: canvasJSONType[],
-        currentFrame: number,
-        fabricRef: fabricRefType
-    ) {
-        const canvas = fabricRef.current!;
-        const newFrames = frames.map((frame, idx) => {
-            if (idx === currentFrame) return canvas.toJSON(extraProps);
-            else return frame;
-        });
-
-        setFrames(newFrames);
     }
 
     // after tapping +
@@ -276,9 +213,11 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
                             }
                             ${currentFrame == idx ? "font-bold" : ""}
                             `}
-                            onClick={() =>
-                                applyOldFrame(frames, idx, fabricRef)
-                            }
+                            onClick={() => {
+                                applyOldFrame(frames, idx, fabricRef);
+                                animationPauseS.set(true);
+                                animationFrameS.set(idx);
+                            }}
                         >
                             {idx}
                         </button>
@@ -322,15 +261,28 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
                 />
                 <Button
                     name="Load Eg frames"
-                    // @ts-expect-error hhh
-                    onClick={() => setFrames(exampleFrames)}
+                    onClick={() => {
+                        fOIdsState.set(exampleFrames.fOIds);
+                        // @ts-expect-error hhh
+                        setFrames(exampleFrames.frames);
+                    }}
+                />
+
+                <Button name="Log frames" onClick={() => console.log(frames)} />
+                <Button
+                    name="Log fOIds"
+                    onClick={() => console.log(fOIdsState.get())}
                 />
                 <Button
-                    name="Load Eg2 frames"
-                    // @ts-expect-error hhh
-                    onClick={() => setFrames(example2Frames)}
+                    name="Log FrameData"
+                    onClick={() => {
+                        const frameData: framesDataType = {
+                            fOIds: fOIdsState.get(),
+                            frames: frames,
+                        };
+                        console.log(frameData);
+                    }}
                 />
-                <Button name="Log frames" onClick={() => console.log(frames)} />
                 <Button
                     name="Toggle Ani Panel"
                     onClick={() => setShowAniPanel((prev) => !prev)}
