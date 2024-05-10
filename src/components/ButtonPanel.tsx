@@ -80,19 +80,28 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
     }
 
     // after tapping +
-    // TODO:
-    //! Adding new frame when on non-last screen, copies currentFrame which is unexpected.
-    // react reconciler, probably batching the canvas changes.
-    // need to make all following function independent of current fabricRef.
-    // OR
-    // await for setCurrentFrame to render on DOM (canvas)
-    // OR
-    // check if button's are rerendered
+
     function addNewFrame(frames: canvasJSONType[], fabricRef: fabricRefType) {
-        const newFrames = [...frames, frames[-1]]; // copy old frame data to newFrame
+        const canvas = fabricRef.current!;
+        // TODO: Allow to add a new frame, when on any frame
+        if (currentFrameS.get() < framesS.get().length - 1) {
+            canvas.loadFromJSON(
+                JSON.stringify(frames[frames.length - 1]),
+                () => {
+                    canvas.renderAll();
+                    const newFrames = [...frames, canvas.toJSON(extraProps)]; // copy old frame data to newFrame
+                    setFrames(newFrames); // add frame
+                    //your code to be executed after 1 second
+                    setCurrentFrame(frames.length); // currently OOR, but will work
+                    updateObjsForNewFrame(fabricRef); // update for new frame
+                    updateFramesData(fabricRef.current!); // save updates to frame
+                    return;
+                }
+            );
+        }
+        const newFrames = [...frames, canvas.toJSON(extraProps)]; // copy old frame data to newFrame
         setFrames(newFrames); // add frame
-        setCurrentFrame(framesS.get().length - 1);
-        //! Current frame should be loaded, then update objs of currentframe
+        setCurrentFrame(frames.length);
         updateObjsForNewFrame(fabricRef); // update for new frame
         updateFramesData(fabricRef.current!); // save updates to frame
     }
