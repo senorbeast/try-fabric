@@ -1,23 +1,16 @@
-import type { fabricRefType } from "../Canvas";
+import type { fabricRefType } from "../../Canvas";
 import { fabric } from "fabric";
 import { v4 as uuidv4 } from "uuid";
 
-import {
-    getReqObjByNames,
-    getReqObjByNamesForID,
-    setObjsOptions,
-} from "./helpers";
-import {
-    linkEndPointsToLine,
-    linkPointsToLine,
-} from "./final_functions/linkage";
+import { getReqObjByNamesForID, setObjsOptions } from "../helpers";
+import { linkPointsToLine } from "./linkage";
 import {
     makeCustomEndPoint,
     updateLinePath,
     updatePointToLine,
-} from "./final_functions/makeUpdateObjects";
-import { endPointOffset } from "./final_functions/constants";
-import { currentFrameS, fOIdsState } from "../react-ridge";
+} from "./makeUpdateObjects";
+import { endPointOffset } from "./constants";
+import { currentFrameS, fOIdsState } from "../../react-ridge";
 
 export const frameObject = (
     fabricRef: fabricRefType,
@@ -25,10 +18,7 @@ export const frameObject = (
 ) => {
     const canvas = fabricRef.current!;
 
-    const p3 = makeCustomEndPoint(
-        startPoint[0] + endPointOffset,
-        startPoint[1] + endPointOffset
-    );
+    const p3 = makeCustomEndPoint(startPoint[0], startPoint[1]);
     p3.name = "p3";
     p3.set({ hasBorders: false, hasControls: false });
 
@@ -96,23 +86,6 @@ function updateObjForNewFrame(
 }
 
 export function runAfterJSONLoad(fabricRef: fabricRefType) {
-    const canvas = fabricRef.current!;
-    const [line, p0, p3] = getReqObjByNames(canvas, ["frame_line", "p0", "p3"]);
-    linkEndPointsToLine(line as fabric.Path, p0!, p3!);
-}
-
-export function runAfterJSONLoad2(
-    fabricRef: fabricRefType
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    // lineName: string,
-    // replace?: boolean
-) {
-    // This is required all canvas JSON is loaded,
-    // these objects/functionality is not stored in the json
-    // const canvas = fabricRef.current!;
-
-    // const [store] = getReqObjByNames(canvas, ["invisibleStore"]);
-    // const fOIds = store!.fOIds as string[];
     const fOIds = fOIdsState.get();
     fOIds.forEach((fOId) => {
         findAndLinkOneGroup(fabricRef, fOId);

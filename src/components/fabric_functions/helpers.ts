@@ -1,6 +1,6 @@
 import { canvasJSONType } from "../ButtonPanel";
 import { fabricRefType } from "../Canvas";
-import { animateCurve, animateObjectAlongPath, imageObject } from "./common";
+import { animateObjectAlongPath, imageObject } from "./common";
 import { fabric } from "fabric";
 import { endPointOffset } from "./final_functions/constants";
 import { interpolatePath } from "./interpolate";

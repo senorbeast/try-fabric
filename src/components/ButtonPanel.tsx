@@ -19,8 +19,8 @@ import { drawLine } from "./fabric_functions/line";
 import {
     frameObject,
     updateObjsForNewFrame,
-    runAfterJSONLoad2,
-} from "./fabric_functions/frame_object";
+    runAfterJSONLoad,
+} from "./fabric_functions/final_functions/frame_object";
 import { newAnimation } from "./fabric_functions/helpers";
 import { extraProps } from "./fabric_functions/final_functions/constants";
 import {
@@ -31,7 +31,6 @@ import {
     framesS,
 } from "./react-ridge";
 import DisplayAnimationPanel from "./AnimationPanel";
-import { Canvas } from "fabric/fabric-impl";
 import { updateFramesData } from "./fabric_functions/final_functions/events";
 
 //TODO: Add fOIds to data, to the collective data
@@ -70,7 +69,7 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
             // run required functions for bezier function to work
             // addCBCHelpers(fabricRef, "frame_line");
             // addCBCHelpers(fabricRef, "cubeLine");
-            runAfterJSONLoad2(fabricRef);
+            runAfterJSONLoad(fabricRef);
             canvas.renderAll.bind(canvas);
         });
         // const loadedFrame = fabricRef.current!.getObjects();
@@ -81,13 +80,19 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
     }
 
     // after tapping +
+    //! Adding new frame when on non-last screen, copies currentFrame which is unexpected.
+    // react reconciler, probably batching the canvas changes.
+    // need to make all following function independent of current fabricRef.
+    // OR
+    // await for setCurrentFrame to render on DOM (canvas)
     function addNewFrame(frames: canvasJSONType[], fabricRef: fabricRefType) {
-        const canvas = fabricRef.current!;
-        setCurrentFrame(frames.length);
-        const newFrames = [...frames, canvas.toJSON(extraProps)]; // copy old frame data to newFrame
+        setCurrentFrame(frames.length - 1);
+        // const canvas = fabricRef.current!;
+        const newFrames = [...frames, frames[-1]]; // copy old frame data to newFrame
         setFrames(newFrames); // add frame
         updateObjsForNewFrame(fabricRef); // update for new frame
         updateFramesData(fabricRef.current!); // save updates to frame
+        setCurrentFrame(frames.length - 1);
     }
 
     return (
