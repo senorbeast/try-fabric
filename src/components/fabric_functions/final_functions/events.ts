@@ -37,7 +37,6 @@ export function bindFOEvents(fabricRef: fabricRefType) {
 export const updateFramesData = (canvas: fabric.Canvas) => {
     // current frame data
     const currentFrameData = canvas.toJSON(extraProps);
-    console.log("Updating frames");
 
     const currentFrame = currentFrameS.get();
     const frames = framesS.get();
