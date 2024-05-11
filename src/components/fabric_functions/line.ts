@@ -85,11 +85,11 @@ function onObjectMoving(e: fabric.IEvent<MouseEvent>, canvas?: fabric.Canvas) {
     if (e.target!.name === "p0" || e.target!.name === "p3") {
         const p = e.target!;
         if (p.line1) {
-            p.line1.path[0][1] = p.left + endPointOffset;
-            p.line1.path[0][2] = p.top + endPointOffset;
+            p.line1.path[0][1] = p.left! + endPointOffset;
+            p.line1.path[0][2] = p.top! + endPointOffset;
         } else if (p.line4) {
-            p.line4.path[1][1] = p.left + endPointOffset;
-            p.line4.path[1][2] = p.top + endPointOffset;
+            p.line4.path[1][1] = p.left! + endPointOffset;
+            p.line4.path[1][2] = p.top! + endPointOffset;
         }
     }
 }

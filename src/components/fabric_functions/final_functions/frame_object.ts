@@ -99,7 +99,7 @@ const findAndLinkOneGroup = (
 ) => {
     // const { line, points } = getReqObj(canvas);
     const canvas = fabricRef.current!;
-    const [line1, p0, p1, p2, p3] = getReqObjByNamesForID(
+    const [lineO, p0, p1, p2, p3] = getReqObjByNamesForID(
         canvas,
         commonID,
         ["frame_line", "p0", "p1", "p2", "p3"],
@@ -107,9 +107,9 @@ const findAndLinkOneGroup = (
     );
 
     // console.log("Linking existing points");
-    if (line1) {
+    if (lineO) {
         // console.log("Line found!", line1.commonID);
-        const line = line1 as fabric.Path;
+        const line = lineO as fabric.Path;
         // To fix position of line after loading
         line!.height = 0;
         line!.width = 0;

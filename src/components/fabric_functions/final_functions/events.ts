@@ -15,6 +15,7 @@ export function bindFOEvents(fabricRef: fabricRefType) {
     // canvas.__eventListeners = {};
     const canvas = fabricRef.current!;
 
+    // @ts-expect-error hhh
     canvas.on({
         "object:selected": (e: fabric.IEvent<MouseEvent>) =>
             onObjectSelected(e, canvas),
@@ -81,19 +82,26 @@ function updateLineToCurve(
     commonID: string,
     canvas: fabric.Canvas
 ) {
-    const [line, p1, p2] = getReqObjByNamesForID(canvas, commonID, [
+    const [lineO, p1, p2] = getReqObjByNamesForID(canvas, commonID, [
         "frame_line",
         "p1",
         "p2",
     ]);
+    const line = lineO as fabric.Path;
 
     if (line) {
         if (e.target!.name == "p3" && (p1 == null || p2 == null)) {
             // add p1, p2 controls points, make it a beizer curve
-            const path = line!.path! as fabric.Path["path"];
-            const startPoint: [number, number] = [path[0][1], path[0][2]];
+            const path = line!.path;
+            const startPoint: [number, number] = [path[0][1], path[0][2]] as [
+                number,
+                number
+            ];
             //TODO: How did p15, p16 work earlier ?
-            const endPoint: [number, number] = [path[1][1], path[1][2]];
+            const endPoint: [number, number] = [path[1][1], path[1][2]] as [
+                number,
+                number
+            ];
             const [controlPoint1, controlPoint2] = findEquidistantPoints(
                 startPoint,
                 endPoint
@@ -139,7 +147,7 @@ function onObjectMouseDown(
     }
     // console.log("mousedown", e);
     if (e.target!.name == "p3" && e.target!.currentType == "curve") {
-        updateCurveToLine(e, e.target!.commonID, canvas);
+        updateCurveToLine(e, e.target!.commonID!, canvas);
     }
 }
 
@@ -151,16 +159,18 @@ function updateCurveToLine(
     // remove p1, p2 controls points, make it a line
     console.log("UpdateCurveToLine");
 
-    const [line, p1, p2] = getReqObjByNamesForID(canvas, commonID, [
+    const [lineO, p1, p2] = getReqObjByNamesForID(canvas, commonID, [
         "frame_line",
         "p1",
         "p2",
     ]);
 
+    const line = lineO as fabric.Path;
+
     if (line) {
-        const path = line!.path! as fabric.Path["path"];
+        const path = line!.path!;
         const endPoint = [path[1][5], path[1][6]];
-        canvas.remove(p1, p2);
+        canvas.remove(p1!, p2!);
         line.path[1] = ["L", endPoint[0], endPoint[1]];
         setObjsOptions([e.target!], {
             currentType: "line",
@@ -169,6 +179,7 @@ function updateCurveToLine(
     }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function onObjectMoving(e: fabric.IEvent<MouseEvent>, canvas?: fabric.Canvas) {
     if (e.target == null) {
         console.log("onObjectMoving null target");
@@ -180,7 +191,7 @@ function onObjectMoving(e: fabric.IEvent<MouseEvent>, canvas?: fabric.Canvas) {
 
     const initialFrame = e.target!.initialFrame;
     const currentType = e.target!.currentType;
-    const commonID = e.target!.commonID;
+    // const commonID = e.target!.commonID;
     // console.log(
     //     "Current frame is",
     //     currentFrame,
@@ -237,13 +248,13 @@ function onObjectMovingForCurve(
             p.line4.path[1][6] = p.top! + endPointOffset;
         }
     } else if (e.target!.name === "p1") {
-        const p = e.target;
+        const p = e.target!;
         if (p.line2) {
             p.line2.path[1][1] = p.left! + controlPointOffset;
             p.line2.path[1][2] = p.top! + controlPointOffset;
         }
     } else if (e.target!.name === "p2") {
-        const p = e.target;
+        const p = e.target!;
         if (p.line3) {
             p.line3.path[1][3] = p.left! + controlPointOffset;
             p.line3.path[1][4] = p.top! + controlPointOffset;
@@ -268,7 +279,9 @@ export function onObjectSelected(
 }
 
 export function onSelectionCleared(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     e: fabric.IEvent<MouseEvent>,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     canvas: fabric.Canvas
 ) {
     // const activeObject = e.target;

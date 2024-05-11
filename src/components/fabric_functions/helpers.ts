@@ -69,7 +69,8 @@ function getReqObjBy(
 ): (fabric.Object | null)[] {
     const result: (fabric.Object | null)[] = [];
     canvas.getObjects().forEach((obj) => {
-        if (value == obj[key]) {
+        const _obj = JSON.parse(JSON.stringify(obj));
+        if (value == _obj[key]) {
             result.push(obj);
         }
     });
@@ -104,13 +105,13 @@ function setObjsOptions(
 // starting at end point of cbc
 // keep same ids/names
 
-function getEndPoint(line: fabric.Object): [number, number] {
+function getEndPoint(line: fabric.Path): [number, number] {
     const path = line.path;
     if (path[1][0] == "L") {
-        return [path[1][1], path[1][2]];
+        return [path[1][1] as number, path[1][2] as number];
     }
     // else if(path[1][0] == 'C'){
-    return [path[1][5], path[1][6]];
+    return [path[1][5] as number, path[1][6] as number];
 }
 
 // lifecycle of frame
@@ -144,9 +145,9 @@ function animateOverFrames(fabricRef: fabricRefType, frames: canvasJSONType[]) {
     // Fill in paths across frames
     frames.forEach((frame) => {
         if (frame !== undefined) {
-            frame.objects.forEach((obj) => {
-                if (obj.name == "frame_line") {
-                    const obj = obj as fabric.Path;
+            frame.objects.forEach((obj1) => {
+                if (obj1.name == "frame_line") {
+                    const obj = obj1 as fabric.Path;
                     allPathsAcrossFrames.push(obj.path);
                 }
             });
@@ -259,14 +260,16 @@ export function newAnimation(
 
                     // Create single animate object
                     if (
-                        !Object.keys(addedAnimateObjects).includes(obj.commonID)
+                        !Object.keys(addedAnimateObjects).includes(
+                            obj.commonID!
+                        )
                     ) {
                         // New animateObject
                         const animateObject = imageObject("my-image");
                         animateObject.set({ name: "animateObject" });
-                        addedAnimateObjects[obj.commonID] = animateObject;
+                        addedAnimateObjects[obj.commonID!] = animateObject;
                     }
-                    fOInFrames[frameIdx][obj.commonID] = obj.path;
+                    fOInFrames[frameIdx][obj.commonID!] = obj.path;
                 }
             });
         }
