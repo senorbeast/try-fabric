@@ -70,12 +70,21 @@ export function updateLinePath(
     endPoint: [number, number],
     line: fabric.Path
 ) {
+    line.left = startPoint[0];
+    line.top = startPoint[1];
+    line.width = 0;
+    line.height = 0;
+
+    line.pathOffset.x = startPoint[0];
+    line.pathOffset.y = startPoint[1];
+
     line.path[0][0] = "M";
     line.path[0][1] = startPoint[0];
     line.path[0][2] = startPoint[1];
     line.path[1][0] = "L";
     line.path[1][1] = endPoint[0];
     line.path[1][2] = endPoint[1];
+
     return line;
 }
 

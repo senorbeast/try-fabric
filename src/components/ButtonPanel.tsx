@@ -219,12 +219,12 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
                     {frames.map((_, idx) => (
                         <button
                             key={idx}
-                            className={`w-8 border-2 ${
-                                frames.length - 1 > idx
-                                    ? "bg-green-400"
+                            className={`w-8 border-2 
+                            ${
+                                currentFrame == idx
+                                    ? "font-bold  bg-purple-400"
                                     : "bg-white"
                             }
-                            ${currentFrame == idx ? "font-bold" : ""}
                             `}
                             onClick={() => {
                                 applyOldFrame(frames, idx, fabricRef);
