@@ -64,13 +64,12 @@ function getReqObjByNamesForID(
 
 function getReqObjBy(
     canvas: fabric.Canvas,
-    key: string,
+    key: keyof fabric.Object,
     value: string
 ): (fabric.Object | null)[] {
     const result: (fabric.Object | null)[] = [];
     canvas.getObjects().forEach((obj) => {
-        const _obj = JSON.parse(JSON.stringify(obj));
-        if (value == _obj[key]) {
+        if (value == obj[key]) {
             result.push(obj);
         }
     });
@@ -251,8 +250,9 @@ export function newAnimation(
     // Fill in paths across frames
     frames.forEach((frame, frameIdx) => {
         if (frame !== undefined) {
-            frame.objects.forEach((obj) => {
-                if (obj.name == "frame_line") {
+            frame.objects.forEach((objO) => {
+                if (objO.name == "frame_line") {
+                    const obj = objO as fabric.Path;
                     // New Frame
                     if (!fOInFrames[frameIdx]) {
                         fOInFrames[frameIdx] = {};
