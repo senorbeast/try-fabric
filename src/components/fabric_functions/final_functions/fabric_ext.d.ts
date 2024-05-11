@@ -5,18 +5,14 @@ import {
     Path as FabricPath,
 } from "@types/fabric";
 
-export * from "@types/fabric";
-
+// export * from "@types/fabric";
 declare module "@types/fabric" {
     namespace fabric {
         interface IObjectOptions
             extends FabricObjectOptions,
                 CustomObjectOptions {}
 
-        interface Object
-            extends FabricObject,
-                CustomObjectOptions,
-                CustomObject {}
+        interface Object extends FabricObject, CustomObject {}
 
         interface Path extends FabricPath, FabricPathOptions {
             path: (string | number)[][];
