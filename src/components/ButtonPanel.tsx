@@ -18,9 +18,9 @@ import _ from "lodash";
 import { drawLine } from "./fabric_functions/line";
 import {
     frameObject,
-    newObjectForNewFrame,
-    runAfterJSONLoad2,
-} from "./fabric_functions/frame_object";
+    updateObjsForNewFrame,
+    runAfterJSONLoad,
+} from "./fabric_functions/final_functions/frame_object";
 import { newAnimation } from "./fabric_functions/helpers";
 import { extraProps } from "./fabric_functions/final_functions/constants";
 import {
@@ -31,6 +31,7 @@ import {
     framesS,
 } from "./react-ridge";
 import DisplayAnimationPanel from "./AnimationPanel";
+import { updateFramesData } from "./fabric_functions/final_functions/events";
 
 //TODO: Add fOIds to data, to the collective data
 export type framesDataType = {
@@ -68,7 +69,7 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
             // run required functions for bezier function to work
             // addCBCHelpers(fabricRef, "frame_line");
             // addCBCHelpers(fabricRef, "cubeLine");
-            runAfterJSONLoad2(fabricRef);
+            runAfterJSONLoad(fabricRef);
             canvas.renderAll.bind(canvas);
         });
         // const loadedFrame = fabricRef.current!.getObjects();
@@ -79,18 +80,30 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
     }
 
     // after tapping +
+
     function addNewFrame(frames: canvasJSONType[], fabricRef: fabricRefType) {
         const canvas = fabricRef.current!;
+        // TODO: Allow to add a new frame, when on any frame
+        if (currentFrameS.get() < framesS.get().length - 1) {
+            canvas.loadFromJSON(
+                JSON.stringify(frames[frames.length - 1]),
+                () => {
+                    canvas.renderAll();
+                    const newFrames = [...frames, canvas.toJSON(extraProps)]; // copy old frame data to newFrame
+                    setFrames(newFrames); // add frame
+                    //your code to be executed after 1 second
+                    setCurrentFrame(frames.length); // currently OOR, but will work
+                    updateObjsForNewFrame(fabricRef); // update for new frame
+                    updateFramesData(fabricRef.current!); // save updates to frame
+                    return;
+                }
+            );
+        }
+        const newFrames = [...frames, canvas.toJSON(extraProps)]; // copy old frame data to newFrame
+        setFrames(newFrames); // add frame
         setCurrentFrame(frames.length);
-        const newFrame = [...frames, canvas.toJSON(extraProps)];
-        setFrames(newFrame); // add frame
-        newObjectForNewFrame(fabricRef);
-
-        // const oldFrame = fabricRef.current!.getObjects();
-        // console.log(
-        //     "Compare oldFrame, savedFrame",
-        //     deepDiff(oldFrame, newFrame[currentFrame])
-        // );
+        updateObjsForNewFrame(fabricRef); // update for new frame
+        updateFramesData(fabricRef.current!); // save updates to frame
     }
 
     return (
@@ -206,12 +219,12 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
                     {frames.map((_, idx) => (
                         <button
                             key={idx}
-                            className={`w-8 border-2 ${
-                                frames.length - 1 > idx
-                                    ? "bg-green-400"
+                            className={`w-8 border-2 
+                            ${
+                                currentFrame == idx
+                                    ? "font-bold  bg-purple-400"
                                     : "bg-white"
                             }
-                            ${currentFrame == idx ? "font-bold" : ""}
                             `}
                             onClick={() => {
                                 applyOldFrame(frames, idx, fabricRef);
@@ -248,16 +261,7 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
                 <p className="text-white">Tactic Obj:</p>
                 <Button
                     name="frameObject"
-                    onClick={() =>
-                        frameObject(
-                            fabricRef,
-                            [100, 100],
-                            [100, 100],
-                            "frame_line",
-                            true,
-                            {}
-                        )
-                    }
+                    onClick={() => frameObject(fabricRef, [100, 100])}
                 />
                 <Button
                     name="Load Eg frames"

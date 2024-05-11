@@ -10,13 +10,7 @@ export const unMovableOptions: fabric.IObjectOptions = {
     hasBorders: false,
 };
 
-export const customAttributes = [
-    "commonID",
-    "initialFrame",
-    "currentType",
-    "currentFrame",
-    "fOIds",
-];
+export const customAttributes = ["commonID", "initialFrame", "currentType"];
 
 export const extraProps = [
     "name",

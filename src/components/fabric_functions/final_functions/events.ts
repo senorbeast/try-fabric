@@ -28,9 +28,13 @@ export function bindFOEvents(fabricRef: fabricRefType) {
             onObjectMouseDown(e, canvas),
         "object:modified": (e: fabric.IEvent<MouseEvent>) =>
             onObjectModified(e, canvas),
+        "object:removed": (e: fabric.IEvent<MouseEvent>) =>
+            onObjectModified(e, canvas),
+        "object:added": (e: fabric.IEvent<MouseEvent>) =>
+            onObjectModified(e, canvas),
     });
 }
-const updateFramesData = (canvas: fabric.Canvas) => {
+export const updateFramesData = (canvas: fabric.Canvas) => {
     // current frame data
     const currentFrameData = canvas.toJSON(extraProps);
 
