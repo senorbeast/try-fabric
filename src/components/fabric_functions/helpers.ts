@@ -281,22 +281,24 @@ export function newAnimation(
     const duration = animationDurationS.get() ?? 1500; // animation duration for each frame in ms
 
     let startTime: number | null = null;
+    let pausedTime: number | null = null;
 
     const renderedAnimateObjects: string[] = [];
 
     const animate = (timestamp: number) => {
-        if (animationPauseS.get() == true) {
-            // console.log("Pause true");
-            return;
-        }
         if (!startTime) {
             startTime = timestamp;
         }
-        const runtime = timestamp - startTime;
+        const runtime = animationPauseS.get()
+            ? pausedTime! - startTime!
+            : timestamp - startTime;
+
+        // const runtime = timestamp - startTime;
         // console.log(
         //     "Animation Progress",
         //     animationFrameS.get() + animationRelativeProgressS.get()
         // );
+        console.log(startTime, timestamp, performance.now());
         animationRelativeProgressS.set(runtime / duration);
 
         // Get objects in currentFrame and update the position
@@ -319,15 +321,26 @@ export function newAnimation(
         );
         canvas.renderAll();
 
-        if (runtime < duration && animationFrameS.get() < frames.length) {
-            // More animation to be done
+        if (animationPauseS.get() == true) {
+            if (pausedTime === null) {
+                // Store the current timestamp as the paused time
+                pausedTime = performance.now();
+            }
+            return;
+        } else if (
+            runtime < duration &&
+            animationFrameS.get() < frames.length
+        ) {
+            // More animation to be done in current frame
             requestAnimationFrame(animate);
+            return;
         } else if (animationFrameS.get() < frames.length - 1) {
-            //
+            // moving to the next frame
             animationFrameS.set((prev) => prev + 1);
             startTime = timestamp;
             animationRelativeProgressS.set(0);
             requestAnimationFrame(animate);
+            return;
         } else {
             // onFullAnimationComplete
             animationFrameS.set(1);
@@ -335,8 +348,10 @@ export function newAnimation(
             animationPauseS.set(true);
             animationRelativeProgressS.set(0);
             console.log("Full animation complete");
+            return;
         }
     };
+
     requestAnimationFrame(animate);
 }
 

@@ -19,4 +19,4 @@ export const framesS = newRidgeState<canvasJSONType[]>([
         objects: [],
     },
 ]);
-// export const prevStartTime;
+export const prevStartTime = newRidgeState<number>(0);

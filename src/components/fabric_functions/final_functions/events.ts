@@ -74,7 +74,7 @@ function onObjectMouseUp(e: fabric.IEvent<MouseEvent>, canvas: fabric.Canvas) {
         return;
     }
     updateLineToCurve(e, e.target!.commonID!, canvas);
-    updateFramesData(canvas);
+    updateFramesData(canvas); //Save to frames
 }
 
 function updateLineToCurve(
@@ -201,7 +201,8 @@ function onObjectMoving(e: fabric.IEvent<MouseEvent>, canvas?: fabric.Canvas) {
     // );
 
     if (initialFrame == currentFrame) {
-        currentType == "point";
+        // Should move normally
+        // currentType == "point";
         // console.log(e.target.left, e.target.top);
         // console.log("Current type is point");
         // TODO: If next frame exist, update the next frame's start point accordingly

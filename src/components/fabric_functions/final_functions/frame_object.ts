@@ -3,7 +3,7 @@ import { fabric } from "fabric";
 import { v4 as uuidv4 } from "uuid";
 
 import { getReqObjByNamesForID, setObjsOptions } from "../helpers";
-import { linkPointsToLine } from "./linkage";
+import { linkLinetoPoints } from "./linkage";
 import {
     makeCustomEndPoint,
     updateLinePath,
@@ -80,7 +80,7 @@ function updateObjForNewFrame(
             p3!.top! + endPointOffset,
         ] as [number, number];
         updateLinePath(pointPos, pointPos, line as fabric.Path);
-        linkPointsToLine(line as fabric.Path, p0!, p1!, p2!, p3!);
+        linkLinetoPoints(line as fabric.Path, p0!, p1!, p2!, p3!);
         canvas.renderAll();
     }
 }
@@ -118,7 +118,7 @@ const findAndLinkOneGroup = (
 
         // Link existing points
         // const [p0, p1, p2, p3] = points;
-        linkPointsToLine(line, p0!, p1!, p2!, p3!);
+        linkLinetoPoints(line, p0!, p1!, p2!, p3!);
     }
 
     // bindCubicEvents(canvas);

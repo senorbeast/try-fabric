@@ -1,11 +1,11 @@
 export {
     linkControlPointsToLine,
     linkEndPointsToLine,
-    linkPointsToLine,
+    linkLinetoPoints,
     unLinkControlPointsFromLine,
 };
 
-function linkPointsToLine(
+function linkLinetoPoints(
     line: fabric.Path,
     p0?: fabric.Object,
     p1?: fabric.Object,
