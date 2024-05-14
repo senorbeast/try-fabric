@@ -1,6 +1,6 @@
 import { fabric } from "fabric";
 import { fabricRefType } from "../../Canvas";
-import { currentFrameS, framesS } from "../../react-ridge";
+import { contextMenuS, currentFrameS, framesS } from "../../react-ridge";
 import {
     getReqObjByNamesForID,
     findEquidistantPoints,
@@ -35,8 +35,26 @@ export function bindFOEvents(fabricRef: fabricRefType) {
         "object:added": (e: fabric.IEvent<MouseEvent>) =>
             onObjectModified(e, canvas),
         drop: (e: fabric.IEvent<MouseEvent>) => onDrop(e, canvas),
+        "selection:updated": (e: fabric.IEvent<MouseEvent>) =>
+            onSelectionUpdated(e, canvas),
+        "selection:created": (e: fabric.IEvent<MouseEvent>) =>
+            onSelectionCreated(e, canvas),
         // drop: (e: fabric.IEvent<MouseEvent>) => onDrop(e, canvas),
     });
+}
+
+function onSelectionUpdated(
+    e: fabric.IEvent<MouseEvent>,
+    canvas: fabric.Canvas
+) {
+    console.log(e);
+}
+
+function onSelectionCreated(
+    e: fabric.IEvent<MouseEvent>,
+    canvas: fabric.Canvas
+) {
+    console.log(e);
 }
 
 function onDrop(e: fabric.IEvent<MouseEvent>, canvas: fabric.Canvas) {
@@ -47,14 +65,26 @@ function onDrop(e: fabric.IEvent<MouseEvent>, canvas: fabric.Canvas) {
 
     const imgE = document.getElementById(getImageElementId) as HTMLImageElement;
 
-    const imgObj = new fabric.Image(imgE, {
+    const imgObj = new fabric.Image(imgE, {});
+    const textObj = new fabric.Text("Hi", {
+        fontFamily: "Helvetica",
+        fill: "#fff",
+        originX: "center",
+        originY: "center",
+        fontSize: 18,
+        top: -10,
+        fontWeight: "bold",
+        name: "text",
+    });
+    const groupObj = new fabric.Group([imgObj], {
         left: e.e.layerX - offsetX, // Fix mouse offset
         top: e.e.layerY - offsetY,
-        angle: 0,
+        dirty: true,
+        // selectable: false,
     });
-    imgObj.scaleToWidth(imgE.width); //scaling the image height and width with target height and width, scaleToWidth, scaleToHeight fabric inbuilt function.
-    imgObj.scaleToHeight(imgE.height);
-    canvas.add(imgObj);
+    groupObj.scaleToWidth(imgE.width); //scaling the image height and width with target height and width, scaleToWidth, scaleToHeight fabric inbuilt function.
+    groupObj.scaleToHeight(imgE.height);
+    canvas.add(groupObj);
     canvas.renderAll();
 }
 
@@ -91,6 +121,15 @@ function onObjectModified(e: fabric.IEvent<MouseEvent>, canvas: fabric.Canvas) {
 
 // Convert Line to Cubic Beizer
 function onObjectMouseUp(e: fabric.IEvent<MouseEvent>, canvas: fabric.Canvas) {
+    if (e.button == 3 && e.target) {
+        console.log("Right clicked");
+        contextMenuS.set({
+            left: e.target!.left!,
+            top: e.target!.top!,
+            staticID: "",
+        });
+        // canvas.remove(e.target);
+    }
     // When endpoint released
     if (e.target == null) {
         console.log("onObjectMouseUp null target");
@@ -291,15 +330,7 @@ export function onObjectSelected(
     canvas: fabric.Canvas
 ) {
     const activeObject = e.target!;
-    if (activeObject.name === "p0" || activeObject.name === "p3") {
-        activeObject.line2!.animate("opacity", "1", {
-            duration: 200,
-            onChange: canvas.renderAll.bind(canvas),
-        });
-        activeObject.line2!.selectable = true;
-    } else {
-        console.log(activeObject);
-    }
+    console.log(activeObject);
 }
 
 export function onSelectionCleared(

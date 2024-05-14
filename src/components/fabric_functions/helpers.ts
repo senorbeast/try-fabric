@@ -298,7 +298,7 @@ export function newAnimation(
         //     "Animation Progress",
         //     animationFrameS.get() + animationRelativeProgressS.get()
         // );
-        console.log(startTime, timestamp, performance.now());
+        // console.log(startTime, timestamp, performance.now());
         animationRelativeProgressS.set(runtime / duration);
 
         // Get objects in currentFrame and update the position
