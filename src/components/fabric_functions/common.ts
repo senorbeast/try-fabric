@@ -8,6 +8,7 @@ export {
     disposeFabric,
     addPath,
     addPoint,
+    addPlayer,
     addRectangle,
     animateCurve,
     animateFirstObject,
@@ -61,6 +62,60 @@ const addRectangle = (fabricRef: fabricRefType) => {
     });
 
     fabricRef.current!.add(rect);
+};
+
+const addPlayer = (fabricRef: fabricRefType) => {
+    const canvas = fabricRef.current!;
+    const props = {
+        left: canvas.width! / 2,
+        top: canvas.height! / 2,
+        text: "P",
+        color: "#ff8000",
+    };
+
+    const group = new fabric.Group([], {
+        left: props.left,
+        top: props.top,
+        name: "player",
+        originX: "center",
+        originY: "center",
+    });
+
+    // group.ref_id = id;
+    group.objecttype = "disabled_borders";
+    group.is_animation = true;
+
+    const circle = new fabric.Circle({
+        radius: 19,
+        fill: props.color,
+        stroke: "#fff",
+        strokeWidth: 3,
+        originX: "center",
+        originY: "center",
+        name: "circle",
+        hasBorders: false,
+        hasControls: false,
+    });
+
+    // circle.ref_id = id;
+
+    const text = new fabric.IText(props.text, {
+        fontFamily: "Helvetica",
+        fill: "#fff",
+        originX: "center",
+        originY: "center",
+        fontSize: 18,
+        top: 0,
+        fontWeight: "bold",
+        name: "text",
+    });
+
+    group.add(circle, text);
+    group.addWithUpdate();
+    group.dirty = true;
+
+    canvas.add(group);
+    canvas.renderAll();
 };
 
 const addPoint = (fabricRef: fabricRefType, point: PointType) => {

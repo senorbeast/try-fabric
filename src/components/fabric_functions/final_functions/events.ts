@@ -1,3 +1,4 @@
+import { fabric } from "fabric";
 import { fabricRefType } from "../../Canvas";
 import { currentFrameS, framesS } from "../../react-ridge";
 import {
@@ -33,8 +34,30 @@ export function bindFOEvents(fabricRef: fabricRefType) {
             onObjectModified(e, canvas),
         "object:added": (e: fabric.IEvent<MouseEvent>) =>
             onObjectModified(e, canvas),
+        drop: (e: fabric.IEvent<MouseEvent>) => onDrop(e, canvas),
+        // drop: (e: fabric.IEvent<MouseEvent>) => onDrop(e, canvas),
     });
 }
+
+function onDrop(e: fabric.IEvent<MouseEvent>, canvas: fabric.Canvas) {
+    // Read data from DragEvent
+    const getImageElementId = e.e.dataTransfer.getData("id");
+    const offsetX = e.e.dataTransfer.getData("offsetX");
+    const offsetY = e.e.dataTransfer.getData("offsetY");
+
+    const imgE = document.getElementById(getImageElementId) as HTMLImageElement;
+
+    const imgObj = new fabric.Image(imgE, {
+        left: e.e.layerX - offsetX, // Fix mouse offset
+        top: e.e.layerY - offsetY,
+        angle: 0,
+    });
+    imgObj.scaleToWidth(imgE.width); //scaling the image height and width with target height and width, scaleToWidth, scaleToHeight fabric inbuilt function.
+    imgObj.scaleToHeight(imgE.height);
+    canvas.add(imgObj);
+    canvas.renderAll();
+}
+
 export const updateFramesData = (canvas: fabric.Canvas) => {
     // current frame data
     const currentFrameData = canvas.toJSON(extraProps);

@@ -27,3 +27,7 @@ export const framesS = newRidgeState<canvasJSONType[]>([
 
 // Modes
 export const modeS = newRidgeState<"freeRoam" | "frames">("freeRoam");
+// ---------------------------------------------------------------------
+
+// NOT USED
+export const draggedElementIDS = newRidgeState<string>("");
