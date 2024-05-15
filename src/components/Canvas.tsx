@@ -23,7 +23,7 @@ const Canvas = () => {
             <div className="bg-slate-600 w-fit h-fit flex ">
                 {/* Works without ref, since fabricjs create a upper canvas */}
                 <canvas id="canvas" />
-                <ContextMenu />
+                <ContextMenu fabricRef={fabricRef} />
             </div>
             <ButtonPanel fabricRef={fabricRef} />
         </div>

@@ -9,6 +9,7 @@ import {
 import { endPointOffset, controlPointOffset, extraProps } from "./constants";
 import { linkControlPointsToLine } from "./linkage";
 import { makeControlsPoints } from "./makeUpdateObjects";
+import { v4 as uuidv4 } from "uuid";
 
 export function bindFOEvents(fabricRef: fabricRefType) {
     // TODO: remove this workaround
@@ -66,24 +67,43 @@ function onDrop(e: fabric.IEvent<MouseEvent>, canvas: fabric.Canvas) {
     const imgE = document.getElementById(getImageElementId) as HTMLImageElement;
 
     const imgObj = new fabric.Image(imgE, {});
-    const textObj = new fabric.Text("Hi", {
-        fontFamily: "Helvetica",
-        fill: "#fff",
-        originX: "center",
-        originY: "center",
-        fontSize: 18,
-        top: -10,
-        fontWeight: "bold",
-        name: "text",
-    });
+
+    const newCommonID: string = uuidv4();
     const groupObj = new fabric.Group([imgObj], {
         left: e.e.layerX - offsetX, // Fix mouse offset
         top: e.e.layerY - offsetY,
         dirty: true,
-        // selectable: false,
+        commonID: newCommonID,
+        hasBorders: false,
+        hasControls: false,
     });
-    groupObj.scaleToWidth(imgE.width); //scaling the image height and width with target height and width, scaleToWidth, scaleToHeight fabric inbuilt function.
-    groupObj.scaleToHeight(imgE.height);
+
+    const textObj = new fabric.IText("hi", {
+        fontFamily: "Helvetica",
+        fill: "#fff",
+        originX: "center",
+        textAlign: "center",
+        fontSize: 18,
+        top: -40,
+        name: "textName",
+    });
+
+    const textObj2 = new fabric.IText("", {
+        fontFamily: "Helvetica",
+        fill: "#fff",
+        originX: "center",
+        textAlign: "center",
+        fontSize: 9,
+        top: -50,
+        name: "textTag",
+    });
+
+    imgObj.scaleToWidth(imgE.width); //scaling the image height and width with target height and width, scaleToWidth, scaleToHeight fabric inbuilt function.
+    imgObj.scaleToHeight(imgE.height);
+
+    groupObj.add(textObj);
+    groupObj.add(textObj2);
+
     canvas.add(groupObj);
     canvas.renderAll();
 }
@@ -126,7 +146,7 @@ function onObjectMouseUp(e: fabric.IEvent<MouseEvent>, canvas: fabric.Canvas) {
         contextMenuS.set({
             left: e.target!.left!,
             top: e.target!.top!,
-            staticID: "",
+            commonID: e.target.commonID!,
         });
         // canvas.remove(e.target);
     }

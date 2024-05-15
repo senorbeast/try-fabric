@@ -32,13 +32,13 @@ export const modeS = newRidgeState<"freeRoam" | "frames">("freeRoam");
 export type contextMenuProps = {
     left: number;
     top: number;
-    staticID: "";
+    commonID: string;
 };
 
 export const contextMenuS = newRidgeState<contextMenuProps>({
     left: 0,
     top: 0,
-    staticID: "",
+    commonID: "",
 });
 
 // NOT USED
