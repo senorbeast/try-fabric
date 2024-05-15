@@ -11,30 +11,31 @@ const ContextMenu = ({ fabricRef }: { fabricRef: fabricRefType }) => {
         const commonID = menu.commonID;
         const canvas = fabricRef.current!;
         if (canvas) {
-            return getReqObjBy(canvas, "commonID", commonID)[0];
+            return getReqObjBy(canvas, "commonID", commonID)[0] as fabric.Group;
         }
         return null;
     }, [fabricRef, menu.commonID]);
 
-    function getTextValue(fabObj) {
-        const fabGrp = fabObj as fabric.Group;
-        const textTag: fabric.IText = fabGrp._objects.filter(
+    function getTextValue(fabGrp: fabric.Group) {
+        const textTag: fabric.Text = fabGrp._objects.filter(
             (obj) => obj.name == "textName"
-        )[0];
+        )[0] as fabric.Text;
         textTag.text;
         return (textTag.text as string) || "";
     }
-    const options = ["Winger", "Forward", "Defender"];
+    const options = ["", "Winger", "Forward", "Defender"];
+
+    const closeMenu = () => setMenu({ left: 0, top: 0, commonID: "" });
 
     return (
         <>
             {menu.left !== 0 ? (
                 <div
-                    className="absolute w-[800px] h-[500px] border-2 border-green-300"
-                    onClick={() => setMenu({ left: 0, top: 0, commonID: "" })}
+                    className="absolute w-[800px] h-[500px]"
+                    onClick={() => closeMenu()}
                     onContextMenu={(e) => {
                         e.preventDefault();
-                        setMenu({ left: 0, top: 0, commonID: "" });
+                        closeMenu();
                     }}
                 >
                     <div
@@ -47,14 +48,14 @@ const ContextMenu = ({ fabricRef }: { fabricRef: fabricRefType }) => {
                         <input
                             className="caret-black border-2 border-black "
                             placeholder="Enter name"
-                            defaultValue={getTextValue(fabObj)}
+                            defaultValue={getTextValue(fabObj!)}
                             onChange={(e) => {
                                 const canvas = fabricRef.current!;
                                 const fabGrp = fabObj as fabric.Group;
-                                const textTag: fabric.IText =
+                                const textTag: fabric.Text =
                                     fabGrp._objects.filter(
                                         (obj) => obj.name == "textName"
-                                    )[0];
+                                    )[0] as fabric.Text;
                                 textTag.set({ text: e.target.value });
                                 canvas.renderAll();
                             }}
@@ -67,12 +68,13 @@ const ContextMenu = ({ fabricRef }: { fabricRef: fabricRefType }) => {
                                 onChange={(e) => {
                                     const canvas = fabricRef.current!;
                                     const fabGrp = fabObj as fabric.Group;
-                                    const textTag: fabric.IText =
+                                    const textTag: fabric.Text =
                                         fabGrp._objects.filter(
                                             (obj) => obj.name == "textTag"
-                                        )[0];
+                                        )[0] as fabric.Text;
                                     textTag.set({ text: e.target.value });
                                     canvas.renderAll();
+                                    closeMenu();
                                 }}
                             >
                                 {options.map((option) => (

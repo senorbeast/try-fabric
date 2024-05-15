@@ -57,55 +57,77 @@ function onSelectionCreated(
 ) {
     console.log(e);
 }
-
-function onDrop(e: fabric.IEvent<MouseEvent>, canvas: fabric.Canvas) {
-    // Read data from DragEvent
-    const getImageElementId = e.e.dataTransfer.getData("id");
-    const offsetX = e.e.dataTransfer.getData("offsetX");
-    const offsetY = e.e.dataTransfer.getData("offsetY");
-
-    const imgE = document.getElementById(getImageElementId) as HTMLImageElement;
+function createStaticObject(
+    canvas: fabric.Canvas,
+    imageId: string,
+    x: number,
+    y: number
+) {
+    const imgE = document.getElementById(imageId) as HTMLImageElement;
 
     const imgObj = new fabric.Image(imgE, {});
 
     const newCommonID: string = uuidv4();
     const groupObj = new fabric.Group([imgObj], {
-        left: e.e.layerX - offsetX, // Fix mouse offset
-        top: e.e.layerY - offsetY,
+        left: x, // Fix mouse offset
+        top: y,
         dirty: true,
         commonID: newCommonID,
-        hasBorders: false,
-        hasControls: false,
+        // hasBorders: false,
+        // hasControls: false,
     });
 
-    const textObj = new fabric.IText("hi", {
+    const textObj = new fabric.Text("hi", {
         fontFamily: "Helvetica",
         fill: "#fff",
         originX: "center",
         textAlign: "center",
-        fontSize: 18,
-        top: -40,
+        fontSize: 15,
+        top: -35,
         name: "textName",
     });
 
-    const textObj2 = new fabric.IText("", {
+    const textObj2 = new fabric.Text("", {
         fontFamily: "Helvetica",
         fill: "#fff",
         originX: "center",
         textAlign: "center",
-        fontSize: 9,
-        top: -50,
+        fontSize: 10,
+        top: -48,
         name: "textTag",
     });
 
-    imgObj.scaleToWidth(imgE.width); //scaling the image height and width with target height and width, scaleToWidth, scaleToHeight fabric inbuilt function.
-    imgObj.scaleToHeight(imgE.height);
+    // imgObj.scaleToWidth(imgE.width); //scaling the image height and width with target height and width, scaleToWidth, scaleToHeight fabric inbuilt function.
+    // imgObj.scaleToHeight(imgE.height);
 
     groupObj.add(textObj);
     groupObj.add(textObj2);
 
     canvas.add(groupObj);
     canvas.renderAll();
+}
+
+function prepareDataFromDragDropEvent(dragEvent: DragEvent) {
+    // Read data from DragEvent
+
+    const getImageElementId = dragEvent.dataTransfer!.getData("id");
+    const mouseOffsetX = parseInt(
+        dragEvent.dataTransfer!.getData("mouseOffsetX")
+    );
+    const mouseOffsetY = parseInt(
+        dragEvent.dataTransfer!.getData("mouseOffsetY")
+    );
+
+    // Fix mouse to img element relative offset
+    const x = dragEvent.layerX - mouseOffsetX;
+    const y = dragEvent.layerY - mouseOffsetY;
+    return { getImageElementId, x, y };
+}
+
+function onDrop(e: fabric.IEvent<MouseEvent>, canvas: fabric.Canvas) {
+    const dragEvent: DragEvent = e.e as DragEvent;
+    const { getImageElementId, x, y } = prepareDataFromDragDropEvent(dragEvent);
+    createStaticObject(canvas, getImageElementId, x, y);
 }
 
 export const updateFramesData = (canvas: fabric.Canvas) => {
