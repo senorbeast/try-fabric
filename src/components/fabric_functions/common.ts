@@ -64,7 +64,7 @@ function renderIcon(icon: HTMLImageElement): fabric.Control["render"] {
     };
 }
 
-function cloneGroup(grpObj: fabric.Group): fabric.Group {
+export function cloneGroup(grpObj: fabric.Group): fabric.Group {
     const newGroup = new fabric.Group([], {
         commonID: uuidv4(),
         name: "groupObj",
@@ -156,6 +156,7 @@ const modifyFabricControls = () => {
         offsetY: 30,
         offsetX: -15,
         cursorStyle: "pointer",
+        //@ts-expect-error this works
         actionHandler: fabric.controlsUtils.rotationWithSnapping,
         actionName: "rotate",
         render: renderIcon(createElementIcon(rotateIcon)),

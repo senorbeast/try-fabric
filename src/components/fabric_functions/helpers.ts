@@ -78,7 +78,9 @@ function getReqObjBy(
 
 type ObjectList = (fabric.Object | null)[];
 
-function getReqObjGroups(canvas: fabric.Canvas): Record<string, ObjectList> {
+export function getReqObjGroups(
+    canvas: fabric.Canvas
+): Record<string, ObjectList> {
     const objCollection: Record<string, ObjectList> = {};
     canvas.getObjects().forEach((obj) => {
         if (obj["commonID"]) {
@@ -104,7 +106,7 @@ function setObjsOptions(
 // starting at end point of cbc
 // keep same ids/names
 
-function getEndPoint(line: fabric.Path): [number, number] {
+export function getEndPoint(line: fabric.Path): [number, number] {
     const path = line.path;
     if (path[1][0] == "L") {
         return [path[1][1] as number, path[1][2] as number];
@@ -193,7 +195,7 @@ function animateOverFrames(fabricRef: fabricRefType, frames: canvasJSONType[]) {
     // animateOverFramesForObj(fabricRef, allPathsAcrossFrames, animateObject);
 }
 
-function animateOverFramesForObj(
+export function animateOverFramesForObj(
     fabricRef: fabricRefType,
     allPathsAcrossFrames: PathType[],
     animateObject: fabric.Image
@@ -230,12 +232,11 @@ export function newAnimation(
 ) {
     const canvas: fabric.Canvas = fabricRef.current!;
     // remove all objects from canvas
-    const removableObjs = canvas
-        .getObjects()
-        .filter(
-            (obj) =>
-                obj.name !== "invisibleStore" || obj.name !== "animateObject"
-        );
+    const removableObjs = canvas.getObjects().filter(
+        (obj) =>
+            //@ts-expect-error need to test this
+            obj.name !== "invisibleStore" || obj.name !== "animateObject"
+    );
 
     canvas.remove(...removableObjs);
 
@@ -362,7 +363,7 @@ function findEquidistantPoints(
     endPoint: PointType
 ): [PointType, PointType] {
     // Calculate slope of the line
-    const slope = (endPoint[1] - startPoint[1]) / (endPoint[0] - startPoint[0]);
+    // const slope = (endPoint[1] - startPoint[1]) / (endPoint[0] - startPoint[0]);
 
     // Calculate distance between start and end points
     const distance = Math.sqrt(
@@ -520,6 +521,7 @@ function findClosestPointsOnCurve(
     const [cp2x, cp2y] = controlPoint2;
 
     let minDistance1 = Infinity;
+    //@ts-expect-error idk
     let closestPoint1: PointType = [];
     for (let t = 0; t <= 1; t += 1 / numSteps) {
         const [x, y] = cubicBezier(
@@ -541,6 +543,7 @@ function findClosestPointsOnCurve(
     }
 
     let minDistance2 = Infinity;
+    //@ts-expect-error idk
     let closestPoint2: PointType = [];
     for (let t = 0; t <= 1; t += 1 / numSteps) {
         const [x, y] = cubicBezier(

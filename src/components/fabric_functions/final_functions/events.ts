@@ -48,14 +48,14 @@ function onSelectionUpdated(
     e: fabric.IEvent<MouseEvent>,
     canvas: fabric.Canvas
 ) {
-    console.log(e);
+    console.log(e, canvas);
 }
 
 function onSelectionCreated(
     e: fabric.IEvent<MouseEvent>,
     canvas: fabric.Canvas
 ) {
-    console.log(e);
+    console.log(e, canvas);
 }
 function createStaticObject(
     canvas: fabric.Canvas,
@@ -156,6 +156,7 @@ export const updateFramesData = (canvas: fabric.Canvas) => {
 };
 
 function onObjectModified(e: fabric.IEvent<MouseEvent>, canvas: fabric.Canvas) {
+    console.log(e);
     updateFramesData(canvas);
 }
 
@@ -284,7 +285,7 @@ function updateCurveToLine(
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function onObjectMoving(e: fabric.IEvent<MouseEvent>, canvas?: fabric.Canvas) {
     if (e.target == null) {
-        console.log("onObjectMoving null target");
+        console.log("onObjectMoving null target", canvas);
         return;
     }
     // const [store] = getReqObjByNames(canvas, ["invisibleStore"]);
@@ -370,7 +371,7 @@ export function onObjectSelected(
     canvas: fabric.Canvas
 ) {
     const activeObject = e.target!;
-    console.log(activeObject);
+    console.log(activeObject, canvas);
 }
 
 export function onSelectionCleared(
@@ -379,6 +380,7 @@ export function onSelectionCleared(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     canvas: fabric.Canvas
 ) {
+    console.log(e, canvas);
     // const activeObject = e.target;
     // if (activeObject == null || activeObject == undefined) return null;
     // if (activeObject.name === "p0" || activeObject.name === "p3") {

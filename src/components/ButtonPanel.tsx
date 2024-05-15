@@ -15,7 +15,6 @@ import {
     addPlayer,
 } from "./fabric_functions/common";
 import { drawQuadratic } from "./fabric_functions/quadratic";
-import _ from "lodash";
 import { drawLine } from "./fabric_functions/line";
 import {
     frameObject,
@@ -334,6 +333,7 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
                                     e.clientY - e.currentTarget.offsetTop;
 
                                 // Pass data to fabric via drag event - data transfer
+                                // @ts-expect-error id exists
                                 e.dataTransfer.setData("id", e.target.id);
                                 e.dataTransfer.setData(
                                     "mouseOffsetX",
