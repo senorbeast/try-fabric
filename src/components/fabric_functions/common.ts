@@ -8,7 +8,6 @@ import {
     lockIcon,
     lockOptions,
     rotateIcon,
-    unMovableOptions,
 } from "./final_functions/constants";
 import { v4 as uuidv4 } from "uuid";
 
@@ -64,6 +63,22 @@ function renderIcon(icon: HTMLImageElement): fabric.Control["render"] {
         ctx.restore();
     };
 }
+
+function cloneGroup(grpObj: fabric.Group): fabric.Group {
+    const newGroup = new fabric.Group([], {
+        commonID: uuidv4(),
+        name: "groupObj",
+    });
+    const objs = grpObj.getObjects();
+
+    objs.forEach((obj) => {
+        obj.clone((cloned: fabric.Object) => {
+            newGroup.add(cloned);
+        });
+    });
+    return newGroup;
+}
+
 function cloneObject(
     _: MouseEvent,
     transform: fabric.Transform,
@@ -77,9 +92,12 @@ function cloneObject(
         const id = uuidv4();
         cloned.set({ commonID: id, left: x, top: y });
         canvas.add(cloned);
-        canvas.renderAll();
     });
 
+    // const newGroup = cloneGroup(target as fabric.Group);
+    // newGroup.set({ left: x, top: y });
+    // canvas.add(newGroup);
+    canvas.renderAll();
     return true;
 }
 
@@ -216,10 +234,6 @@ const addPlayer = (fabricRef: fabricRefType) => {
         originY: "center",
     });
 
-    // group.ref_id = id;
-    group.objecttype = "disabled_borders";
-    group.is_animation = true;
-
     const circle = new fabric.Circle({
         radius: 19,
         fill: props.color,
@@ -272,7 +286,7 @@ const addPath = (fabricRef: fabricRefType) => {
         strokeWidth: 2,
     });
     fabricRef.current!.add(path);
-    path.path?.forEach((point) => console.log(point.x, point.y));
+    path.path?.forEach((point) => console.log(point[0], point[1]));
 };
 
 const animateLeft = (fabricRef: fabricRefType) => {

@@ -71,10 +71,8 @@ function createStaticObject(
     const groupObj = new fabric.Group([imgObj], {
         left: x, // Fix mouse offset
         top: y,
-        dirty: true,
         commonID: newCommonID,
-        // hasBorders: false,
-        // hasControls: false,
+        name: "groupObj",
     });
 
     const textObj = new fabric.Text("hi", {

@@ -8,6 +8,13 @@ export const lockOptions = {
     hasBorders: false,
 };
 
+export const unlockOptions = {
+    lockMovementX: false,
+    lockMovementY: false,
+    hasControls: true,
+    hasBorders: true,
+};
+
 export const unMovableOptions: fabric.IObjectOptions = {
     evented: false,
     selectable: false,
