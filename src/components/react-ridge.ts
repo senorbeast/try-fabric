@@ -8,6 +8,7 @@ export const animationPauseS = newRidgeState<boolean>(true);
 export const animationDurationS = newRidgeState<number>(1500);
 export const animationFrameS = newRidgeState<number>(1);
 export const animationRelativeProgressS = newRidgeState<number>(0);
+export const rafID = newRidgeState<number>(0);
 
 // export const prevStartTime = newRidgeState<number>(0); // to fix
 
@@ -26,7 +27,8 @@ export const framesS = newRidgeState<canvasJSONType[]>([
 // ---------------------------------------------------------------------
 
 // Modes
-export const modeS = newRidgeState<"freeRoam" | "frames">("freeRoam");
+export type modeTypes = "freeRoam" | "frames";
+export const modeS = newRidgeState<modeTypes>("freeRoam");
 // ---------------------------------------------------------------------
 
 export type contextMenuProps = {

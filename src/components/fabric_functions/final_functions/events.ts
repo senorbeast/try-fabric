@@ -1,6 +1,11 @@
 import { fabric } from "fabric";
 import { fabricRefType } from "../../Canvas";
-import { contextMenuS, currentFrameS, framesS } from "../../react-ridge";
+import {
+    animationPauseS,
+    contextMenuS,
+    currentFrameS,
+    framesS,
+} from "../../react-ridge";
 import {
     getReqObjByNamesForID,
     findEquidistantPoints,
@@ -10,6 +15,7 @@ import { endPointOffset, controlPointOffset, extraProps } from "./constants";
 import { linkControlPointsToLine } from "./linkage";
 import { makeControlsPoints } from "./makeUpdateObjects";
 import { v4 as uuidv4 } from "uuid";
+import { canvasJSONType } from "../../ButtonPanel";
 
 export function bindFOEvents(fabricRef: fabricRefType) {
     // TODO: remove this workaround
@@ -34,29 +40,32 @@ export function bindFOEvents(fabricRef: fabricRefType) {
         "object:removed": (e: fabric.IEvent<MouseEvent>) =>
             onObjectModified(e, canvas),
         "object:added": (e: fabric.IEvent<MouseEvent>) =>
-            onObjectModified(e, canvas),
+            onObjectAdded(e, canvas),
         drop: (e: fabric.IEvent<MouseEvent>) => onDrop(e, canvas),
-        "selection:updated": (e: fabric.IEvent<MouseEvent>) =>
-            onSelectionUpdated(e, canvas),
-        "selection:created": (e: fabric.IEvent<MouseEvent>) =>
-            onSelectionCreated(e, canvas),
+        // "selection:updated": (e: fabric.IEvent<MouseEvent>) =>
+        //     onSelectionUpdated(e, canvas),
+        // "selection:created": (e: fabric.IEvent<MouseEvent>) =>
+        //     onSelectionCreated(e, canvas),
         // drop: (e: fabric.IEvent<MouseEvent>) => onDrop(e, canvas),
     });
 }
 
-function onSelectionUpdated(
-    e: fabric.IEvent<MouseEvent>,
-    canvas: fabric.Canvas
-) {
-    console.log(e, canvas);
-}
+// function onSelectionUpdated(
+//     e: fabric.IEvent<MouseEvent>,
+//     canvas: fabric.Canvas
+// ) {
+//     return;
+//     // console.log(e, canvas);
+// }
 
-function onSelectionCreated(
-    e: fabric.IEvent<MouseEvent>,
-    canvas: fabric.Canvas
-) {
-    console.log(e, canvas);
-}
+// function onSelectionCreated(
+//     e: fabric.IEvent<MouseEvent>,
+//     canvas: fabric.Canvas
+// ) {
+//     return;
+//     // console.log(e, canvas);
+// }
+
 function createStaticObject(
     canvas: fabric.Canvas,
     imageId: string,
@@ -131,15 +140,13 @@ function onDrop(e: fabric.IEvent<MouseEvent>, canvas: fabric.Canvas) {
 export const updateFramesData = (canvas: fabric.Canvas) => {
     // current frame data
     const currentFrameData = canvas.toJSON(extraProps);
-
     const currentFrame = currentFrameS.get();
-    const frames = framesS.get();
-    // console.log(currentFrame, frames);
+    const frames: canvasJSONType[] = framesS.get();
 
     if (currentFrame < frames.length) {
         // console.log("Updating frames....");
         // Update
-        framesS.set((prev) =>
+        framesS.set((prev: canvasJSONType[]) =>
             prev.map((item) =>
                 prev.indexOf(item) == currentFrame ? currentFrameData : item
             )
@@ -147,7 +154,7 @@ export const updateFramesData = (canvas: fabric.Canvas) => {
     } else if (currentFrame == frames.length) {
         // append
         console.log("Adding new frame....");
-        framesS.set((prev) => [...prev, currentFrameData]);
+        framesS.set((prev: canvasJSONType[]) => [...prev, currentFrameData]);
     } else {
         console.log("Adding frame error....");
 
@@ -155,9 +162,20 @@ export const updateFramesData = (canvas: fabric.Canvas) => {
     }
 };
 
+function onObjectAdded(e: fabric.IEvent<MouseEvent>, canvas: fabric.Canvas) {
+    // console.log("onObjectAdded");
+    updateFramesData(canvas);
+}
+
 function onObjectModified(e: fabric.IEvent<MouseEvent>, canvas: fabric.Canvas) {
     // console.log(e);
+    const pause = animationPauseS.get();
+    // if (animationPauseS.get() == true) {
+    // console.log("onObjectModified", pause);
+    //! Causing bugs, updates frame data during animations sometimes.
+    // race condition like situation
     updateFramesData(canvas);
+    // }
 }
 
 // Convert Line to Cubic Beizer
@@ -327,7 +345,7 @@ function onObjectMoving(e: fabric.IEvent<MouseEvent>, canvas?: fabric.Canvas) {
             // console.log("before", frames[currentFrame + 1]);
             const commonID = e.target.commonID!;
 
-            framesS.set((draft) => {
+            framesS.set((draft: canvasJSONType[]) => {
                 const nextFrame = draft[currentFrame + 1];
 
                 // Find p0 of same frameObject collection in nextFrame

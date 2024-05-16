@@ -10,6 +10,7 @@ import {
     animationPauseS,
     animationRelativeProgressS,
     currentFrameS,
+    rafID,
 } from "../react-ridge";
 
 export {
@@ -218,6 +219,13 @@ export function animateOverFramesForObj(
     };
     sequenceAnimation();
 }
+export function logFrameObjCount(frames: canvasJSONType[]) {
+    const result: number[] = [];
+    frames.forEach((frame) => {
+        result.push(frame.objects.length);
+    });
+    console.log(result);
+}
 
 export function newAnimation(
     fabricRef: fabricRefType,
@@ -232,11 +240,9 @@ export function newAnimation(
 ) {
     const canvas: fabric.Canvas = fabricRef.current!;
     // remove all objects from canvas
-    const removableObjs = canvas.getObjects().filter(
-        (obj) =>
-            //@ts-expect-error need to test this
-            obj.name !== "invisibleStore" || obj.name !== "animateObject"
-    );
+    const removableObjs = canvas
+        .getObjects()
+        .filter((obj) => obj.name !== "animateObject");
 
     canvas.remove(...removableObjs);
 
@@ -323,37 +329,31 @@ export function newAnimation(
         canvas.renderAll();
 
         if (animationPauseS.get() == true) {
-            // if (pausedTime === null) {
-            // Store the current timestamp as the paused time
-            // pausedTime = performance.now();
-            // }
+            cancelAnimationFrame(rafID.get());
             return;
         } else if (
             runtime < duration &&
             animationFrameS.get() < frames.length
         ) {
             // More animation to be done in current frame
-            requestAnimationFrame(animate);
-            return;
         } else if (animationFrameS.get() < frames.length - 1) {
             // moving to the next frame
-            animationFrameS.set((prev) => prev + 1);
+            animationFrameS.set((prev: number) => prev + 1);
             startTime = timestamp;
             animationRelativeProgressS.set(0);
-            requestAnimationFrame(animate);
-            return;
         } else {
             // onFullAnimationComplete
             animationFrameS.set(1);
-            currentFrameS.set(0);
+            currentFrameS.set(1);
             animationPauseS.set(true);
             animationRelativeProgressS.set(0);
             console.log("Full animation complete");
-            return;
         }
+        requestAnimationFrame(animate);
     };
 
-    requestAnimationFrame(animate);
+    const raFID = requestAnimationFrame(animate);
+    rafID.set(raFID);
 }
 
 export type PointType = [number, number];
