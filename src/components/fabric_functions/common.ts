@@ -1,7 +1,6 @@
 import { fabric } from "fabric";
 import { fabricRefType } from "../Canvas";
-import { interpolatePath } from "./interpolate";
-import { bindFOEvents } from "./final_functions/events";
+import { bindFOEvents } from "./final_functions/events/events";
 import {
     cloneIcon,
     deleteIcon,
@@ -10,6 +9,8 @@ import {
     rotateIcon,
 } from "./final_functions/constants";
 import { v4 as uuidv4 } from "uuid";
+import { PathType, PointType } from "./final_functions/helper.types";
+import { interpolatePath } from "./final_functions/frameObject/helpers/interpolate";
 
 export {
     initFabric,
@@ -26,7 +27,6 @@ export {
     resetPos,
     logObject,
     addImageObject,
-    imageObject,
     animateOnPathC,
 };
 
@@ -356,8 +356,6 @@ function animateObject(
     );
 }
 
-export type PointType = [number, number];
-
 // const path: (string | number)[][] = [
 //     ["M", 50, 50],
 //     ["L", 400, 200],
@@ -407,8 +405,6 @@ function animateOnPathC(
 
     animate(0);
 }
-
-export type PathType = (string | number)[][];
 
 function animateObjectAlongPath(
     fabricRef: fabricRefType,
@@ -531,18 +527,6 @@ const addImageObject = (fabricRef: fabricRefType, imgId: string) => {
         height: 32,
     });
     canvas.add(imgInstance);
-};
-
-const imageObject = (imgId: string): fabric.Image => {
-    const imgElement = document.getElementById(imgId) as HTMLImageElement;
-    const imgInstance = new fabric.Image(imgElement, {
-        left: 100,
-        top: 100,
-        angle: 0,
-        width: 32,
-        height: 32,
-    });
-    return imgInstance;
 };
 
 // function animateDrag(fabricRef: fabricRefType) {

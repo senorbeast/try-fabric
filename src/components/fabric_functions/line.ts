@@ -1,8 +1,11 @@
 import type { fabricRefType } from "../Canvas";
 import { fabric } from "fabric";
 import { makeEndPoint } from "./cubic";
-import { getReqObjByNames } from "./helpers";
-import { onObjectSelected, onSelectionCleared } from "./final_functions/events";
+import {
+    onObjectSelected,
+    onSelectionCleared,
+} from "./final_functions/events/events";
+import { getReqObjByNames } from "./final_functions/frameObject/helpers/getterSetters";
 
 export const drawLine = (fabricRef: fabricRefType) => {
     const canvas = fabricRef.current!;

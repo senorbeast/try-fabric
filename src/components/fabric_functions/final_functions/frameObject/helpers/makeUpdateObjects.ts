@@ -1,11 +1,13 @@
 import { fabric } from "fabric";
-import { fabricRefType } from "../../Canvas";
-import { imageObject } from "../common";
-import { setObjsOptions } from "../helpers";
-import { endPointOffset, unMovableOptions } from "./constants";
+import { fabricRefType } from "../../../../Canvas";
+import { endPointOffset, unMovableOptions } from "../../constants";
 import { linkEndPointsToLine } from "./linkage";
+import { setObjsOptions } from "./getterSetters";
 
-export { updatePointToLine, makeEndPoints, makeControlsPoints };
+export { makeEndPoints, makeControlsPoints, makeCustomEndPoint, imageObject };
+export { updateLinePath, updatePointToLine };
+
+// Update --------------------------------------------------------
 
 function updatePointToLine(
     fabricRef: fabricRefType,
@@ -36,6 +38,31 @@ function updatePointToLine(
     canvas.renderAll();
 }
 
+function updateLinePath(
+    startPoint: [number, number],
+    endPoint: [number, number],
+    line: fabric.Path
+) {
+    line.left = startPoint[0];
+    line.top = startPoint[1];
+    line.width = 0;
+    line.height = 0;
+
+    line.pathOffset.x = startPoint[0];
+    line.pathOffset.y = startPoint[1];
+
+    line.path[0][0] = "M";
+    line.path[0][1] = startPoint[0];
+    line.path[0][2] = startPoint[1];
+    line.path[1][0] = "L";
+    line.path[1][1] = endPoint[0];
+    line.path[1][2] = endPoint[1];
+
+    return line;
+}
+
+// Make -------------------------------------------------------------
+
 function makeLinePath(
     startPoint: [number, number],
     endPoint: [number, number],
@@ -65,29 +92,6 @@ function makeLinePath(
     return line;
 }
 
-export function updateLinePath(
-    startPoint: [number, number],
-    endPoint: [number, number],
-    line: fabric.Path
-) {
-    line.left = startPoint[0];
-    line.top = startPoint[1];
-    line.width = 0;
-    line.height = 0;
-
-    line.pathOffset.x = startPoint[0];
-    line.pathOffset.y = startPoint[1];
-
-    line.path[0][0] = "M";
-    line.path[0][1] = startPoint[0];
-    line.path[0][2] = startPoint[1];
-    line.path[1][0] = "L";
-    line.path[1][1] = endPoint[0];
-    line.path[1][2] = endPoint[1];
-
-    return line;
-}
-
 function makeEndPoints(
     startPoint: number[],
     endPoint: number[]
@@ -103,7 +107,7 @@ function makeEndPoints(
     return [p0, p3];
 }
 
-export function makeCustomEndPoint(left: number, top: number) {
+function makeCustomEndPoint(left: number, top: number) {
     const c = imageObject("my-image");
     c.set({
         left: left,
@@ -137,3 +141,17 @@ function makeControlPoint(left: number, top: number) {
 
     return c;
 }
+
+const imageObject = (imgId: string): fabric.Image => {
+    const imgElement = document.getElementById(imgId) as HTMLImageElement;
+    const imgInstance = new fabric.Image(imgElement, {
+        left: 100,
+        top: 100,
+        angle: 0,
+        width: 32,
+        height: 32,
+    });
+    return imgInstance;
+};
+
+// ---------------------------------------------------------------------

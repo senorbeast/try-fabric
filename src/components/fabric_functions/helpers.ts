@@ -1,107 +1,18 @@
-import { canvasJSONType } from "../ButtonPanel";
 import { fabricRefType } from "../Canvas";
-import { animateObjectAlongPath, imageObject } from "./common";
+import { animateObjectAlongPath } from "./common";
 import { fabric } from "fabric";
-import { endPointOffset } from "./final_functions/constants";
-import { interpolatePath } from "./interpolate";
-import {
-    animationDurationS,
-    animationFrameS,
-    animationPauseS,
-    animationRelativeProgressS,
-    currentFrameS,
-    rafID,
-} from "../react-ridge";
+import { canvasJSONType, PointType } from "./final_functions/helper.types";
+import { imageObject } from "./final_functions/frameObject/helpers/makeUpdateObjects";
 
-export {
-    getReqObjBy,
-    getReqObjByNames,
-    getReqObjByNamesForID,
-    setObjsOptions,
-    animateOverFrames,
-    findEquidistantPoints,
-    mapControlPointsOnCurve,
-    calculateControlPoints,
-};
-
-function getReqObjByNames(
-    canvas: fabric.Canvas,
-    ids: string[],
-    objects?: fabric.Object[]
-) {
-    const result: (fabric.Object | null)[] = [];
-    const filterObjects = objects ?? canvas.getObjects();
-
-    ids.forEach((id, index) => {
-        filterObjects.forEach((obj) => {
-            if (id == obj.name) {
-                result.push(obj);
-            }
-        });
-        if (result.length == index) result.push(null);
-    });
-    return result;
-}
-
-function getReqObjByNamesForID(
-    canvas: fabric.Canvas,
-    commonID: string,
-    names: string[],
-    objects?: fabric.Object[]
-) {
-    const result: (fabric.Object | null)[] = [];
-    const filterObjects = objects ?? canvas.getObjects();
-
-    names.forEach((name, index) => {
-        filterObjects.forEach((obj) => {
-            if (name == obj.name && commonID == obj.commonID) {
-                result.push(obj);
-            }
-        });
-        if (result.length == index) result.push(null);
-    });
-    return result;
-}
-
-function getReqObjBy(
-    canvas: fabric.Canvas,
-    key: keyof fabric.Object,
-    value: string
-): (fabric.Object | null)[] {
-    const result: (fabric.Object | null)[] = [];
-    canvas.getObjects().forEach((obj) => {
-        if (value == obj[key]) {
-            result.push(obj);
-        }
-    });
-    return result;
-}
-
-type ObjectList = (fabric.Object | null)[];
-
-export function getReqObjGroups(
-    canvas: fabric.Canvas
-): Record<string, ObjectList> {
-    const objCollection: Record<string, ObjectList> = {};
-    canvas.getObjects().forEach((obj) => {
-        if (obj["commonID"]) {
-            if (!objCollection[obj["commonID"]]) {
-                objCollection[obj["commonID"]] = [];
-            }
-            objCollection[obj["commonID"]].push(obj);
-        }
-    });
-    return objCollection;
-}
-
-function setObjsOptions(
-    objects: fabric.Object[],
-    options: fabric.IObjectOptions
-) {
-    objects.forEach((obj) => {
-        obj.set(options);
-    });
-}
+// export {
+//     getReqObjBy,
+//     getReqObjByNames,
+//     getReqObjByNamesForID,
+//     setObjsOptions,
+//     animateOverFrames,
+//     mapControlPointsOnCurve,
+//     calculateControlPoints,
+// };
 
 // For each new frame, old cbc FO, are converted to line FO,
 // starting at end point of cbc
@@ -227,174 +138,6 @@ export function logFrameObjCount(frames: canvasJSONType[]) {
     console.log(result);
 }
 
-export function newAnimation(
-    fabricRef: fabricRefType,
-    frames: canvasJSONType[]
-    // animationRef: React.MutableRefObject<{
-    //     pause: boolean;
-    //     duration: number;
-    //     currentFrame: number;
-    //     relativeProgress: number | null;
-    // }>
-    // pause: boolean
-) {
-    const canvas: fabric.Canvas = fabricRef.current!;
-    currentFrameS.set(-1); // [IMP] so, (updateFrameData doesn't update frames) via onObjectsModified during animations
-
-    // remove all objects from canvas
-    const removableObjs = canvas.getObjects();
-    // .filter((obj) => obj.);
-
-    canvas.remove(...removableObjs);
-
-    // commonID, [path, animateObject]
-    type foPath = Record<string, PathType>;
-    //frameNo, foPath
-    const fOInFrames: Record<number, foPath> = {};
-
-    const addedAnimateObjects: Record<string, fabric.Object> = {};
-
-    // for each FO i will require allPaths
-    // Fill in paths across frames
-    frames.forEach((frame, frameIdx) => {
-        if (frame !== undefined) {
-            frame.objects.forEach((objO) => {
-                if (objO.name == "frame_line") {
-                    const obj = objO as fabric.Path;
-                    // New Frame
-                    if (!fOInFrames[frameIdx]) {
-                        fOInFrames[frameIdx] = {};
-                    }
-
-                    // Create single animate object
-                    if (
-                        !Object.keys(addedAnimateObjects).includes(
-                            obj.commonID!
-                        )
-                    ) {
-                        // New animateObject
-                        const animateObject = imageObject("my-image");
-                        animateObject.set({ name: "animateObject" });
-                        addedAnimateObjects[obj.commonID!] = animateObject;
-                    }
-                    fOInFrames[frameIdx][obj.commonID!] = obj.path;
-                }
-            });
-        }
-    });
-    canvas.renderAll();
-
-    // console.log(fOInFrames);
-
-    const duration = animationDurationS.get() ?? 1500; // animation duration for each frame in ms
-
-    let startTime: number | null = null;
-    // let pausedTime: number | null = null;
-
-    const renderedAnimateObjects: string[] = [];
-
-    const animate = (timestamp: number) => {
-        if (!startTime) {
-            startTime = timestamp;
-        }
-        // const runtime = animationPauseS.get()
-        //     ? pausedTime! - startTime!
-        //     : timestamp - startTime;
-
-        const runtime = timestamp - startTime;
-        // console.log(
-        //     "Animation Progress",
-        //     animationFrameS.get() + animationRelativeProgressS.get()
-        // );
-        // console.log(startTime, timestamp, performance.now());
-        animationRelativeProgressS.set(runtime / duration);
-
-        // Get objects in currentFrame and update the position
-        Object.entries(fOInFrames[animationFrameS.get()]).forEach(
-            ([commonID, frameObjectPath]) => {
-                if (!renderedAnimateObjects.includes(commonID)) {
-                    renderedAnimateObjects.push(commonID);
-                    canvas.add(addedAnimateObjects[commonID]);
-                }
-                const [x, y] = interpolatePath(
-                    frameObjectPath,
-                    animationRelativeProgressS.get()
-                );
-                // Set position
-                addedAnimateObjects[commonID].set({
-                    left: x - endPointOffset,
-                    top: y - endPointOffset,
-                });
-            }
-        );
-        canvas.renderAll();
-
-        if (animationPauseS.get() == true) {
-            cancelAnimationFrame(rafID.get());
-            return;
-        } else if (
-            runtime < duration &&
-            animationFrameS.get() < frames.length
-        ) {
-            // More animation to be done in current frame
-        } else if (animationFrameS.get() < frames.length - 1) {
-            // moving to the next frame
-            animationFrameS.set((prev: number) => prev + 1);
-            startTime = timestamp;
-            animationRelativeProgressS.set(0);
-        } else {
-            // onFullAnimationComplete
-            animationFrameS.set(1);
-            currentFrameS.set(1);
-            animationPauseS.set(true);
-            animationRelativeProgressS.set(0);
-            console.log("Full animation complete");
-        }
-        requestAnimationFrame(animate);
-    };
-
-    const raFID = requestAnimationFrame(animate);
-    rafID.set(raFID);
-}
-
-export type PointType = [number, number];
-
-function findEquidistantPoints(
-    startPoint: PointType,
-    endPoint: PointType
-): [PointType, PointType] {
-    // Calculate slope of the line
-    // const slope = (endPoint[1] - startPoint[1]) / (endPoint[0] - startPoint[0]);
-
-    // Calculate distance between start and end points
-    const distance = Math.sqrt(
-        (endPoint[0] - startPoint[0]) ** 2 + (endPoint[1] - startPoint[1]) ** 2
-    );
-
-    // Determine direction vector
-    const dx = endPoint[0] - startPoint[0];
-    const dy = endPoint[1] - startPoint[1];
-
-    // Normalize direction vector
-    const length = Math.sqrt(dx * dx + dy * dy);
-    const directionVector = [dx / length, dy / length];
-
-    // Calculate distance from start point to equidistant points
-    const equidistantDistance = distance / 3; // Dividing by 3 to get equidistant points closer to the ends
-
-    // Calculate equidistant points
-    const equidistantPoint1 = [
-        startPoint[0] + equidistantDistance * directionVector[0],
-        startPoint[1] + equidistantDistance * directionVector[1],
-    ] as PointType;
-    const equidistantPoint2 = [
-        endPoint[0] - equidistantDistance * directionVector[0],
-        endPoint[1] - equidistantDistance * directionVector[1],
-    ] as PointType;
-
-    return [equidistantPoint1, equidistantPoint2];
-}
-
 function mapControlPointsOnCurve(
     startPoint: PointType,
     endPoint: PointType,
@@ -449,7 +192,7 @@ function mapControlPointsOnCurve(
 }
 
 // Function to calculate control points for a cubic Bézier curve
-function calculateControlPoints(
+export function calculateControlPoints(
     start: PointType,
     end: PointType,
     control1: PointType,

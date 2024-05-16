@@ -1,6 +1,7 @@
 import type { fabricRefType } from "../Canvas";
 import { fabric } from "fabric";
-import { calculateControlPoints, getReqObjByNames } from "./helpers";
+import { calculateControlPoints } from "./helpers";
+import { getReqObjByNames } from "./final_functions/frameObject/helpers/getterSetters";
 
 export const drawCubic = (fabricRef: fabricRefType) => {
     const canvas = fabricRef.current!;
@@ -212,10 +213,10 @@ function onObjectMoving(e: fabric.IEvent<MouseEvent>, canvas?: fabric.Canvas) {
         "newCP2",
     ]);
     const path = line.path;
-    const startPoint = [path[0][1], path[0][2]];
-    const controlPoint1 = [path[1][1], path[1][2]];
-    const controlPoint2 = [path[1][3], path[1][4]];
-    const endPoint = [path[1][5], path[1][6]];
+    // const startPoint = [path[0][1], path[0][2]];
+    // const controlPoint1 = [path[1][1], path[1][2]];
+    // const controlPoint2 = [path[1][3], path[1][4]];
+    // const endPoint = [path[1][5], path[1][6]];
 
     // const [cp1, cp2] = calculateControlPoints(
     //     startPoint,

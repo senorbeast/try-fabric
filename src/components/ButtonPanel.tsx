@@ -1,7 +1,6 @@
 import { useState } from "react";
 import Button from "./Button";
 import { fabricRefType } from "./Canvas";
-import { cubic, linear, quad } from "./fabric_functions/interpolate";
 import { drawCubic } from "./fabric_functions/cubic";
 import exampleFrames from "../assets/exampleFrames.json";
 import {
@@ -11,41 +10,39 @@ import {
     animateFirstObject,
     animateOnPathC,
     addImageObject,
-    imageObject,
     addPlayer,
 } from "./fabric_functions/common";
 import { drawQuadratic } from "./fabric_functions/quadratic";
 import { drawLine } from "./fabric_functions/line";
-import {
-    frameObject,
-    updateObjsForNewFrame,
-    runAfterJSONLoad,
-} from "./fabric_functions/final_functions/frame_object";
-import { logFrameObjCount, newAnimation } from "./fabric_functions/helpers";
+import { frameObject } from "./fabric_functions/final_functions/frameObject/core/frame_object";
 import { extraProps } from "./fabric_functions/final_functions/constants";
+
+import DisplayAnimationPanel from "./AnimationPanel";
+import { newAnimation } from "./fabric_functions/final_functions/frameObject/animations/animate";
+import { runAfterJSONLoad } from "./fabric_functions/final_functions/frameObject/core/runAfterJSONLoad";
+import { updateFramesData } from "./fabric_functions/final_functions/frameObject/core/updateFramesData";
+import { updateObjsForNewFrame } from "./fabric_functions/final_functions/frameObject/core/updateObjsForNewFrame";
 import {
-    animationFrameS,
-    animationPauseS,
-    currentFrameS,
-    draggedElementIDS,
-    fOIdsState,
+    canvasJSONType,
+    framesDataType,
+} from "./fabric_functions/final_functions/helper.types";
+import {
     framesS,
     modeS,
+    currentFrameS,
+    animationPauseS,
     modeTypes,
-} from "./react-ridge";
-import DisplayAnimationPanel from "./AnimationPanel";
-import { updateFramesData } from "./fabric_functions/final_functions/events";
-
-// Final JSON to be saved in backend for frames
-export type framesDataType = {
-    fOIds: string[];
-    frames: canvasJSONType[];
-};
-
-export type canvasJSONType = {
-    version: string;
-    objects: fabric.Object[];
-};
+    animationFrameS,
+    draggedElementIDS,
+    fOIdsState,
+} from "./fabric_functions/final_functions/react-ridge";
+import { logFrameObjCount } from "./fabric_functions/helpers";
+import { imageObject } from "./fabric_functions/final_functions/frameObject/helpers/makeUpdateObjects";
+import {
+    cubic,
+    linear,
+    quad,
+} from "./fabric_functions/final_functions/frameObject/helpers/interpolate";
 
 const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
     // const [frames, setFrames] = useState<canvasJSONType[]>([
@@ -270,7 +267,7 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
                     />
                     <p className="text-white">Frames:</p>
                     <div className="flex">
-                        {frames.map((_: canvasJSONType[], idx: number) => (
+                        {frames.map((_, idx: number) => (
                             <button
                                 key={idx}
                                 className={`w-8 border-2 
@@ -360,7 +357,9 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
                         name="Load Eg frames"
                         onClick={() => {
                             fOIdsState.set(exampleFrames.fOIds);
-                            setFrames(exampleFrames.frames);
+                            setFrames(
+                                exampleFrames.frames as unknown as canvasJSONType[]
+                            );
                         }}
                     />
 

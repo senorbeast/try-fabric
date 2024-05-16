@@ -1,12 +1,12 @@
 import { useMemo, useState } from "react";
-import { contextMenuS } from "./react-ridge";
-import { getReqObjBy } from "./fabric_functions/helpers";
 import { fabricRefType } from "./Canvas";
 import { fabric } from "fabric";
 import {
     lockOptions,
     unlockOptions,
 } from "./fabric_functions/final_functions/constants";
+import { getReqObjBy } from "./fabric_functions/final_functions/frameObject/helpers/getterSetters";
+import { contextMenuS } from "./fabric_functions/final_functions/react-ridge";
 
 const ContextMenu = ({ fabricRef }: { fabricRef: fabricRefType }) => {
     const [menu, setMenu] = contextMenuS.use();
@@ -25,7 +25,6 @@ const ContextMenu = ({ fabricRef }: { fabricRef: fabricRefType }) => {
             // @ts-expect-error type is text
             (obj) => obj.type == "text" && obj.fontSize == 15
         )[0] as fabric.Text;
-        console.log(textTag);
         return (textTag.text as string) || "";
     }
     const options = ["", "Winger", "Forward", "Defender"];
