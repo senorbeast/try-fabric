@@ -9,7 +9,7 @@ export const animationDurationS = newRidgeState<number>(1500);
 export const animationFrameS = newRidgeState<number>(1);
 export const animationRelativeProgressS = newRidgeState<number>(0);
 
-export const prevStartTime = newRidgeState<number>(0); // to fix
+// export const prevStartTime = newRidgeState<number>(0); // to fix
 
 // ---------------------------------------------------------------------
 
