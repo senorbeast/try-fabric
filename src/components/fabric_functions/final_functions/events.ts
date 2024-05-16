@@ -343,19 +343,19 @@ function onObjectMoving(e: fabric.IEvent<MouseEvent>, canvas?: fabric.Canvas) {
                 const p0 = frameObjectP0[0]; //next frame p0
                 const p3 = e.target!; // current frame p3
                 const line = frameObjectLine[0] as fabric.Path;
-                console.log(p0, frameObjectLine);
+                // console.log(p0, frameObjectLine);
 
                 // TODO: properly update all the next frame,
                 // its line, p0, and everything that is required to be updated
 
-                console.log(p0);
+                // console.log(p0);
                 if (p0.line1) {
                     p0.line1.path[0][1] = p3.left! + endPointOffset;
                     p0.line1.path[0][2] = p3.top! + endPointOffset;
                     p0.line1.left = p3.left;
                     p0.line1.top = p3.top;
-                    console.log("Editing line");
-                    console.log(p0.line1);
+                    // console.log("Editing line");
+                    // console.log(p0.line1);
                 }
                 p0.left = p3.left;
                 p0.top = p3.top;
