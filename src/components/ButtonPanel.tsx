@@ -247,15 +247,6 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
                             }
                         />
                     </div>
-                    {/* Free Roam */}
-                    <div className="flex">
-                        <Button
-                            name="Add Image"
-                            onClick={() =>
-                                addImageObject(fabricRef, "my-image")
-                            }
-                        />
-                    </div>
                 </>
             ) : null}
             {/* Frames or free roam Mode */}

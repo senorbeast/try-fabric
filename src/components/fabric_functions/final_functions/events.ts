@@ -156,7 +156,7 @@ export const updateFramesData = (canvas: fabric.Canvas) => {
 };
 
 function onObjectModified(e: fabric.IEvent<MouseEvent>, canvas: fabric.Canvas) {
-    console.log(e);
+    // console.log(e);
     updateFramesData(canvas);
 }
 
@@ -291,6 +291,8 @@ function onObjectMoving(e: fabric.IEvent<MouseEvent>, canvas?: fabric.Canvas) {
     // const [store] = getReqObjByNames(canvas, ["invisibleStore"]);
     // const currentFrame = store!.currentFrame;
     const currentFrame = currentFrameS.get();
+    const frames = framesS.get();
+    const framesLength = frames.length;
 
     const initialFrame = e.target!.initialFrame;
     const currentType = e.target!.currentType;
@@ -310,7 +312,7 @@ function onObjectMoving(e: fabric.IEvent<MouseEvent>, canvas?: fabric.Canvas) {
         // console.log("Current type is point");
         // TODO: If next frame exist, update the next frame's start point accordingly
     } else {
-        // Line or Curve
+        // Line or Curve Object moving
         if (currentType == "line") {
             onObjectMovingForLine(e, endPointOffset);
         } else if (currentType == "curve") {
@@ -318,8 +320,76 @@ function onObjectMoving(e: fabric.IEvent<MouseEvent>, canvas?: fabric.Canvas) {
         } else {
             console.log("Can't decide between line and curve");
         }
+
+        // Update p3 on next frame if it exists
+        if (e.target!.name === "p3" && currentFrame < framesLength - 1) {
+            // update the next frame state
+            // console.log("before", frames[currentFrame + 1]);
+            const commonID = e.target.commonID!;
+
+            framesS.set((draft) => {
+                const nextFrame = draft[currentFrame + 1];
+
+                // Find p0 of same frameObject collection in nextFrame
+                const frameObjectP0 = nextFrame.objects.filter(
+                    (obj) => obj.commonID == commonID && obj.name == "p0"
+                );
+
+                const frameObjectLine = nextFrame.objects.filter(
+                    (obj) =>
+                        obj.commonID == commonID && obj.name == "frame_line"
+                );
+                // Update position of p0 and its corresponding path
+                const p0 = frameObjectP0[0]; //next frame p0
+                const p3 = e.target!; // current frame p3
+                const line = frameObjectLine[0] as fabric.Path;
+                // console.log(p0, frameObjectLine);
+
+                // TODO: properly update all the next frame,
+                // its line, p0, and everything that is required to be updated
+
+                // console.log(p0);
+                if (p0.line1) {
+                    p0.line1.path[0][1] = p3.left! + endPointOffset;
+                    p0.line1.path[0][2] = p3.top! + endPointOffset;
+                    p0.line1.left = p3.left;
+                    p0.line1.top = p3.top;
+                    // console.log("Editing line");
+                    // console.log(p0.line1);
+                }
+                p0.left = p3.left;
+                p0.top = p3.top;
+
+                line.left = p3.left;
+                line.top = p3.top;
+                line.path[0][1] = p3.left! + endPointOffset;
+                line.path[0][2] = p3.top! + endPointOffset;
+
+                return draft;
+            });
+            // console.log("after", frames[currentFrame + 1]);
+            canvas?.renderAll();
+        }
     }
 }
+
+// Updating nested obj, immutably
+// const result = prev.map((frame, idx) => {
+//     if (idx == currentFrame + 1) {
+//         const newObjs = frame.objects.map((obj) => {
+//             if (obj.commonID && obj.name == "p0") {
+
+//                 const newObjOptions = obj.
+
+//                 return // that obj;
+//             }
+//             return obj;
+//         });
+
+//         return; // that frame
+//     }
+//     return frame;
+// });
 
 function onObjectMovingForLine(
     e: fabric.IEvent<MouseEvent>,

@@ -282,7 +282,7 @@ export function newAnimation(
     const duration = animationDurationS.get() ?? 1500; // animation duration for each frame in ms
 
     let startTime: number | null = null;
-    let pausedTime: number | null = null;
+    // let pausedTime: number | null = null;
 
     const renderedAnimateObjects: string[] = [];
 
@@ -290,11 +290,11 @@ export function newAnimation(
         if (!startTime) {
             startTime = timestamp;
         }
-        const runtime = animationPauseS.get()
-            ? pausedTime! - startTime!
-            : timestamp - startTime;
+        // const runtime = animationPauseS.get()
+        //     ? pausedTime! - startTime!
+        //     : timestamp - startTime;
 
-        // const runtime = timestamp - startTime;
+        const runtime = timestamp - startTime;
         // console.log(
         //     "Animation Progress",
         //     animationFrameS.get() + animationRelativeProgressS.get()
@@ -323,10 +323,10 @@ export function newAnimation(
         canvas.renderAll();
 
         if (animationPauseS.get() == true) {
-            if (pausedTime === null) {
-                // Store the current timestamp as the paused time
-                pausedTime = performance.now();
-            }
+            // if (pausedTime === null) {
+            // Store the current timestamp as the paused time
+            // pausedTime = performance.now();
+            // }
             return;
         } else if (
             runtime < duration &&
