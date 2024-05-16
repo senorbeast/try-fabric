@@ -29,5 +29,17 @@ export const framesS = newRidgeState<canvasJSONType[]>([
 export const modeS = newRidgeState<"freeRoam" | "frames">("freeRoam");
 // ---------------------------------------------------------------------
 
+export type contextMenuProps = {
+    left: number;
+    top: number;
+    commonID: string;
+};
+
+export const contextMenuS = newRidgeState<contextMenuProps>({
+    left: 0,
+    top: 0,
+    commonID: "",
+});
+
 // NOT USED
 export const draggedElementIDS = newRidgeState<string>("");

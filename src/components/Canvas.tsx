@@ -3,6 +3,7 @@ import { fabric } from "fabric";
 import { useEffect, useRef } from "react";
 import ButtonPanel from "./ButtonPanel";
 import { initFabric, disposeFabric } from "./fabric_functions/common";
+import ContextMenu from "./ContextMenu";
 
 export type fabricRefType = React.MutableRefObject<fabric.Canvas | undefined>;
 
@@ -19,9 +20,10 @@ const Canvas = () => {
 
     return (
         <div className="flex-col w-full h-screen bg-black">
-            <div className="bg-slate-600 w-fit h-fit flex">
+            <div className="bg-slate-600 w-fit h-fit flex ">
                 {/* Works without ref, since fabricjs create a upper canvas */}
                 <canvas id="canvas" />
+                <ContextMenu fabricRef={fabricRef} />
             </div>
             <ButtonPanel fabricRef={fabricRef} />
         </div>

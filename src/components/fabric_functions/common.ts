@@ -24,6 +24,8 @@ export {
 
 const initFabric = (fabricRef: fabricRefType) => {
     fabricRef.current = new fabric.Canvas("canvas", {
+        stopContextMenu: true,
+        fireRightClick: true,
         height: 500,
         width: 800,
         selection: false,
