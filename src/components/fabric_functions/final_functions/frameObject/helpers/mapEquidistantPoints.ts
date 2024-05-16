@@ -1,4 +1,4 @@
-import { PointType } from "../../fabric_ext";
+import { PointType } from "../../helper.types";
 
 export function findEquidistantPoints(
     startPoint: PointType,

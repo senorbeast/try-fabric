@@ -2,8 +2,11 @@ import { fabric } from "fabric";
 
 import { useEffect, useRef } from "react";
 import ButtonPanel from "./ButtonPanel";
-import { initFabric, disposeFabric } from "./fabric_functions/common";
 import ContextMenu from "./ContextMenu";
+import {
+    initFabric,
+    disposeFabric,
+} from "./fabric_functions/final_functions/setupCanvas/initFabric";
 
 export type fabricRefType = React.MutableRefObject<fabric.Canvas | undefined>;
 

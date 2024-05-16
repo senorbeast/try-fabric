@@ -4,15 +4,7 @@ import { fabric } from "fabric";
 import { canvasJSONType, PointType } from "./final_functions/helper.types";
 import { imageObject } from "./final_functions/frameObject/helpers/makeUpdateObjects";
 
-// export {
-//     getReqObjBy,
-//     getReqObjByNames,
-//     getReqObjByNamesForID,
-//     setObjsOptions,
-//     animateOverFrames,
-//     mapControlPointsOnCurve,
-//     calculateControlPoints,
-// };
+export { animateOverFrames, mapControlPointsOnCurve, calculateControlPoints };
 
 // For each new frame, old cbc FO, are converted to line FO,
 // starting at end point of cbc
@@ -192,7 +184,7 @@ function mapControlPointsOnCurve(
 }
 
 // Function to calculate control points for a cubic Bézier curve
-export function calculateControlPoints(
+function calculateControlPoints(
     start: PointType,
     end: PointType,
     control1: PointType,
