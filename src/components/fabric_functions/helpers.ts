@@ -239,10 +239,11 @@ export function newAnimation(
     // pause: boolean
 ) {
     const canvas: fabric.Canvas = fabricRef.current!;
+    currentFrameS.set(-1); // [IMP] so, (updateFrameData doesn't update frames) via onObjectsModified during animations
+
     // remove all objects from canvas
-    const removableObjs = canvas
-        .getObjects()
-        .filter((obj) => obj.name !== "animateObject");
+    const removableObjs = canvas.getObjects();
+    // .filter((obj) => obj.);
 
     canvas.remove(...removableObjs);
 

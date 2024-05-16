@@ -138,7 +138,7 @@ function onDrop(e: fabric.IEvent<MouseEvent>, canvas: fabric.Canvas) {
 }
 
 export const updateFramesData = (canvas: fabric.Canvas) => {
-    // current frame data
+    console.log("updateFramesData");
     const currentFrameData = canvas.toJSON(extraProps);
     const currentFrame = currentFrameS.get();
     const frames: canvasJSONType[] = framesS.get();
@@ -163,19 +163,11 @@ export const updateFramesData = (canvas: fabric.Canvas) => {
 };
 
 function onObjectAdded(e: fabric.IEvent<MouseEvent>, canvas: fabric.Canvas) {
-    // console.log("onObjectAdded");
     updateFramesData(canvas);
 }
 
 function onObjectModified(e: fabric.IEvent<MouseEvent>, canvas: fabric.Canvas) {
-    // console.log(e);
-    const pause = animationPauseS.get();
-    // if (animationPauseS.get() == true) {
-    // console.log("onObjectModified", pause);
-    //! Causing bugs, updates frame data during animations sometimes.
-    // race condition like situation
     updateFramesData(canvas);
-    // }
 }
 
 // Convert Line to Cubic Beizer
