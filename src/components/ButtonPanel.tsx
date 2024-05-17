@@ -59,6 +59,10 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
 
     const [pause, setPause] = animationPauseS.use();
 
+    // TODO: Probably need a useEffect
+    // to applyOldFrame or changeFrame, to run on when frame is changed,
+    // since frame change can happen programmatically (after animation completes)
+
     // when we tap old frames
     function applyOldFrame(
         frames: canvasJSONType[],
@@ -80,6 +84,19 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
         //     deepDiff(oldFrame, loadedFrame)
         // );
     }
+
+    // TODO: Instead of apply updates for objects on new frame,
+    // A. 1.apply those when user clicks on that frame, independent of any frame
+    // upgrade point to line on cond met
+    // 2. if any fOId is left in fOIds, according to cond, keep as point or upgrade to line.
+    // 3. if already line convert to coinciding point
+
+    // B. on new frame
+    // 1. just create copy of prev frame json to new frame.
+    // 2. rest of the changes will be handle when user clicks on that particular frame.
+
+    // TODO: Easier to start with A2, add than when user changes frame (applyOldFrame)
+    // Add anything to current canvas will update the frameState too.
 
     // after tapping +
 
@@ -281,6 +298,7 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
                                     applyOldFrame(frames, idx, fabricRef);
                                     animationPauseS.set(true);
                                     animationFrameS.set(idx);
+                                    // Also update
                                 }}
                             >
                                 {idx}

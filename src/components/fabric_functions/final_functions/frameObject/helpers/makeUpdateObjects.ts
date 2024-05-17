@@ -1,14 +1,15 @@
 import { fabric } from "fabric";
 import { fabricRefType } from "../../../../Canvas";
 import { endPointOffset, unMovableOptions } from "../../constants";
-import { linkEndPointsToLine } from "./linkage";
-import { setObjsOptions } from "./getterSetters";
+import { linkEndPointsToLine, linkLinetoPoints } from "./linkage";
+import { getReqObjByNamesForID, setObjsOptions } from "./getterSetters";
 
 export { makeEndPoints, makeControlsPoints, makeCustomEndPoint, imageObject };
-export { updateLinePath, updatePointToLine };
+export { updateLinePath, updatePointToLine, updateLineToCoincidingLine };
 
 // Update --------------------------------------------------------
 
+// For new frames, or when condn is met
 function updatePointToLine(
     fabricRef: fabricRefType,
     p3: fabric.Object,
@@ -38,6 +39,7 @@ function updatePointToLine(
     canvas.renderAll();
 }
 
+// Helps updateLineToCoincidingLine
 function updateLinePath(
     startPoint: [number, number],
     endPoint: [number, number],
@@ -59,6 +61,36 @@ function updateLinePath(
     line.path[1][2] = endPoint[1];
 
     return line;
+}
+
+// For new frames, or when condn is met (when frameObject is already a line)
+function updateLineToCoincidingLine(
+    p3: fabric.Object,
+    commonID: string,
+    canvas: fabric.Canvas,
+    objects?: fabric.Object[]
+) {
+    // If already a line ? Then:
+    // Move coinciding line to that pointPosition
+    const [line, p0, p1, p2] = getReqObjByNamesForID(
+        canvas,
+        commonID,
+        ["frame_line", "p0", "p1", "p2"],
+        objects
+    );
+    canvas.remove(p1!, p2!); //remove controlPoints, from canvas (but its reference is used next)
+    // move initial point to endpoint + update path
+
+    p0!.left = p3.left!;
+    p0!.top = p3.top!;
+    // Offset to center
+    const pointPos = [
+        p3!.left! + endPointOffset,
+        p3!.top! + endPointOffset,
+    ] as [number, number];
+    updateLinePath(pointPos, pointPos, line as fabric.Path);
+    linkLinetoPoints(line as fabric.Path, p0!, p1!, p2!, p3);
+    canvas.renderAll();
 }
 
 // Make -------------------------------------------------------------

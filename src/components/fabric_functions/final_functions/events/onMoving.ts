@@ -18,7 +18,7 @@ export function onObjectMoving(
     const currentType = e.target!.currentType;
 
     if (initialFrame == currentFrame) {
-        // Should move normally
+        //  Should move normally since fabricObject is a point then
         // TODO: If next frame exist, update the next frame's start point accordingly
     } else {
         // Line or Curve Object moving
