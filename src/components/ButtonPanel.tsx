@@ -21,7 +21,7 @@ import {
     updateObjsForNewFrame,
     runAfterJSONLoad,
 } from "./fabric_functions/final_functions/frame_object";
-import { newAnimation } from "./fabric_functions/helpers";
+import { logFrameObjCount, newAnimation } from "./fabric_functions/helpers";
 import { extraProps } from "./fabric_functions/final_functions/constants";
 import {
     animationFrameS,
@@ -31,6 +31,7 @@ import {
     fOIdsState,
     framesS,
     modeS,
+    modeTypes,
 } from "./react-ridge";
 import DisplayAnimationPanel from "./AnimationPanel";
 import { updateFramesData } from "./fabric_functions/final_functions/events";
@@ -110,6 +111,16 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
         updateFramesData(fabricRef.current!); // save updates to frame
     }
 
+    // function addNewFrame(frames: canvasJSONType[], fabricRef: fabricRefType) {
+    //     setCurrentFrame(frames.length - 1);
+    //     // const canvas = fabricRef.current!;
+    //     const newFrames = [...frames, frames[-1]]; // copy old frame data to newFrame
+    //     setFrames(newFrames); // add frame
+    //     updateObjsForNewFrame(fabricRef); // update for new frame
+    //     updateFramesData(fabricRef.current!); // save updates to frame
+    //     setCurrentFrame(frames.length - 1);
+    // }
+
     return (
         <div className="p-2">
             {/* Modes Row */}
@@ -121,7 +132,7 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
                             : "Go back to: Free Roam"
                     }
                     onClick={() =>
-                        setModes((prev) =>
+                        setModes((prev: modeTypes) =>
                             prev == "frames" ? "freeRoam" : "frames"
                         )
                     }
@@ -259,7 +270,7 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
                     />
                     <p className="text-white">Frames:</p>
                     <div className="flex">
-                        {frames.map((_, idx) => (
+                        {frames.map((_: canvasJSONType[], idx: number) => (
                             <button
                                 key={idx}
                                 className={`w-8 border-2 
@@ -293,7 +304,7 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
                                 onClick={() => {
                                     // animateOverFrames(fabricRef, frames);
                                     newAnimation(fabricRef, frames);
-                                    setPause((prev) => !prev);
+                                    setPause((prev: boolean) => !prev);
                                 }}
                             />
                         </>
@@ -349,7 +360,6 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
                         name="Load Eg frames"
                         onClick={() => {
                             fOIdsState.set(exampleFrames.fOIds);
-                            // @ts-expect-error hhh
                             setFrames(exampleFrames.frames);
                         }}
                     />
@@ -370,6 +380,12 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
                                 frames: frames,
                             };
                             console.log(frameData);
+                        }}
+                    />
+                    <Button
+                        name="Frame obj counts"
+                        onClick={() => {
+                            console.log(logFrameObjCount(framesS.get()));
                         }}
                     />
                     <Button
