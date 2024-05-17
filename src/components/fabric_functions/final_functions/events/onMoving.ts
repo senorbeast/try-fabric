@@ -17,9 +17,15 @@ export function onObjectMoving(
     const initialFrame = e.target!.initialFrame;
     const currentType = e.target!.currentType;
 
+    // Update p0 and line in next frame, when p3 changes
+    // Works for all p3 (point or a line)
+    if (e.target!.name === "p3" && currentFrame < framesLength - 1) {
+        // update the next frame state
+        updateStartPointAndLinePathForNextFrame(e, canvas!, currentFrame);
+    }
+
     if (initialFrame == currentFrame) {
-        //  Should move normally since fabricObject is a point then
-        // TODO: If next frame exist, update the next frame's start point accordingly
+        //  Should move normally since fabricObject is a point
     } else {
         // Line or Curve Object moving
         if (currentType == "line") {
@@ -29,16 +35,10 @@ export function onObjectMoving(
         } else {
             console.log("Can't decide between line and curve");
         }
-
-        // Update p3 on next frame if it exists
-        if (e.target!.name === "p3" && currentFrame < framesLength - 1) {
-            // update the next frame state
-            carryForwardChangeToNextFrameForFrameLine(e, canvas!, currentFrame);
-        }
     }
 }
 
-function carryForwardChangeToNextFrameForFrameLine(
+function updateStartPointAndLinePathForNextFrame(
     e: fabric.IEvent<MouseEvent>,
     canvas: fabric.Canvas,
     currentFrame: number
