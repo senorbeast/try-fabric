@@ -98,6 +98,14 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
     // TODO: Easier to start with A2, add than when user changes frame (applyOldFrame)
     // Add anything to current canvas will update the frameState too.
 
+    // TODO: [IMP] A2, is inefficient since, we run it on each frameChange,
+    // why not be trigger by events, instead of checking or pooling like.
+    // SO, Apply updates only when new frame is created,
+    // Also when new fO is edited in sequence, should update all subsequent frames immediately.
+
+    // Conclusion:
+    // TODO: So, update next frames, data when adding new frameObject, and next frames exists
+
     // after tapping +
 
     function addNewFrame(frames: canvasJSONType[], fabricRef: fabricRefType) {

@@ -46,8 +46,8 @@ function updateStartPointAndLinePathForNextFrame(
     // console.log("before", frames[currentFrame + 1]);
     const commonID = e.target!.commonID!;
 
-    framesS.set((draft: canvasJSONType[]) => {
-        const nextFrame = draft[currentFrame + 1];
+    framesS.set((frames: canvasJSONType[]) => {
+        const nextFrame = frames[currentFrame + 1];
 
         // Find p0 of same frameObject collection in nextFrame
         const frameObjectP0 = nextFrame.objects.filter(
@@ -82,7 +82,7 @@ function updateStartPointAndLinePathForNextFrame(
         line.path[0][1] = p3.left! + endPointOffset;
         line.path[0][2] = p3.top! + endPointOffset;
 
-        return draft;
+        return frames;
     });
     // console.log("after", frames[currentFrame + 1]);
     canvas.renderAll();
