@@ -105,6 +105,11 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
 
     // Conclusion:
     // TODO: So, update next frames, data when adding new frameObject, and next frames exists
+    // DONE:
+    // so, all next frames are editing with a line, when a frameObject added in a middle frame
+    // but when the fO is moved, only the starting pos in the next frame is moved
+    // TODO:  Also, update the p3 in all frames where fO is line, when fO is moved in its initialFrame
+    // Editing fO acts has currentType as curve
 
     // after tapping +
 
@@ -326,8 +331,8 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
                                 name={pause ? "▶" : "⏸"}
                                 onClick={() => {
                                     // animateOverFrames(fabricRef, frames);
-                                    newAnimation(fabricRef, frames);
                                     setPause((prev: boolean) => !prev);
+                                    newAnimation(fabricRef, frames);
                                 }}
                             />
                         </>
