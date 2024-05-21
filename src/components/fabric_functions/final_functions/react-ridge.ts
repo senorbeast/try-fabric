@@ -1,5 +1,5 @@
 import { newRidgeState } from "react-ridge-state";
-import { canvasJSONType } from "./ButtonPanel";
+import { canvasJSONType } from "./helper.types";
 
 // Init state
 

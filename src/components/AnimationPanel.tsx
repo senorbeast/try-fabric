@@ -2,7 +2,7 @@ import {
     animationFrameS,
     animationRelativeProgressS,
     currentFrameS,
-} from "./react-ridge";
+} from "./fabric_functions/final_functions/react-ridge";
 
 const DisplayAnimationPanel = () => {
     const animationFrame = animationFrameS.useValue();

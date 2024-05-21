@@ -1,12 +1,15 @@
 import { fabric } from "fabric";
-import { fabricRefType } from "../../Canvas";
-import { imageObject } from "../common";
-import { setObjsOptions } from "../helpers";
-import { endPointOffset, unMovableOptions } from "./constants";
-import { linkEndPointsToLine } from "./linkage";
+import { fabricRefType } from "../../../../Canvas";
+import { endPointOffset, unMovableOptions } from "../../constants";
+import { linkEndPointsToLine, linkLinetoPoints } from "./linkage";
+import { getReqObjByNamesForID, setObjsOptions } from "./getterSetters";
 
-export { updatePointToLine, makeEndPoints, makeControlsPoints };
+export { makeEndPoints, makeControlsPoints, makeCustomEndPoint, imageObject };
+export { updateLinePath, updatePointToLine, updateLineToCoincidingLine };
 
+// Update --------------------------------------------------------
+
+// For new frames, or when condn is met
 function updatePointToLine(
     fabricRef: fabricRefType,
     p3: fabric.Object,
@@ -35,6 +38,62 @@ function updatePointToLine(
     // canvas.add(p0);
     canvas.renderAll();
 }
+
+// Helps updateLineToCoincidingLine
+function updateLinePath(
+    startPoint: [number, number],
+    endPoint: [number, number],
+    line: fabric.Path
+) {
+    line.left = startPoint[0];
+    line.top = startPoint[1];
+    line.width = 0;
+    line.height = 0;
+
+    line.pathOffset.x = startPoint[0];
+    line.pathOffset.y = startPoint[1];
+
+    line.path[0][0] = "M";
+    line.path[0][1] = startPoint[0];
+    line.path[0][2] = startPoint[1];
+    line.path[1][0] = "L";
+    line.path[1][1] = endPoint[0];
+    line.path[1][2] = endPoint[1];
+
+    return line;
+}
+
+// For new frames, or when condn is met (when frameObject is already a line)
+function updateLineToCoincidingLine(
+    p3: fabric.Object,
+    commonID: string,
+    canvas: fabric.Canvas,
+    objects?: fabric.Object[]
+) {
+    // If already a line ? Then:
+    // Move coinciding line to that pointPosition
+    const [line, p0, p1, p2] = getReqObjByNamesForID(
+        canvas,
+        commonID,
+        ["frame_line", "p0", "p1", "p2"],
+        objects
+    );
+    canvas.remove(p1!, p2!); //remove controlPoints, from canvas (but its reference is used next)
+    // move initial point to endpoint + update path
+
+    p0!.left = p3.left!;
+    p0!.top = p3.top!;
+    // Offset to center
+    const pointPos = [
+        p3!.left! + endPointOffset,
+        p3!.top! + endPointOffset,
+    ] as [number, number];
+    updateLinePath(pointPos, pointPos, line as fabric.Path);
+    linkLinetoPoints(line as fabric.Path, p0!, p1!, p2!, p3);
+    canvas.renderAll();
+}
+
+// Make -------------------------------------------------------------
 
 function makeLinePath(
     startPoint: [number, number],
@@ -65,29 +124,6 @@ function makeLinePath(
     return line;
 }
 
-export function updateLinePath(
-    startPoint: [number, number],
-    endPoint: [number, number],
-    line: fabric.Path
-) {
-    line.left = startPoint[0];
-    line.top = startPoint[1];
-    line.width = 0;
-    line.height = 0;
-
-    line.pathOffset.x = startPoint[0];
-    line.pathOffset.y = startPoint[1];
-
-    line.path[0][0] = "M";
-    line.path[0][1] = startPoint[0];
-    line.path[0][2] = startPoint[1];
-    line.path[1][0] = "L";
-    line.path[1][1] = endPoint[0];
-    line.path[1][2] = endPoint[1];
-
-    return line;
-}
-
 function makeEndPoints(
     startPoint: number[],
     endPoint: number[]
@@ -103,7 +139,7 @@ function makeEndPoints(
     return [p0, p3];
 }
 
-export function makeCustomEndPoint(left: number, top: number) {
+function makeCustomEndPoint(left: number, top: number) {
     const c = imageObject("my-image");
     c.set({
         left: left,
@@ -137,3 +173,17 @@ function makeControlPoint(left: number, top: number) {
 
     return c;
 }
+
+const imageObject = (imgId: string): fabric.Image => {
+    const imgElement = document.getElementById(imgId) as HTMLImageElement;
+    const imgInstance = new fabric.Image(imgElement, {
+        left: 100,
+        top: 100,
+        angle: 0,
+        width: 32,
+        height: 32,
+    });
+    return imgInstance;
+};
+
+// ---------------------------------------------------------------------

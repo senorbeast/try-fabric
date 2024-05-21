@@ -20,6 +20,9 @@
         "noUnusedParameters": true,
         "noFallthroughCasesInSwitch": true
     },
+    "rules": {
+        "@typescript-eslint/ban-ts-comment": "warn"
+    },
     // "paths": {
     //     "@types/fabric": ["./src/fabric_ext.d.ts"],
     //     "fabric/fabric-impl": ["./src/fabric_ext.d.ts"]
