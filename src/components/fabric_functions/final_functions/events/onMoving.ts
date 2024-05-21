@@ -20,18 +20,12 @@ export function onObjectMoving(
     // Update p0 and line in next frame, when p3 changes
     // Works for all p3 (point or a line)
     if (e.target!.name === "p3" && currentFrame < framesLength - 1) {
-        // update p0 in the next frame state
+        // update the next frame state
         updateStartPointAndLinePathForNextFrame(e, canvas!, currentFrame);
     }
-    // console.log("onObjMoving");
-    // console.log(initialFrame);
 
     if (initialFrame == currentFrame) {
         //  Should move normally since fabricObject is a point
-        // if (e.target!.name == "p3" && currentFrame < framesLength - 1) {
-        // const pointObj: fabric.Object = e.target!;
-        // updateAllNextFramesFO(pointObj, currentFrame);
-        // }
     } else {
         // Line or Curve Object moving
         if (currentType == "line") {
@@ -119,19 +113,19 @@ function updateStartPointAndLinePathForNextFrame(
         // TODO: properly update all the next frame,
         // its line, p0, and everything that is required to be updated
         // console.log(p0);
-        // if (p0.line1) {
-        //     p0.line1.path[0][1] = p3.left! + endPointOffset;
-        //     p0.line1.path[0][2] = p3.top! + endPointOffset;
-        //     p0.line1.left = p3.left;
-        //     p0.line1.top = p3.top;
-        //     // console.log("Editing line");
-        //     // console.log(p0.line1);
-        // }
+        if (p0.line1) {
+            p0.line1.path[0][1] = p3.left! + endPointOffset;
+            p0.line1.path[0][2] = p3.top! + endPointOffset;
+            p0.line1.left = p3.left;
+            p0.line1.top = p3.top;
+            // console.log("Editing line");
+            // console.log(p0.line1);
+        }
         p0.left = p3.left;
         p0.top = p3.top;
 
-        // line.left = p3.left;
-        // line.top = p3.top;
+        line.left = p3.left;
+        line.top = p3.top;
         line.path[0][1] = p3.left! + endPointOffset;
         line.path[0][2] = p3.top! + endPointOffset;
 
