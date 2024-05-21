@@ -46,50 +46,50 @@ export function onObjectMoving(
 
 //  Causing lag, unused now
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-function updateAllNextFramesFO(pointObj: fabric.Object, currentFrame: number) {
-    // update p3,p0, line in all next frames, where its not already edited
-    framesS.set((frames: canvasJSONType[]) => {
-        // frames.map((frame, idx) => {
-        // if (idx > currentFrame) {
-        // Find fO objs
+// function updateAllNextFramesFO(pointObj: fabric.Object, currentFrame: number) {
+//     // update p3,p0, line in all next frames, where its not already edited
+//     framesS.set((frames: canvasJSONType[]) => {
+//         // frames.map((frame, idx) => {
+//         // if (idx > currentFrame) {
+//         // Find fO objs
 
-        const frame = frames[currentFrame + 1];
-        // updateCoincidingFOforFrame(frame, pointObj);
-        //     }
-        // });
-        return frames;
-    });
-}
+//         const frame = frames[currentFrame + 1];
+//         // updateCoincidingFOforFrame(frame, pointObj);
+//         //     }
+//         // });
+//         return frames;
+//     });
+// }
 
-function updateCoincidingFOforFrame(
-    frame: canvasJSONType,
-    pointObj: fabric.Object
-) {
-    const frameObjectCollection = frame.objects.filter(
-        (obj) => obj.commonID == pointObj.commonID
-    );
-    if (frameObjectCollection[0].currentType == "curve") {
-        return;
-    }
+// function updateCoincidingFOforFrame(
+//     frame: canvasJSONType,
+//     pointObj: fabric.Object
+// ) {
+//     const frameObjectCollection = frame.objects.filter(
+//         (obj) => obj.commonID == pointObj.commonID
+//     );
+//     if (frameObjectCollection[0].currentType == "curve") {
+//         return;
+//     }
 
-    // Update line, p0, p3 for non-edited fO, i.e. lines
-    const p0: fabric.Object = frameObjectCollection.filter(
-        (obj) => (obj.name = "p0")
-    )[0];
-    const line: fabric.Path = frameObjectCollection.filter(
-        (obj) => (obj.name = "frame_line")
-    )[0] as fabric.Path;
-    const p3 = frameObjectCollection.filter((obj) => (obj.name = "p3"))[0];
+//     // Update line, p0, p3 for non-edited fO, i.e. lines
+//     const p0: fabric.Object = frameObjectCollection.filter(
+//         (obj) => (obj.name = "p0")
+//     )[0];
+//     const line: fabric.Path = frameObjectCollection.filter(
+//         (obj) => (obj.name = "frame_line")
+//     )[0] as fabric.Path;
+//     const p3 = frameObjectCollection.filter((obj) => (obj.name = "p3"))[0];
 
-    p0.left = pointObj.left;
-    p0.top = pointObj.top;
-    p3.left = pointObj.left;
-    p3.top = pointObj.top;
-    line.path[0][1] = pointObj.left! + endPointOffset;
-    line.path[0][2] = pointObj.top! + endPointOffset;
-    line.path[1][1] = pointObj.left! + endPointOffset;
-    line.path[1][2] = pointObj.top! + endPointOffset;
-}
+//     p0.left = pointObj.left;
+//     p0.top = pointObj.top;
+//     p3.left = pointObj.left;
+//     p3.top = pointObj.top;
+//     line.path[0][1] = pointObj.left! + endPointOffset;
+//     line.path[0][2] = pointObj.top! + endPointOffset;
+//     line.path[1][1] = pointObj.left! + endPointOffset;
+//     line.path[1][2] = pointObj.top! + endPointOffset;
+// }
 
 function updateStartPointAndLinePathForNextFrame(
     e: fabric.IEvent<MouseEvent>,

@@ -1,11 +1,7 @@
 import { extraProps } from "../../constants";
-import {
-    makeCustomEndPoint,
-    makeLineP0FromP3,
-} from "../helpers/makeUpdateObjects";
+import { makeLineP0FromP3 } from "../helpers/makeUpdateObjects";
 import { currentFrameS, framesS } from "../../react-ridge";
 import { canvasJSONType } from "../../helper.types";
-import { setObjsOptions } from "../helpers/getterSetters";
 
 export function updateFramesWithFO(p3: fabric.Object) {
     // While adding a new FO, and ifs its not the last frame,
@@ -17,18 +13,12 @@ export function updateFramesWithFO(p3: fabric.Object) {
     const newOptions: fabric.IObjectOptions = {
         initialFrame: p3!.currentFrame,
         commonID: p3!.commonID,
-        currentType: "point",
     };
 
-    const p3C = makeCustomEndPoint(p3.left!, p3.top!);
-    setObjsOptions([p3C], newOptions);
-
-    const [line, p0] = makeLineP0FromP3(p3C!, newOptions);
-
+    const [line, p0] = makeLineP0FromP3(p3, newOptions);
     const lineJSON = line.toJSON(extraProps) as unknown as fabric.Object;
     const p0JSON = p0.toJSON(extraProps) as unknown as fabric.Object;
-    const p3JSON = p3C!.toJSON(extraProps) as unknown as fabric.Object;
-    console.log(lineJSON, p0JSON);
+    const p3JSON = p3.toJSON(extraProps) as unknown as fabric.Object;
 
     // Add line, p0, p3 to all consecutive frameStates
     const currentFrame = currentFrameS.get();
@@ -44,5 +34,6 @@ export function updateFramesWithFO(p3: fabric.Object) {
         return frames;
     });
 
-    // frames.return;
+    // set p3 back to point in current frame
+    p3.set({ currentType: "point" });
 }
