@@ -4,38 +4,34 @@ import { endPointOffset, unMovableOptions } from "../../constants";
 import { linkEndPointsToLine, linkLinetoPoints } from "./linkage";
 import { getReqObjByNamesForID, setObjsOptions } from "./getterSetters";
 
-export { makeEndPoints, makeControlsPoints, makeCustomEndPoint, imageObject };
-export { updateLinePath, updatePointToLine, updateLineToCoincidingLine };
+// make
+export {
+    makeEndPoints,
+    makeControlsPoints,
+    makeCustomEndPoint,
+    imageObject,
+    makeLineP0FromP3,
+};
+
+// update or upgrade
+export {
+    updateLinePath,
+    updatePointToCoincidingLine,
+    updateLineToCoincidingLine,
+};
 
 // Update --------------------------------------------------------
 
 // For new frames, or when condn is met
-function updatePointToLine(
+function updatePointToCoincidingLine(
     fabricRef: fabricRefType,
     p3: fabric.Object,
     oldOptions: fabric.IObjectOptions
 ) {
     const canvas = fabricRef.current!;
+    const [line, p0] = makeLineP0FromP3(p3, oldOptions);
 
-    const pointPosition = [
-        p3.left! + endPointOffset,
-        p3.top! + endPointOffset,
-    ] as [number, number];
-
-    //set the path of the line
-    const line = makeLinePath(pointPosition, pointPosition, "frame_line");
-    const p0 = makeCustomEndPoint(
-        pointPosition[0] - endPointOffset,
-        pointPosition[1] - endPointOffset
-    );
-    p0.set({ opacity: 0.5, ...unMovableOptions, name: "p0" });
-
-    linkEndPointsToLine(line, p0, p3);
-    // console.log("objs, updatePointToLine", line, p0, p3);
-    setObjsOptions([line, p0, p3], { currentType: "line", ...oldOptions });
     [line, p0].map((o) => canvas.add(o));
-    // canvas.add(line);
-    // canvas.add(p0);
     canvas.renderAll();
 }
 
@@ -139,7 +135,7 @@ function makeEndPoints(
     return [p0, p3];
 }
 
-function makeCustomEndPoint(left: number, top: number) {
+function makeCustomEndPoint(left: number, top: number): fabric.Image {
     const c = imageObject("my-image");
     c.set({
         left: left,
@@ -172,6 +168,28 @@ function makeControlPoint(left: number, top: number) {
     });
 
     return c;
+}
+
+function makeLineP0FromP3(
+    p3: fabric.Object,
+    ObjOptions: fabric.IObjectOptions
+): [fabric.Path, fabric.Image] {
+    const pointPosition = [
+        p3.left! + endPointOffset,
+        p3.top! + endPointOffset,
+    ] as [number, number];
+
+    //set the path of the line
+    const line = makeLinePath(pointPosition, pointPosition, "frame_line");
+    const p0 = makeCustomEndPoint(
+        pointPosition[0] - endPointOffset,
+        pointPosition[1] - endPointOffset
+    );
+    p0.set({ opacity: 0.5, ...unMovableOptions, name: "p0" });
+
+    linkEndPointsToLine(line, p0, p3);
+    setObjsOptions([line, p0, p3], { currentType: "line", ...ObjOptions });
+    return [line, p0];
 }
 
 const imageObject = (imgId: string): fabric.Image => {

@@ -98,6 +98,19 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
     // TODO: Easier to start with A2, add than when user changes frame (applyOldFrame)
     // Add anything to current canvas will update the frameState too.
 
+    // TODO: [IMP] A2, is inefficient since, we run it on each frameChange,
+    // why not be trigger by events, instead of checking or pooling like.
+    // SO, Apply updates only when new frame is created,
+    // Also when new fO is edited in sequence, should update all subsequent frames immediately.
+
+    // Conclusion:
+    // TODO: So, update next frames, data when adding new frameObject, and next frames exists
+    // DONE:
+    // so, all next frames are editing with a line, when a frameObject added in a middle frame
+    // but when the fO is moved, only the starting pos in the next frame is moved
+    // TODO:  Also, update the p3 in all frames where fO is line, when fO is moved in its initialFrame
+    // Editing fO acts has currentType as curve
+
     // after tapping +
 
     function addNewFrame(frames: canvasJSONType[], fabricRef: fabricRefType) {
@@ -318,8 +331,8 @@ const ButtonPanel = ({ fabricRef }: { fabricRef: fabricRefType }) => {
                                 name={pause ? "▶" : "⏸"}
                                 onClick={() => {
                                     // animateOverFrames(fabricRef, frames);
-                                    newAnimation(fabricRef, frames);
                                     setPause((prev: boolean) => !prev);
+                                    newAnimation(fabricRef, frames);
                                 }}
                             />
                         </>
