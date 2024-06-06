@@ -1,6 +1,7 @@
 import type { fabricRefType } from "../Canvas";
 import { fabric } from "./custom_attribute";
-import { calculateControlPoints, getReqObjByNames } from "./helpers";
+import { getReqObjByNames } from "./helpers";
+import { mapControlPointsToCurve } from "./nearestPointCalc";
 
 export const drawCubic = (fabricRef: fabricRefType) => {
     const canvas = fabricRef.current!;
@@ -31,7 +32,7 @@ export const drawCubic = (fabricRef: fabricRefType) => {
     line.name = "cubeLine";
     canvas.add(line);
 
-    const [cp1, cp2] = calculateControlPoints(
+    const [cp1, cp2] = mapControlPointsToCurve(
         startPoint,
         controlPoint1,
         controlPoint2,
@@ -217,15 +218,22 @@ function onObjectMoving(e: fabric.IEvent<MouseEvent>, canvas?: fabric.Canvas) {
     const controlPoint2 = [path[1][3], path[1][4]];
     const endPoint = [path[1][5], path[1][6]];
 
-    const [cp1, cp2] = calculateControlPoints(
+    const [cp1, cp2] = mapControlPointsToCurve(
         startPoint,
         controlPoint1,
         controlPoint2,
         endPoint
     );
-    console.log(newCP1, newCP2);
-    newCP1.set({ left: cp1[0], top: cp1[1] });
-    newCP2.set({ left: cp2[0], top: cp2[1] });
+
+    console.log(cp1, cp2);
+    newCP1.set({
+        left: cp1[0] - controlPointOffset,
+        top: cp1[1] - controlPointOffset,
+    });
+    newCP2.set({
+        left: cp2[0] - controlPointOffset,
+        top: cp2[1] - controlPointOffset,
+    });
     canvas?.renderAll.bind(canvas);
 
     if (e.target!.name === "p0" || e.target!.name === "p3") {

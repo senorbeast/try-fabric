@@ -14,7 +14,6 @@ export {
     animateOverFrames,
     findEquidistantPoints,
     mapControlPointsOnCurve,
-    calculateControlPoints,
 };
 
 function getReqObjByNames(
@@ -396,122 +395,85 @@ function mapControlPointsOnCurve(
 }
 
 // Function to calculate control points for a cubic Bézier curve
-function calculateControlPoints(
-    start: PointType,
-    end: PointType,
-    control1: PointType,
-    control2: PointType
-): [PointType, PointType] {
-    return findClosestPointsOnCurve(start, end, control1, control2);
+// function calculateControlPoints(
+//     start: PointType,
+//     end: PointType,
+//     control1: PointType,
+//     control2: PointType
+// ): [PointType, PointType] {
+//     return findClosestPointsOnCurve(start, end, control1, control2);
 
-    // const [x0, y0] = start;
-    // const [x3, y3] = end;
-    // const [x1, y1] = control1;
-    // const [x2, y2] = control2;
-    // const dx1 = x1 - x0;
-    // const dy1 = y1 - y0;
-    // const dx2 = x2 - x3;
-    // const dy2 = y2 - y3;
-    // const xc1 = x0 + dx1 / 3;
-    // const yc1 = y0 + dy1 / 3;
-    // const xc2 = x3 - dx2 / 3;
-    // const yc2 = y3 - dy2 / 3;
-    // return [
-    //     [xc1, yc1],
-    //     [xc2, yc2],
-    // ];
-}
+// const [x0, y0] = start;
+// const [x3, y3] = end;
+// const [x1, y1] = control1;
+// const [x2, y2] = control2;
+// const dx1 = x1 - x0;
+// const dy1 = y1 - y0;
+// const dx2 = x2 - x3;
+// const dy2 = y2 - y3;
+// const xc1 = x0 + dx1 / 3;
+// const yc1 = y0 + dy1 / 3;
+// const xc2 = x3 - dx2 / 3;
+// const yc2 = y3 - dy2 / 3;
+// return [
+//     [xc1, yc1],
+//     [xc2, yc2],
+// ];
+// }
 
-function cubicBezier(
-    startX: number,
-    startY: number,
-    cp1x: number,
-    cp1y: number,
-    cp2x: number,
-    cp2y: number,
-    endX: number,
-    endY: number,
-    t: number
-): PointType {
-    const invT = 1 - t;
-    const invT2 = invT * invT;
-    const t2 = t * t;
-    const t3 = t2 * t;
+// function distance(x1: number, y1: number, x2: number, y2: number): number {
+//     return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+// }
 
-    const x =
-        startX * invT * invT2 +
-        3 * cp1x * t * invT2 +
-        3 * cp2x * invT * t2 +
-        endX * t3;
-    const y =
-        startY * invT * invT2 +
-        3 * cp1y * t * invT2 +
-        3 * cp2y * invT * t2 +
-        endY * t3;
+// function findClosestPointsOnCurve(
+//     startPoint: PointType,
+//     endPoint: PointType,
+//     controlPoint1: PointType,
+//     controlPoint2: PointType,
+//     numSteps: number = 1000
+// ): [PointType, PointType] {
+//     const [startX, startY] = startPoint;
+//     const [endX, endY] = endPoint;
+//     const [cp1x, cp1y] = controlPoint1;
+//     const [cp2x, cp2y] = controlPoint2;
 
-    return [x, y];
-}
+//     let minDistance1 = Infinity;
+//     let closestPoint1: PointType = [0, 0];
+//     for (let t = 0; t <= 1; t += 1 / numSteps) {
+//         const [x, y] = cubicBezier(
+//             startPoint,
+//             controlPoint1,
+//             controlPoint2,
+//             endPoint,
+//             t
+//         );
+//         const dist = distance(cp1x, cp1y, x, y);
+//         if (dist < minDistance1) {
+//             minDistance1 = dist;
+//             closestPoint1 = [x, y];
+//         }
+//     }
 
-function distance(x1: number, y1: number, x2: number, y2: number): number {
-    return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
-}
+//     let minDistance2 = Infinity;
+//     let closestPoint2: PointType = [0, 0];
+//     for (let t = 0; t <= 1; t += 1 / numSteps) {
+//         const [x, y] = cubicBezier(
+//             startPoint,
+//             controlPoint1,
+//             controlPoint2,
+//             endPoint,
+//             t
+//         );
+//         const dist = distance(cp2x, cp2y, x, y);
+//         if (dist < minDistance2) {
+//             minDistance2 = dist;
+//             closestPoint2 = [x, y];
+//         }
+//     }
 
-function findClosestPointsOnCurve(
-    startPoint: PointType,
-    endPoint: PointType,
-    controlPoint1: PointType,
-    controlPoint2: PointType,
-    numSteps: number = 1000
-): [PointType, PointType] {
-    const [startX, startY] = startPoint;
-    const [endX, endY] = endPoint;
-    const [cp1x, cp1y] = controlPoint1;
-    const [cp2x, cp2y] = controlPoint2;
+//     return [closestPoint1, closestPoint2];
+// }
 
-    let minDistance1 = Infinity;
-    let closestPoint1: PointType = [];
-    for (let t = 0; t <= 1; t += 1 / numSteps) {
-        const [x, y] = cubicBezier(
-            startX,
-            startY,
-            cp1x,
-            cp1y,
-            cp2x,
-            cp2y,
-            endX,
-            endY,
-            t
-        );
-        const dist = distance(cp1x, cp1y, x, y);
-        if (dist < minDistance1) {
-            minDistance1 = dist;
-            closestPoint1 = [x, y];
-        }
-    }
-
-    let minDistance2 = Infinity;
-    let closestPoint2: PointType = [];
-    for (let t = 0; t <= 1; t += 1 / numSteps) {
-        const [x, y] = cubicBezier(
-            startX,
-            startY,
-            cp1x,
-            cp1y,
-            cp2x,
-            cp2y,
-            endX,
-            endY,
-            t
-        );
-        const dist = distance(cp2x, cp2y, x, y);
-        if (dist < minDistance2) {
-            minDistance2 = dist;
-            closestPoint2 = [x, y];
-        }
-    }
-
-    return [closestPoint1, closestPoint2];
-}
 // With derivates
 
 // // Function to calculate the derivative of the cubic Bezier curve at a specific t value
